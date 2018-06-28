@@ -2,7 +2,7 @@
 # example Dockerfile for https://docs.docker.com/engine/examples/postgresql_service/
 #
 
-FROM lrgc01/debian_stretch
+FROM lrgc01/minbase_debian9
 
 # Install and keep thin
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``

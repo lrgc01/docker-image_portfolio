@@ -23,12 +23,31 @@ fi
 # Not used yet
 EXCLUDE="--exclude=openssh-client,ifupdown,iproute2,iptables,iputils-ping,isc-dhcp-client,e2fsprogs,dmidecode,ucf,vim-tiny"
 
-debootstrap $VARIANT_ARG $DISTRIB $DEST_DIR $SOURCE_URL
+# Create image
+#debootstrap $VARIANT_ARG $DISTRIB $DEST_DIR $SOURCE_URL
+
+# clean after debootstrap process (dpkg / apt)
+# chroot debootstrap/build/debian9-2 /bin/bash
+echo 
+echo "Cleaning packages from new image."
+echo
+
+# Necessary mount to chroot
+mount proc ${DEST_DIR}/proc -t proc
+mount sysfs ${DEST_DIR}/sys -t sysfs
+
+chroot ${DEST_DIR} apt clean
+chroot ${DEST_DIR} rm -f /var/lib/apt/lists/httpredir.debian.org*
+
+umount ${DEST_DIR}/sys
+umount ${DEST_DIR}/proc
+
 
 # New name for docker image
-echo "Wanna proceed with docker image import with name $DOCKER_USER/$VARIANT_$DISTRIB ?"
+echo "Wanna proceed with docker image import with name $DOCKER_USER/${VARIANT}_${DISTRIB} ?"
 
 read resp
+echo
 
 case "$resp" in
 
