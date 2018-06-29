@@ -7,12 +7,10 @@ FROM lrgc01/debootstrap-minb-debian9
 # Install and keep thin
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``
 #       allows the RUN command to span multiple lines.
-# Note2: clean some files that will be downloaded again on every "apt update" command.
 RUN apt-get update && \
     apt-get install -y postgresql && \
     apt-get clean && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/*debian.org*
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin
 
 # Run the rest of the commands as the ``postgres`` user created by the ``postgres-9.6`` package when it was ``apt-get installed``
 USER postgres
