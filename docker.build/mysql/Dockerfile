@@ -1,36 +1,32 @@
 #
-# example Dockerfile for https://docs.docker.com/engine/examples/postgresql_service/
-#
 
 FROM lrgc01/debootstrap-minb-debian9
 
 # Install and keep thin
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``
 #       allows the RUN command to span multiple lines.
+# Note2: clean some files that will be downloaded again on every "apt update" command.
+# Note3: There is no man command on base docker image, so no man pages at all.
+# Note4: Make sure all hosts have access to this docker mysql-server
+# Note5: Once running, grant all privileges to root from anywhere which docker password.
 RUN apt-get update && \
-    apt-get install -y postgresql && \
+    apt-get install -y mariadb-server && \
     apt-get clean && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
+    rm -f /var/lib/apt/lists/*debian.org* && \
+    rm -fr /usr/share/man/man* && \
+    sed -e 's/127.0.0.1/0.0.0.0/' < /etc/mysql/mariadb.conf.d/50-server.cnf > \
+       /etc/mysql/mariadb.conf.d/50-server.cnf.new && \
+    mv -f /etc/mysql/mariadb.conf.d/50-server.cnf.new /etc/mysql/mariadb.conf.d/50-server.cnf && \
+    /usr/bin/mysqld_safe --nowatch && sleep 5 && \
+    (echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'docker'" | mysql -u root) && \
+    mysqladmin -u root shutdown
 
-# Run the rest of the commands as the ``postgres`` user created by the ``postgres-9.6`` package when it was ``apt-get installed``
-USER postgres
-
-# Create a PostgreSQL role named ``docker`` with ``docker`` as the password and
-# then create a database `docker` owned by the ``docker`` role.
-# Adjust PostgreSQL configuration so that remote connections to the
-# database are possible.
-# And add ``listen_addresses`` to ``/etc/postgresql/9.6/main/postgresql.conf``
-RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
-    createdb -O docker docker && \
-    echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.6/main/pg_hba.conf && \
-    echo "listen_addresses='*'" >> /etc/postgresql/9.6/main/postgresql.conf
-
-# Expose the PostgreSQL port
-EXPOSE 5432
+# Expose the Mysql/MariaDB port
+EXPOSE 3306
 
 # Add VOLUMEs to allow backup of config, logs and databases
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+VOLUME  ["/etc/mysql", "/var/log/mysql", "/var/lib/mysql"]
 
 # Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/9.6/bin/postgres", "-D", "/var/lib/postgresql/9.6/main", "-c", "config_file=/etc/postgresql/9.6/main/postgresql.conf"]
+CMD ["/usr/bin/mysqld_safe"]
