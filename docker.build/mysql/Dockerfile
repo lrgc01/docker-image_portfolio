@@ -26,7 +26,7 @@ RUN apt-get update && \
 EXPOSE 3306
 
 # Add VOLUMEs to allow backup of config, logs and databases
-VOLUME  ["/etc/mysql", "/var/log/mysql", "/var/lib/mysql"]
+#VOLUME  ["/etc/mysql", "/var/log/mysql", "/var/lib/mysql"]
 
 # Set the default command to run when starting the container
 CMD ["/usr/bin/mysqld_safe"]
