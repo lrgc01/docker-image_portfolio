@@ -23,11 +23,10 @@ fi
 # Not used yet
 EXCLUDE="--exclude=openssh-client,ifupdown,iproute2,iptables,iputils-ping,isc-dhcp-client,e2fsprogs,dmidecode,ucf,vim-tiny"
 
-# Create image
-#debootstrap $VARIANT_ARG $DISTRIB $DEST_DIR $SOURCE_URL
+# Create image (uncomment)
+####debootstrap $VARIANT_ARG $DISTRIB $DEST_DIR $SOURCE_URL
 
 # clean after debootstrap process (dpkg / apt)
-# chroot debootstrap/build/debian9-2 /bin/bash
 echo 
 echo "Cleaning packages from new image."
 echo
