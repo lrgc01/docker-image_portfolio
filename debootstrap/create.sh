@@ -2,9 +2,12 @@
 
 SOURCE_URL=http://httpredir.debian.org/debian
 
+# Change to your needs. It's just an easy way to push it up to docker.com repository.
 DOCKER_USER="lrgc01"
 
 DATE_STAMP=$(date +%m%d%H%M)
+
+# Variant is optional
 # Min system (man debootstrap)
 VARIANT="minbase"
 
@@ -12,11 +15,12 @@ if [ "$VARIANT" != "" ]; then
    VARIANT_OPT="--variant=$VARIANT"
 fi
 
+# Mandatory:
 # stretch, wheezy, stable, etc
 DISTRIB=stable
 
 # You can pass DESTDIR via command argument
-DEST_DIR=${1:-"./${VARIANT}_${DISTRIB}-${DATE_STAMP}"}
+DEST_DIR=${1:-"./${VARIANT:-base}_${DISTRIB}-${DATE_STAMP}"}
 #DEST_DIR="minbase_stable-02021156"
 
 # Not necessary in most systems (no app will handle network admin for example - it's a dockerd task)
