@@ -2,10 +2,11 @@
 
 # Could be ubuntu
 # or any official distribution in Docker Hub, like debian
-# We use out own mininal base bootstrap made from debootstrap
-#FROM lrgc01/minbase_stable
-FROM jre
+# We use out own jre openjdk base which in turn is built over 
+# a mininal base bootstrap made from debootstrap
+FROM lrgc01/jre
 
+# Using apt method from site is too slow. Better download first and copy.
 COPY jenkins* /
 
 # Install and keep thin
