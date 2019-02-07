@@ -16,6 +16,7 @@ BUILD_VER=$(date +%Y%m%d%H%M)
 BASEPATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # first download the package from source:
+# Uncomment here:
 #wget https://www-us.apache.org/dist/maven/maven-3/3.6.0/binaries/${PACKAGE}
 #wget https://www.apache.org/dist/maven/maven-3/3.6.0/binaries/${CHECK}
 
