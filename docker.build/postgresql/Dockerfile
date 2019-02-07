@@ -1,5 +1,6 @@
 #
-# example Dockerfile for https://docs.docker.com/engine/examples/postgresql_service/
+# example Dockerfile from https://docs.docker.com/engine/examples/postgresql_service/
+# with little improve
 #
 
 FROM lrgc01/debootstrap-minb-debian9
