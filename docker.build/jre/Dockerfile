@@ -21,7 +21,7 @@ RUN apt-get update && \
 EXPOSE 8080
 
 # Add VOLUMEs 
-VOLUME  ["/var/lib/jre"]
+VOLUME ["/var/lib/jre"]
 
 # Set the default command to run when starting the container
 CMD ["/bin/bash"]
