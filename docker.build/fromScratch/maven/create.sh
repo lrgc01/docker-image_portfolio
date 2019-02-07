@@ -12,6 +12,7 @@ PACKAGE="${MAVEN_BASE}-bin.tar.gz"
 CHECK="${MAVEN_BASE}-bin.tar.gz.sha512"
 
 BUILD_VER=$(date +%Y%m%d%H%M)
+DOCKERFILE="Dockerfile.tmp"
 
 BASEPATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -32,24 +33,17 @@ fi
 tar -xf $PACKAGE -C ${OPTDIR}
 
 
-cat > Dockerfile << EOF
-FROM lrgc01/jre
-LABEL Comment="This image is used to start the maven on demand from ssh"
+cat > ${DOCKERFILE} << EOF
+FROM scratch
+LABEL Comment="This image is used just to share the volume of maven install"
 ENV PATH /${OPTDIR}/$MAVEN_BASE/bin:$BASEPATH
 COPY ${OPTDIR} /opt
-RUN apt-get update && \
-    apt-get install -y openssh-server && \
-    apt-get clean && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/*debian.org* && \
-    rm -fr /usr/share/man/man* 
 VOLUME ["/${OPTDIR}/$MAVEN_BASE"]
-EXPOSE 22
-CMD ["/etc/init.d/ssh","start","-D"]
+CMD ["#noop"]
 EOF
 
 # Now build the image using docker build
-docker build -t lrgc01/maven:${BUILD_VER} .
+docker build -t lrgc01/scratch_maven:${BUILD_VER} -f ${DOCKERFILE} . 
 
 # Cleaning
-rm -fr ${OPTDIR}
+rm -fr ${OPTDIR} ${DOCKERFILE}

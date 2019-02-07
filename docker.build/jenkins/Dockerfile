@@ -5,12 +5,13 @@
 # We use out own jre openjdk base which in turn is built over 
 # a mininal base bootstrap made from debootstrap
 FROM lrgc01/jre
+LABEL Comment="Use base jre because of Java Runtime env."
 
 # Using apt method from site is too slow. Better download first and copy.
 COPY jenkins* /
 
 # Install and keep thin
-# Note: here we use ``&&\`` to run commands one after the other - the ``\``
+# Note: here we use &&\ to run commands one after the other - the \
 #       allows the RUN command to span multiple lines.
 # Note2: clean some files that will be downloaded again on every "apt update" command.
 # Note3: There is no man command on base docker image, so no man pages at all.

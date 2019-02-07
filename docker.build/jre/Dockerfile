@@ -4,6 +4,7 @@
 # or any official distribution in Docker Hub, like debian
 # We use out own mininal base bootstrap made from debootstrap
 FROM lrgc01/minbase_stable_debian9
+LABEL Comment="Built from minbase_stable_debian9 plus openjdk-8-jre"
 
 # Install and keep thin
 # Note: here we use &&\ to run commands one after the other - the \
@@ -18,7 +19,7 @@ RUN apt-get update && \
     rm -fr /usr/share/man/man* 
 
 # Expose some default port
-EXPOSE 8080
+#EXPOSE 8080
 
 # Add VOLUMEs 
 VOLUME ["/var/lib/jre"]
