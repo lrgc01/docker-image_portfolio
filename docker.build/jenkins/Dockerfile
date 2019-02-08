@@ -2,7 +2,7 @@
 
 # Could be ubuntu
 # or any official distribution in Docker Hub, like debian
-# We use out own jre openjdk base which in turn is built over 
+# We use our own jre openjdk base which in turn is built over 
 # a mininal base bootstrap made from debootstrap
 FROM lrgc01/jre
 LABEL Comment="Use base jre because of Java Runtime env."
@@ -11,10 +11,14 @@ LABEL Comment="Use base jre because of Java Runtime env."
 COPY jenkins* /
 
 # Install and keep thin
-# Note: here we use &&\ to run commands one after the other - the \
-#       allows the RUN command to span multiple lines.
-# Note2: clean some files that will be downloaded again on every "apt update" command.
-# Note3: There is no man command on base docker image, so no man pages at all.
+# Note1: here we use &&\ to run commands one after the other.
+#        (the "\" allows the RUN command to span multiple lines.)
+# Note2: clean some files that will be downloaded again on 
+#        every "apt update" command.
+# Note3: There is no man command on base docker image, so no 
+#        man pages at all.
+# Note4: The pack jenkins_2.150.2_all.deb should have been 
+#        already downloaded.
 RUN apt-get update && \
     apt-get install -y daemon procps psmisc net-tools && \
     apt-get clean && \
