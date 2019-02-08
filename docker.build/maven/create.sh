@@ -1,8 +1,15 @@
 #!/bin/bash
 
 WORKDIR="`dirname $0`"
-
 cd "$WORKDIR"
+
+# Folder is optional - end with a slash
+FOLDER="lrgc01/"
+IMGNAME="maven"
+# Versioning in order to keep a copy if running more than once
+# Note the ":" in the formated output
+# May change for own needs
+BUILD_VER=$(date +:%Y%m%d%H%M)
 
 OPTDIR="opt"
 
@@ -12,6 +19,7 @@ PACKAGE="${MAVEN_BASE}-bin.tar.gz"
 CHECK="${MAVEN_BASE}-bin.tar.gz.sha512"
 
 BUILD_VER=$(date +%Y%m%d%H%M)
+DOCKERFILE="Dockerfile.tmp"
 
 BASEPATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -32,7 +40,7 @@ fi
 tar -xf $PACKAGE -C ${OPTDIR}
 
 
-cat > Dockerfile << EOF
+cat > ${DOCKERFILE} << EOF
 FROM lrgc01/jre
 LABEL Comment="This image is used to start the maven on demand from ssh"
 ENV PATH /${OPTDIR}/$MAVEN_BASE/bin:$BASEPATH
@@ -49,7 +57,7 @@ CMD ["/etc/init.d/ssh","start","-D"]
 EOF
 
 # Now build the image using docker build
-docker build -t lrgc01/maven:${BUILD_VER} .
+docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
 
 # Cleaning
-rm -fr ${OPTDIR}
+rm -fr ${OPTDIR} ${DOCKERFILE}

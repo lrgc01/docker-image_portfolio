@@ -1,8 +1,15 @@
 #!/bin/bash
 
 WORKDIR="`dirname $0`"
-
 cd "$WORKDIR"
+
+# Folder is optional - end with a slash
+FOLDER="lrgc01/"
+IMGNAME="scratch_maven"
+# Versioning in order to keep a copy if running more than once
+# Note the ":" in the formated output
+# May change for own needs
+BUILD_VER=$(date +:%Y%m%d%H%M)
 
 OPTDIR="opt"
 
@@ -43,7 +50,7 @@ CMD ["#noop"]
 EOF
 
 # Now build the image using docker build
-docker build -t lrgc01/scratch_maven:${BUILD_VER} -f ${DOCKERFILE} . 
+docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} . 
 
 # Cleaning
 rm -fr ${OPTDIR} ${DOCKERFILE}
