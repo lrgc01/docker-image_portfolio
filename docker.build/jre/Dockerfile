@@ -2,7 +2,7 @@
 
 # Could be ubuntu
 # or any official distribution in Docker Hub, like debian
-# We use out own mininal base bootstrap made from debootstrap
+# We use our own mininal base bootstrap made from debootstrap
 FROM lrgc01/minbase_stable_debian9
 LABEL Comment="Built from minbase_stable_debian9 plus openjdk-8-jre"
 
