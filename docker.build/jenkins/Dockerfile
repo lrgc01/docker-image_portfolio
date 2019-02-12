@@ -4,8 +4,8 @@
 # or any official distribution in Docker Hub, like debian
 # We use our own jre openjdk base which in turn is built over 
 # a mininal base bootstrap made from debootstrap
-FROM lrgc01/jre
-LABEL Comment="Use base jre because of Java Runtime env."
+FROM lrgc01/openjdk
+LABEL Comment="Jenkins over base + jdk environment."
 
 # Using apt method from site is too slow. Better download first and copy.
 COPY jenkins* /
@@ -20,7 +20,7 @@ COPY jenkins* /
 # Note4: The pack jenkins_2.150.2_all.deb should have been 
 #        already downloaded.
 RUN apt-get update && \
-    apt-get install -y daemon procps psmisc net-tools && \
+    apt-get install -y daemon procps psmisc net-tools git && \
     apt-get clean && \
     dpkg -i /jenkins_2.150.2_all.deb ; \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
