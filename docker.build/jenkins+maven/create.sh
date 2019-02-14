@@ -47,13 +47,13 @@ tar -xf $PACKAGE -C ${OPTDIR}
 mv -f ${OPTDIR}/${MAVEN_BASE} ${MAVEN_RUN}
 
 cat > ${DOCKERFILE} << EOF
-FROM lrgc01/jre
+FROM lrgc01/openjdk
 LABEL Comment="$COMMENT"
 ENV PATH $BASEPATH:/${MAVEN_RUN}/bin
 COPY jenkins* /
 COPY ${OPTDIR} /${OPTDIR}/
 RUN apt-get update && \
-    apt-get install -y daemon procps psmisc net-tools && \
+    apt-get install -y daemon procps psmisc net-tools git && \
     dpkg -i /${JENKINS_PKG} && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \

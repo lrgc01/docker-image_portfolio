@@ -9,6 +9,7 @@ LABEL Comment="Jenkins over base + jdk environment."
 
 # Using apt method from site is too slow. Better download first and copy.
 COPY jenkins* /
+COPY profile /etc/
 
 # Install and keep thin
 # Note1: here we use &&\ to run commands one after the other.
