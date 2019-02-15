@@ -1,5 +1,8 @@
 #!/bin/sh
 
+WORKDIR="`dirname $0`"
+cd "$WORKDIR"
+
 SOURCE_URL=http://httpredir.debian.org/debian
 
 # Change to your needs. It's just an easy way to push it up to docker.com repository.
@@ -43,6 +46,7 @@ mount sysfs ${DEST_DIR}/sys -t sysfs
 chroot ${DEST_DIR} apt clean
 # Wipe out the repo list archive(s) (about 38MB that will always be updated)
 rm -f ${DEST_DIR}/var/lib/apt/lists/httpredir.debian.org*
+mkdir ${DEST_DIR}/run/sshd
 
 umount ${DEST_DIR}/sys
 umount ${DEST_DIR}/proc

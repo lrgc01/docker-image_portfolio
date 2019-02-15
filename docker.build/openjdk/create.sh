@@ -16,7 +16,7 @@ BUILD_VER=$(date +:%Y%m%d%H%M)
 DOCKERFILE="Dockerfile.tmp"
 
 cat > ${DOCKERFILE} << EOF
-FROM lrgc01/minbase_stable_debian9
+FROM lrgc01/minbase_stable
 LABEL Comment="$COMMENT"
 RUN apt-get update && \
     apt-get install -y default-jdk-headless && \

@@ -1,0 +1,20 @@
+# Generic definition to be used in create.sh scripts 
+# in all image definition under this directory.
+
+BASE_FOLDER="lrgc01/"
+
+BASEPATH=/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/bin:/sbin:/usr/bin:/usr/sbin
+
+# Global build version when want to keep all the same
+# versioning tag
+GLOBAL_TAG_VER=""
+
+# Will be used within all images related to jenkins docker system
+JENKINS_USR=jenkins
+JENKINS_UID=10002
+JENKINS_GRP=jenkins
+JENKINS_GID=10002
+JENKINS_HOMEDIR=/var/lib/jenkins
+
+# Jenkins System key file
+JENKINS_KEY_FILE="Jenkins_System_Key"
