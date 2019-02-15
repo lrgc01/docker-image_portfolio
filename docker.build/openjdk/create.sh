@@ -3,6 +3,8 @@
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
 
+COMMENT="Adding jdk on top of base image"
+
 # Folder is optional - end with a slash
 FOLDER="lrgc01/"
 IMGNAME="openjdk"
@@ -11,6 +13,23 @@ IMGNAME="openjdk"
 # May change for own needs
 BUILD_VER=$(date +:%Y%m%d%H%M)
 
-# Now build the image using docker build
-docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} .
+DOCKERFILE="Dockerfile.tmp"
 
+cat > ${DOCKERFILE} << EOF
+FROM lrgc01/minbase_stable_debian9
+LABEL Comment="$COMMENT"
+RUN apt-get update && \
+    apt-get install -y default-jdk-headless && \
+    apt-get clean && \
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
+    rm -f /var/lib/apt/lists/*debian.org* && \
+    rm -fr /usr/share/man/man* 
+VOLUME ["/usr/lib/jvm"]
+CMD ["/bin/bash"]
+EOF
+
+# Now build the image using docker build
+docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+
+# Cleaning
+rm -fr ${DOCKERFILE}
