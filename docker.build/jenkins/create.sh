@@ -28,6 +28,7 @@ USERDIR=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR=${USERDIR#/}
 KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
 BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/bin:/usr/sbin"}
+LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
@@ -38,9 +39,6 @@ JENKINS_PKG="jenkins_2.150.2_all.deb"
 if [ ! -f "$JENKINS_PKG" ]; then
    wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
 fi
-
-# python commands to be linked to py_wrap.sh
-PYFILES="python python3 pytest py.test pyinstaller"
 
 # Pre build of some directory trees
 #
@@ -76,21 +74,51 @@ chown $UID:$GID "$USERDIR"/.bashrc
 # 
 # ---- Python wrapper built in bash ----
 #
-if [ ! -d usr/local/bin ]; then
-   mkdir -p usr/local/bin
+# This will be used by jenkins to find out the python host
+PYHOST_FILE=${JENKINS_PYHOST_FILE:-"python.host"}
+PYWRAP_FILE=${JENKINS_PYWRAP_FILE:-"py_wrap.sh"}
+# python commands to be linked to $PYWRAP_FILE
+PYFILES="python python3 pytest py.test pyinstaller"
+
+if [ ! -d $LOCALBIN ]; then
+   mkdir -p $LOCALBIN
 fi
-cp -p py_wrap.sh usr/local/bin
-( cd usr/local/bin 
+cat > $LOCALBIN/$PYWRAP_FILE << EOF
+#!/bin/sh
+
+if [ -f ~/$PYHOST_FILE ]; then
+   PYHOST=\$(cat ~/$PYHOST_FILE)
+else
+   echo "Could not determine python server IP. No ~/$PYHOST_FILE file."
+   exit 1
+fi
+
+CWD="\`pwd\`"		# Should run in the same directory
+COMMAND=\`basename \$0\`	# Just want the command name itself
+
+if [ "\$COMMAND" = "python" ] ; then
+   # If need python2, remove this IF but install python2 in the python container
+   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; python3 "\$@" )"
+else
+   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
+fi
+
+EOF
+
+# Don't forget to make it executable
+chmod 755 $LOCALBIN/$PYWRAP_FILE
+
+( cd $LOCALBIN 
 for pyfile in $PYFILES
 do
-   ln -sf py_wrap.sh $pyfile
+   ln -sf $PYWRAP_FILE $pyfile
 done )
 #
 # ---- end python wrap ----
 
 #
 # ---- The jenkins CMD to start container ----
-cp jenkins usr/local/bin
+cp jenkins $LOCALBIN
 #
 # ---- end jenkins CMD ----
 
@@ -117,7 +145,7 @@ RUN groupadd -g $GID $GRP && \
     rm -f /jenkins_*.deb 
 EXPOSE 8080
 VOLUME  ["/$USERDIR"]
-CMD ["/usr/local/bin/jenkins","start"]
+CMD ["/$LOCALBIN/jenkins","start"]
 EOF
 
 # Now build the image using docker build
