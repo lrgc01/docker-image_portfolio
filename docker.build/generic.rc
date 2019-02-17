@@ -3,7 +3,7 @@
 
 BASE_FOLDER="lrgc01/"
 
-BASEPATH=/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/bin:/sbin:/usr/bin:/usr/sbin
+BASEPATH=/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin
 
 LOCALBIN="usr/local/bin"
 

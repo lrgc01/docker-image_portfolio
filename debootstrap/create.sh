@@ -28,7 +28,7 @@ DEST_DIR=${1:-"./${VARIANT:-base}_${DISTRIB}-${DATE_STAMP}"}
 # Not necessary in most systems (no app will handle network admin for example - it's up to the dockerd daemon)
 EXCLUDE_OPT="--exclude=bsdutils,less,manpages,manpages-dev,ifupdown,iproute2,iptables,iputils-ping,isc-dhcp-client,e2fsprogs,dmidecode,ucf,vim-tiny"
 # Some others might be included
-#INCLUDE_OPT="--include=openssh-server"
+INCLUDE_OPT="--include=openssh-server"
 
 # Create image (will take some time... go get a coffee)
 debootstrap $VARIANT_OPT $EXCLUDE_OPT $INCLUDE_OPT $DISTRIB $DEST_DIR $SOURCE_URL

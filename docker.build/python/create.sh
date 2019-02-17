@@ -42,13 +42,14 @@ grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR/$IPFILE"
 /usr/sbin/sshd -D
 
 EOF
+# Seems useless, because when COPY by Dockerfile it looses file mode
 chmod 755 $START_CMD
 
 #
 # ---- end workaround IP ----
 
 cat > ${DOCKERFILE} << EOF
-FROM lrgc01/minbase_stable
+FROM lrgc01/minbase_stable_ssh
 LABEL Comment="$COMMENT"
 COPY $START_CMD /
 RUN groupadd -g $GID $GRP && \

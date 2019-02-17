@@ -50,7 +50,7 @@ LABEL Comment="This image is used just to share the volume of maven install"
 ENV PATH /${OPTDIR}/maven/bin:$BASEPATH
 COPY ${OPTDIR} /opt
 VOLUME ["/${OPTDIR}/maven"]
-CMD["/#noop"]
+CMD ["/#noop"]
 EOF
 
 # Now build the image using docker build

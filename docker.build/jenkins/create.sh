@@ -27,18 +27,26 @@ USERDIR=${JENKINS_HOMEDIR:-var/lib/jenkins}
 # Strip out first slash
 USERDIR=${USERDIR#/}
 KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
-BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/bin:/usr/sbin"}
+BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
 LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
+JENKINS_WAR=${JENKINS_WAR:-"/usr/share/jenkins/jenkins.war"}
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
 
+#
+# ---- Jenkins tree ----
+#
 # This has to be always checked - use direct download because 
 # the download from apt repo is to slow
-JENKINS_PKG="jenkins_2.150.2_all.deb"
+JENKINS_PKG="jenkins_2.150.3_all.deb"
 if [ ! -f "$JENKINS_PKG" ]; then
    wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
 fi
+# Extracted contents go into tarball
+dpkg -x ${JENKINS_PKG} .
+#
+# ---- end Jenkins tree ----
 
 # Pre build of some directory trees
 #
@@ -118,34 +126,40 @@ done )
 
 #
 # ---- The jenkins CMD to start container ----
-cp jenkins $LOCALBIN
+cat > $LOCALBIN/jenkins << EOF
+#!/bin/bash
+
+PATH=$BASEPATH
+export PATH
+umask 022
+java -jar $JENKINS_WAR --httpPort=8080
+EOF
+chmod 755 $LOCALBIN/jenkins
 #
 # ---- end jenkins CMD ----
 
-# Make tar ball
-tar -czf ${TAR_BALL} "$USERDIR" usr 
-
+# Make tar ball that will contain usr and var trees
+tar -czf ${TAR_BALL} usr etc var
+# may add USERDIR when it is not inside var
+#tar -czf ${TAR_BALL} usr etc var "${USERDIR}"
 # 
 # ---- Finally run docker build ----
 #
 cat > ${DOCKERFILE} << EOF
 FROM lrgc01/openjdk
 LABEL Comment="$COMMENT"
-COPY jenkins_* /
 ADD $TAR_BALL /
 RUN groupadd -g $GID $GRP && \
     useradd -M -u $UID -g $GRP -d /$USERDIR $USR && \
     apt-get update && \
-    apt-get install -y daemon procps psmisc net-tools git && \
+    apt-get install -y git && \
     apt-get clean && \
-    dpkg -i /jenkins_2.150.2_all.deb ; \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -f /var/lib/apt/lists/*debian.org* && \
-    rm -fr /usr/share/man/man* && \
-    rm -f /jenkins_*.deb 
+    rm -fr /usr/share/man/man* 
 EXPOSE 8080
 VOLUME  ["/$USERDIR"]
-CMD ["/$LOCALBIN/jenkins","start"]
+CMD ["/$LOCALBIN/jenkins"]
 EOF
 
 # Now build the image using docker build
@@ -154,4 +168,4 @@ docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
 # ---- end docker build ----
 
 # Cleaning
-rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR" usr var
+rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR" usr var etc
