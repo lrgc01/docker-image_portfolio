@@ -43,18 +43,30 @@ tar -xf $PACKAGE -C ${OPTDIR}
 # Change versioned name to universal maven
 mv ${OPTDIR}/${MAVEN_BASE} ${OPTDIR}/maven
 
+# nope is an empty file just to keep everything clean by avoiding error 
+# messagens in some situations
+cat > nope.c << EOF
+#include <stdio.h>
+#include <stdlib.h>
+
+void main(void){
+  exit(0);
+}
+EOF
+gcc --static -o nope nope.c
 
 cat > ${DOCKERFILE} << EOF
 FROM scratch
 LABEL Comment="This image is used just to share the volume of maven install"
 ENV PATH /${OPTDIR}/maven/bin:$BASEPATH
 COPY ${OPTDIR} /opt
+COPY nope /
 VOLUME ["/${OPTDIR}/maven"]
-CMD ["/#noop"]
+CMD ["/nope"]
 EOF
 
 # Now build the image using docker build
 docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} . 
 
 # Cleaning
-rm -fr ${OPTDIR} ${DOCKERFILE}
+rm -fr ${OPTDIR} ${DOCKERFILE} nope nope.c
