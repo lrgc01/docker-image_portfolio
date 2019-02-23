@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# workaround to get my ip
+grep -w $(hostname) /etc/hosts | awk '{print $1}' > "/var/lib/jenkins/python.host"
+# then start sshd
+/usr/sbin/sshd -D
+

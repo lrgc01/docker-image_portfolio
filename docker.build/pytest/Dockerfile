@@ -11,11 +11,11 @@ RUN groupadd -g 10002 jenkins && \
     useradd -M -u 10002 -g jenkins -d /var/lib/jenkins jenkins && \
     set -ex && \
     apt-get update && \
-    apt-get install -y python3-pip --no-install-recommends && \
+    apt-get install -y python3-pip && \
     apt-get clean && \
     pip3 install pytest pyinstaller && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/* && \
+    rm -fr /var/lib/apt/lists/* && \
     rm -fr /usr/share/man/man* && \
     chmod 755 /python.start
 
