@@ -24,35 +24,19 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Python over openssh-server image"
-IMGNAME="python3"
+COMMENT="Azure linux CLI over openssh-server image"
+IMGNAME="azure_cli"
 
-UID_=${JENKINS_UID:-102}
-GID_=${JENKINS_GID:-103}
-USR_=${JENKINS_USR:-pyuser}
-GRP_=${JENKINS_GRP:-pygrp}
-USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+UID_=${AZURE_UID:-10001}
+GID_=${AZURE_GID:-10001}
+USR_=${AZURE_USR:-azusr}
+GRP_=${AZURE_GRP:-azgrp}
+USERDIR_=${AZURE_HOMEDIR:-home/azure}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${PY_START_CMD:-"python.start"}
-IPFILE=${PY_IPFILE:-"python.host"}
+#START_CMD=${AZ_START_CMD:-"/bin/bash"}
 
-# 
-# ---- Start command ----
-#    ... with workaround to get IP 
-#
-
-cat > $START_CMD << EOF
-#!/bin/bash
-
-# workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-# then start sshd
-/usr/sbin/sshd -D
-
-EOF
-# Seems useless, because when COPY by Dockerfile it looses file mode
-chmod 755 $START_CMD
+#AZ_REPO=stretch
 
 #
 # ---- end workaround IP ----
@@ -60,19 +44,21 @@ chmod 755 $START_CMD
 cat > ${DOCKERFILE} << EOF
 FROM lrgc01/minbase_stable_ssh
 LABEL Comment="$COMMENT"
-COPY $START_CMD /
 RUN groupadd -g $GID_ $GRP_ && \
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \
+    useradd -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \
     apt-get update && \
-    apt-get install -y python3-pip && \
+    apt-get install -y gnupg2 apt-transport-https lsb-release software-properties-common dirmngr && \
+    AZ_REPO=\$(lsb_release -cs) && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ \$AZ_REPO main" > /etc/apt/sources.list.d/azure-cli.list && \
+    apt-key --keyring /etc/apt/trusted.gpg.d/Microsoft.gpg adv --keyserver packages.microsoft.com --recv-keys BC528686B50D79E339D3721CEB3E94ADBE1229CF && \
+    apt-get update && \
+    apt-get install -y azure-cli && \
     apt-get clean && \
-    pip3 install pytest pyinstaller && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -f /var/lib/apt/lists/*debian.org* && \
-    rm -fr /usr/share/man/man* && \
-    chmod 755 /$START_CMD
+    rm -fr /usr/share/man/man* 
 EXPOSE 22
-CMD ["/$START_CMD"]
+CMD ["/usr/sbin/sshd","-D"]
 EOF
 
 # Now build the image using docker build only if root is running
@@ -82,6 +68,5 @@ fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD
+   rm -fr ${DOCKERFILE} 
 fi
-

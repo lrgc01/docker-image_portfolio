@@ -13,19 +13,28 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 # May change for own needs
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 
-DOCKERFILE="Dockerfile.tmp"
+# Optionaly this script can prepare the docker-build environment
+if [ "$#" -gt 0 ]; then
+   case "$1" in
+      env|prepare|Dockerfile)
+        DOCKERFILE="Dockerfile"
+   ;;
+   esac
+else
+   DOCKERFILE="Dockerfile.tmp"
+fi
 
 COMMENT="Jenkins over base + jdk environment"
 IMGNAME="jenkins"
 
 # These are expected to be sourced from generic.rc
-UID=${JENKINS_UID:-102}
-GID=${JENKINS_GID:-103}
-USR=${JENKINS_USR:-pyuser}
-GRP=${JENKINS_GRP:-pygrp}
-USERDIR=${JENKINS_HOMEDIR:-var/lib/jenkins}
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 # Strip out first slash
-USERDIR=${USERDIR#/}
+USERDIR_=${USERDIR_#/}
 KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
 BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
 LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
@@ -52,31 +61,31 @@ dpkg -x ${JENKINS_PKG} .
 #
 # ---- SSH configuration ----
 #
-if [ ! -d "$USERDIR" ]; then
-   mkdir -p "$USERDIR" 
+if [ ! -d "$USERDIR_" ]; then
+   mkdir -p "$USERDIR_" 
 fi
-mkdir -p "$USERDIR"/.ssh
-ssh-keygen -f "$USERDIR/.ssh/$KEY_FILE" -N ''
-cp "$USERDIR/.ssh/$KEY_FILE".pub "$USERDIR"/.ssh/authorized_keys
+mkdir -p "$USERDIR_"/.ssh
+ssh-keygen -f "$USERDIR_/.ssh/$KEY_FILE" -N ''
+cp "$USERDIR_/.ssh/$KEY_FILE".pub "$USERDIR_"/.ssh/authorized_keys
 # ssh config to use widely
-cat > "$USERDIR"/.ssh/config << EOF
+cat > "$USERDIR_"/.ssh/config << EOF
 Host *
 IdentityFile ~/.ssh/$KEY_FILE
-User $USR
+User $USR_
 StrictHostKeyChecking no
 EOF
 # Proper settings to ensure ssh running
-chown -R $UID:$GID "$USERDIR"
-chmod -R go-rwx "$USERDIR"
+chown -R $UID_:$GID_ "$USERDIR_"
+chmod -R go-rwx "$USERDIR_"
 #
 # ---- end SSH ----
 
 # 
 # ---- other user configs ----
-echo export PATH=$BASEPATH > "$USERDIR"/.profile
-echo export PATH=$BASEPATH > "$USERDIR"/.bashrc
-chown $UID:$GID "$USERDIR"/.profile
-chown $UID:$GID "$USERDIR"/.bashrc
+echo export PATH=$BASEPATH > "$USERDIR_"/.profile
+echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
+chown $UID_:$GID_ "$USERDIR_"/.profile
+chown $UID_:$GID_ "$USERDIR_"/.bashrc
 # ---- end configs ----
 
 # 
@@ -140,8 +149,8 @@ chmod 755 $LOCALBIN/jenkins
 
 # Make tar ball that will contain usr and var trees
 tar -czf ${TAR_BALL} usr etc var
-# may add USERDIR when it is not inside var
-#tar -czf ${TAR_BALL} usr etc var "${USERDIR}"
+# may add USERDIR_ when it is not inside var
+#tar -czf ${TAR_BALL} usr etc var "${USERDIR_}"
 # 
 # ---- Finally run docker build ----
 #
@@ -149,8 +158,8 @@ cat > ${DOCKERFILE} << EOF
 FROM lrgc01/openjdk
 LABEL Comment="$COMMENT"
 ADD $TAR_BALL /
-RUN groupadd -g $GID $GRP && \
-    useradd -M -u $UID -g $GRP -d /$USERDIR $USR && \
+RUN groupadd -g $GID_ $GRP_ && \
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \
     apt-get update && \
     apt-get install -y git && \
     apt-get clean && \
@@ -158,14 +167,19 @@ RUN groupadd -g $GID $GRP && \
     rm -f /var/lib/apt/lists/*debian.org* && \
     rm -fr /usr/share/man/man* 
 EXPOSE 8080
-VOLUME  ["/$USERDIR"]
+VOLUME  ["/$USERDIR_"]
 CMD ["/$LOCALBIN/jenkins"]
 EOF
 
-# Now build the image using docker build
-docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+# Now build the image using docker build only if root is running
+if [ `whoami` = "root" ]; then
+  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+fi
 #
 # ---- end docker build ----
 
-# Cleaning
-rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR" usr var etc
+if [ "$DOCKERFILE" != "Dockerfile" ] ; then
+   # Cleaning only if Dockerfile.tmp is the current one
+   rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR_" usr var etc
+fi
+
