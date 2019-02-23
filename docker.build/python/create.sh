@@ -24,8 +24,8 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Python over openssh-server image"
-IMGNAME="python3"
+COMMENT="Pytest n pyinstaller via pip3 over openssh-server image"
+IMGNAME="pytest_pyinstaller"
 
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -58,20 +58,29 @@ chmod 755 $START_CMD
 # ---- end workaround IP ----
 
 cat > ${DOCKERFILE} << EOF
-FROM lrgc01/minbase_stable_ssh
+#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM lrgc01/stretch_slim-ssh
+
 LABEL Comment="$COMMENT"
+
 COPY $START_CMD /
-RUN groupadd -g $GID_ $GRP_ && \
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \
-    apt-get update && \
-    apt-get install -y python3-pip && \
-    apt-get clean && \
-    pip3 install pytest pyinstaller && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/*debian.org* && \
-    rm -fr /usr/share/man/man* && \
+
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    set -ex && \\
+    apt-get update && \\
+    apt-get install -y python3-pip && \\
+    apt-get clean && \\
+    pip3 install pytest pyinstaller && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
     chmod 755 /$START_CMD
+
 EXPOSE 22
+
 CMD ["/$START_CMD"]
 EOF
 
