@@ -17,7 +17,7 @@ BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 if [ "$#" -gt 0 ]; then
    case "$1" in
       env|prepare|Dockerfile)
-        DOCKERFILE="Dockerfile"
+        DOCKERFILE="Dockerfile.tmp"
    ;;
    esac
 else
@@ -86,7 +86,8 @@ EOF
 
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" ]; then
-  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  #docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f Dockerfile .
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then

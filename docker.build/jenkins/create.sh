@@ -92,8 +92,8 @@ chown $UID_:$GID_ "$USERDIR_"/.bashrc
 # ---- Python wrapper built in bash ----
 #
 # This will be used by jenkins to find out the python host
-PYHOST_FILE=${JENKINS_PYHOST_FILE:-"python.host"}
-PYWRAP_FILE=${JENKINS_PYWRAP_FILE:-"py_wrap.sh"}
+PYHOST_FILE=${PYHOST_FILE:-"python.host"}
+PYWRAP_FILE=${PYWRAP_FILE:-"py_wrap.sh"}
 # python commands to be linked to $PYWRAP_FILE
 PYFILES="python python3 pytest py.test pyinstaller"
 
@@ -132,6 +132,46 @@ do
 done )
 #
 # ---- end python wrap ----
+
+# 
+# ---- Node.js wrapper commands in bash ----
+#
+# This will be used by jenkins to find out the node.js host
+NODE_HOST_FILE=${NODE_HOST_FILE:-"nodejs.host"}
+NODE_WRAP_FILE=${NODE_WRAP_FILE:-"nodejs_wrap.sh"}
+# python commands to be linked to $PYWRAP_FILE
+NODE_FILES="node npm "
+
+if [ ! -d $LOCALBIN ]; then
+   mkdir -p $LOCALBIN
+fi
+cat > $LOCALBIN/$NODE_WRAP_FILE << EOF
+#!/bin/sh
+
+if [ -f ~/$NODE_HOST_FILE ]; then
+   NODE_HOST=\$(cat ~/$NODE_HOST_FILE)
+else
+   echo "Could not determine python server IP. No ~/$NODE_HOST_FILE file."
+   exit 1
+fi
+
+CWD="\`pwd\`"		# Should run in the same directory
+COMMAND=\`basename \$0\`	# Just want the command name itself
+
+ssh -o StrictHostKeyChecking=no \$NODE_HOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
+
+EOF
+
+# Don't forget to make it executable
+chmod 755 $LOCALBIN/$NODE_WRAP_FILE
+
+( cd $LOCALBIN 
+for nodefile in $NODE_FILES
+do
+   ln -sf $NODE_WRAP_FILE $nodefile
+done )
+#
+# ---- end Node.js wrap ----
 
 #
 # ---- The jenkins CMD to start container ----

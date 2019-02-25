@@ -21,9 +21,16 @@ JENKINS_HOMEDIR=/var/lib/jenkins
 # Jenkins System key file
 JENKINS_KEY_FILE="Jenkins_System_Key"
 
-JENKINS_PYHOST_FILE="python.host"
-JENKINS_PYWRAP_FILE="py_wrap.sh"
+# Used in jenkins
+PYHOST_FILE="python.host"
+PYWRAP_FILE="py_wrap.sh"
+NODE_HOST_FILE="nodejs.host"
+NODE_WRAP_FILE="nodejs_warp.sh"
 
 # To python image
 PY_START_CMD="python.start"
 PY_IPFILE="$JENKINS_PYHOST_FILE"
+
+# To nodejs image
+NODE_START_CMD="nodejs.start"
+NODE_IPFILE="nodejs.host"
