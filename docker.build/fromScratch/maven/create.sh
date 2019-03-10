@@ -5,7 +5,6 @@ cd "$WORKDIR"
 
 # Folder is optional - end with a slash
 FOLDER="lrgc01/"
-IMGNAME="scratch_maven"
 # Versioning in order to keep a copy if running more than once
 # Note the ":" in the formated output
 # May change for own needs
@@ -18,7 +17,19 @@ MAVEN_BASE="apache-maven-$MAVEN_VERSION"
 PACKAGE="${MAVEN_BASE}-bin.tar.gz"
 CHECK="${MAVEN_BASE}-bin.tar.gz.sha512"
 
-DOCKERFILE="Dockerfile.tmp"
+# Optionaly this script can prepare the docker-build environment
+if [ "$#" -gt 0 ]; then
+   case "$1" in
+      env|prepare|Dockerfile)
+        DOCKERFILE="Dockerfile"
+   ;;
+   esac
+else
+   DOCKERFILE="Dockerfile.tmp"
+fi
+
+COMMENT="Maven from scratch just to share the volume of maven install"
+IMGNAME="scratch_maven"
 
 BASEPATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -43,8 +54,11 @@ tar -xf $PACKAGE -C ${OPTDIR}
 # Change versioned name to universal maven
 mv ${OPTDIR}/${MAVEN_BASE} ${OPTDIR}/maven
 
-# nope is an empty file just to keep everything clean by avoiding error 
-# messagens in some situations
+#
+# ---- Start CMD ----
+#
+# nope is an 'do nothing' static linked binary just to keep everything 
+# clean with 0 exit code and avoid error messagens in some situations
 cat > nope.c << EOF
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,10 +68,12 @@ void main(void){
 }
 EOF
 gcc --static -o nope nope.c
+#
+# ---- end Start CMD ----
 
 cat > ${DOCKERFILE} << EOF
 FROM scratch
-LABEL Comment="This image is used just to share the volume of maven install"
+LABEL Comment="$COMMENT"
 ENV PATH /${OPTDIR}/maven/bin:$BASEPATH
 COPY ${OPTDIR} /opt
 COPY nope /
@@ -66,7 +82,14 @@ CMD ["/nope"]
 EOF
 
 # Now build the image using docker build
-docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} . 
+if [ `whoami` = "root" ]; then
+   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} . 
+fi
+#
+# ---- end docker build ----
 
 # Cleaning
-rm -fr ${OPTDIR} ${DOCKERFILE} nope nope.c
+if [ "$DOCKERFILE" != "Dockerfile" ] ; then
+   # Cleaning only if Dockerfile.tmp is the current one
+   rm -fr ${OPTDIR} ${DOCKERFILE} nope nope.c
+fi
