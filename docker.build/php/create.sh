@@ -67,14 +67,14 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/stretch_slim-ssh
+FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
 RUN apt-get update && \\
-    apt-get install -y php-fpm php-mysql && \\
+    apt-get install -y php php-fpm php-mysql && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\

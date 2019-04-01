@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/stretch_slim-ssh
+FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="Pytest n pyinstaller via pip3 over openssh-server image"
 

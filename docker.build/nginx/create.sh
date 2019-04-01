@@ -67,7 +67,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/stretch_slim-ssh
+FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="$COMMENT"
 

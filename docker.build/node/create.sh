@@ -17,7 +17,7 @@ BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 if [ "$#" -gt 0 ]; then
    case "$1" in
       env|prepare|Dockerfile)
-        DOCKERFILE="Dockerfile.tmp"
+        DOCKERFILE="Dockerfile"
    ;;
    esac
 else
@@ -61,7 +61,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/stretch_slim-ssh
+FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="$COMMENT"
 
