@@ -7,7 +7,7 @@ LABEL Comment="nginx web server over openssh-server image"
 
 COPY nginx.start /
 
-RUN apt-get clean && \
+RUN apt-get update && \
     apt-get install -y nginx && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
