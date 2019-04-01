@@ -48,7 +48,7 @@ TAR_BALL=temp_tarball.tgz
 #
 # This has to be always checked - use direct download because 
 # the download from apt repo is to slow
-JENKINS_PKG="jenkins_2.150.3_all.deb"
+JENKINS_PKG="jenkins_2.164.1_all.deb"
 if [ ! -f "$JENKINS_PKG" ]; then
    wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
 fi
@@ -198,13 +198,13 @@ cat > ${DOCKERFILE} << EOF
 FROM lrgc01/openjdk
 LABEL Comment="$COMMENT"
 ADD $TAR_BALL /
-RUN groupadd -g $GID_ $GRP_ && \
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \
-    apt-get update && \
-    apt-get install -y git && \
-    apt-get clean && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/*debian.org* && \
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    apt-get update && \\
+    apt-get install -y git && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -f /var/lib/apt/lists/*debian.org* && \\
     rm -fr /usr/share/man/man* 
 EXPOSE 8080
 VOLUME  ["/$USERDIR_"]

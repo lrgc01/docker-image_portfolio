@@ -14,10 +14,15 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 
 # Optionaly this script can prepare the docker-build environment
+#
+##### WARNING
+#####
+##### this Dockerfile is built from nodejs official Docker
+##### Don't overwrite here. Using .tmp to the future.
 if [ "$#" -gt 0 ]; then
    case "$1" in
       env|prepare|Dockerfile)
-        DOCKERFILE="Dockerfile"
+        DOCKERFILE="Dockerfile.tmp"
    ;;
    esac
 else

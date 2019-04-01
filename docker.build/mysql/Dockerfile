@@ -3,7 +3,8 @@
 # Could be ubuntu
 # or any official distribution in Docker Hub, like debian
 # We use out own mininal base bootstrap made from debootstrap
-FROM lrgc01/minbase_stable
+#FROM lrgc01/minbase_stable
+FROM lrgc01/stretch_slim-ssh
 
 # Install and keep thin
 # Note: here we use ``&&\`` to run commands one after the other - the ``\``
@@ -16,7 +17,7 @@ FROM lrgc01/minbase_stable
 RUN groupadd -g 336 mysql && \
     useradd -M -s /bin/false -u 336 -g mysql -d /nonexistent mysql && \
     apt-get update && \
-    apt-get install -y mariadb-server-10.1 && \
+    apt-get install -y mariadb-server && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -f /var/lib/apt/lists/*debian.org* && \
