@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# workaround to get my ip
+grep -w $(hostname) /etc/hosts | awk '{print $1}' > "/var/lib/jenkins/php.host"
+
+# First start the fpm server as a daemon
+/usr/sbin/php-fpm7.0 --daemonize --fpm-config /etc/php/7.0/fpm/php-fpm.conf
+
+# then start sshd without detach
+/usr/sbin/sshd -D
+
