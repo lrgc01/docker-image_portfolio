@@ -104,7 +104,7 @@ cat > $LOCALBIN/$PYWRAP_FILE << EOF
 #!/bin/sh
 
 if [ -f ~/$PYHOST_FILE ]; then
-   PYHOST=\$(cat ~/$PYHOST_FILE)
+   PYHOST=\$(head -1 ~/$PYHOST_FILE)
 else
    echo "Could not determine python server IP. No ~/$PYHOST_FILE file."
    exit 1
@@ -149,7 +149,7 @@ cat > $LOCALBIN/$NODE_WRAP_FILE << EOF
 #!/bin/sh
 
 if [ -f ~/$NODE_HOST_FILE ]; then
-   NODE_HOST=\$(cat ~/$NODE_HOST_FILE)
+   NODE_HOST=\$(head -1 ~/$NODE_HOST_FILE)
 else
    echo "Could not determine python server IP. No ~/$NODE_HOST_FILE file."
    exit 1
