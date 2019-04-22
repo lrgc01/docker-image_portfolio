@@ -24,8 +24,16 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="nginx web server over openssh-server image"
-IMGNAME="nginx-ssh_stretch_slim"
+COMMENT="etcd server over openssh-server image"
+IMGNAME="etcd-ssh_stretch_slim"
+
+ETCD_VER="v3.3.12"
+# choose either URL
+GOOGLE_URL=https://storage.googleapis.com/etcd
+GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
+BASE_URL=${GOOGLE_URL}
+
+ETCD_URL="${BASE_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz"
 
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
@@ -36,8 +44,8 @@ GRP_=${JENKINS_GRP:-pygrp}
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${NGINX_START_CMD:-"nginx.start"}
-IPFILE=${NGINX_IPFILE:-"nginx.host"}
+START_CMD=${ETCD_START_CMD:-"etcd.start"}
+IPFILE=${ETCD_IPFILE:-"etcd.host"}
 
 # 
 # ---- Start command ----
@@ -50,8 +58,18 @@ cat > $START_CMD << EOF
 # workaround to get my ip
 #grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
-# Up to now is running only the nginx itself - may use sshd in the future
-/usr/sbin/nginx -g "daemon off;" -c /etc/nginx/nginx.conf
+# Simple start - to do a more complete call rememter to use /usr/local/bin
+# A nice idea is to use /etcd-data as a docker volume
+# Listen on all IPs - let docker handle binding.
+/usr/local/bin/etcd --name s1 \
+	--data-dir /etcd-data \
+	--listen-client-urls http://0.0.0.0:2379 \
+	--advertise-client-urls http://0.0.0.0:2379 \
+	--listen-peer-urls http://0.0.0.0:2380 \
+	--initial-advertise-peer-urls http://0.0.0.0:2380 \
+	--initial-cluster s1=http://0.0.0.0:2380 \
+	--initial-cluster-token tkn \
+	--initial-cluster-state new
 
 # then start sshd without detach (but change off to on in nginx call)
 #/usr/sbin/sshd -D
@@ -73,21 +91,18 @@ LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
-RUN apt-get update && \\
-    apt-get install -y nginx && \\
-    apt-get clean && \\
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
-    rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
-    mkdir /run/php && \\
+ADD ${ETCD_URL} /tmp/etcd
+
+RUN find /tmp/etcd -maxdepth 3 \( -name etcd -o -name etcdctl \) -type f -exec cp -p {} /usr/local/bin \\; && \\
+    rm -fr /tmp/etcd && \\
     chmod 755 /$START_CMD
 
 # Obvious Web ports
-EXPOSE 80
-EXPOSE 443
+EXPOSE 2379
+EXPOSE 2380
 
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
-VOLUME  ["/etc/nginx", "/var/log/nginx", "/var/www/html"]
+VOLUME  ["/etcd-data"]
 
 CMD ["/$START_CMD"]
 EOF
