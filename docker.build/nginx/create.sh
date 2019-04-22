@@ -48,12 +48,12 @@ cat > $START_CMD << EOF
 #!/bin/bash
 
 # workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
+#grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
 # Up to now is running only the nginx itself - may use sshd in the future
-/usr/sbin/nginx -g "daemon on;" -c /etc/nginx/nginx.conf
+/usr/sbin/nginx -g "daemon off;" -c /etc/nginx/nginx.conf
 
-# then start sshd without detach
+# then start sshd without detach (but change off to on in nginx call)
 #/usr/sbin/sshd -D
 
 EOF
