@@ -91,10 +91,12 @@ LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
-ADD ${ETCD_URL} /tmp/etcd
+ADD ${ETCD_URL} /tmp/etcd.tgz
 
-RUN find /tmp/etcd -maxdepth 3 \( -name etcd -o -name etcdctl \) -type f -exec cp -p {} /usr/local/bin \\; && \\
-    rm -fr /tmp/etcd && \\
+RUN mkdir /tmp/etcd.tmp && \\
+    tar -xf /tmp/etcd.tgz -C /tmp/etcd.tmp && \\
+    find /tmp/etcd.tmp -maxdepth 2 \( -name etcd -o -name etcdctl \) -type f -exec cp -p {} /usr/local/bin \\; && \\
+    rm -fr /tmp/etcd.tgz /tmp/etcd.tmp && \\
     chmod 755 /$START_CMD
 
 # Obvious Web ports
