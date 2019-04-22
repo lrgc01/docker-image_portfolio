@@ -26,7 +26,7 @@ RUN groupadd -g 336 mysql && \
        /etc/mysql/mariadb.conf.d/50-server.cnf.new && \
     mv -f /etc/mysql/mariadb.conf.d/50-server.cnf.new /etc/mysql/mariadb.conf.d/50-server.cnf && \
     /usr/bin/mysqld_safe --nowatch && sleep 5 && \
-    (echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'docker'" | mysql -u root) && \
+    (echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'docker' with grant option" | mysql -u root) && \
     mysqladmin -u root shutdown
 
 # Expose the Mysql/MariaDB port
