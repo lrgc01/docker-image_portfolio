@@ -1,13 +1,13 @@
 ## Postgresql on top of lrgc01/ssh-stretch_slim
 
 - postgresql (latest from metapackage) on debian stretch 9 (stable) 
-- by now on version 9.6
+- by now on version 9.6 (stable)
 - based on lrgc01/ssh-stretch_slim
 
 ### Here is the Dockerfile:
 
 ```
-FROM lrgc01/debian_stretch
+FROM lrgc01/ssh-stretch_slim
 
 # Install and keep thin
 # Note: here we use &&\ to run commands one after the other - the \
