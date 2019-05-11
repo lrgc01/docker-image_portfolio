@@ -1,21 +1,21 @@
-#
-# example Dockerfile from https://docs.docker.com/engine/examples/postgresql_service/
-# with little improve
-#
+## Postgresql on top of lrgc01/ssh-stretch_slim
 
-FROM lrgc01/ssh-stretch_slim
+- postgresql (latest from metapackage) on debian stretch 9 (stable) 
+- by now on version 9.6
+- based on lrgc01/ssh-stretch_slim
+
+### Here is the Dockerfile:
+
+```
+FROM lrgc01/debian_stretch
 
 # Install and keep thin
 # Note: here we use &&\ to run commands one after the other - the \
 #       allows the RUN command to span multiple lines.
-# Note2: clean some files that will be downloaded again on every "apt update" command.
-# Note3: There is no man command on base docker image, so no man pages at all.
 RUN apt-get update && \
     apt-get install -y postgresql && \
     apt-get clean && \
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
-    rm -f /var/lib/apt/lists/*debian.org* && \
-    rm -fr /usr/share/man/man* 
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin
 
 # Run the rest of the commands as the postgres user created by the postgres-9.6 package when it was apt-get installed
 USER postgres
@@ -39,3 +39,5 @@ VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 # Set the default command to run when starting the container
 CMD ["/usr/lib/postgresql/9.6/bin/postgres", "-D", "/var/lib/postgresql/9.6/main", "-c", "config_file=/etc/postgresql/9.6/main/postgresql.conf"]
+```
+
