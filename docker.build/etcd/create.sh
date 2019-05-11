@@ -27,7 +27,7 @@ fi
 COMMENT="etcd server over openssh-server image"
 IMGNAME="etcd-ssh_stretch_slim"
 
-ETCD_VER="v3.3.12"
+ETCD_VER="v3.3.13"
 # choose either URL
 GOOGLE_URL=https://storage.googleapis.com/etcd
 GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
