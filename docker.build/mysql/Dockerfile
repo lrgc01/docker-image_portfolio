@@ -17,7 +17,7 @@ FROM lrgc01/ssh-stretch_slim
 RUN groupadd -g 336 mysql && \
     useradd -M -s /bin/false -u 336 -g mysql -d /nonexistent mysql && \
     apt-get update && \
-    apt-get install -y mariadb-server && \
+    apt-get install -y mariadb-server --no-install-recommends && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -f /var/lib/apt/lists/*debian.org* && \
