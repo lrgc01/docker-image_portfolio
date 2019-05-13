@@ -34,6 +34,7 @@ USR_=${AZURE_USR:-azusr}
 GRP_=${AZURE_GRP:-azgrp}
 USERDIR_=${AZURE_HOMEDIR:-home/azure}
 USERDIR_=${USERDIR_#/}
+USERPASS_=`echo "DockerAz123" | openssl passwd -1 -stdin`
 
 #START_CMD=${AZ_START_CMD:-"/bin/bash"}
 
@@ -46,7 +47,7 @@ FROM lrgc01/ssh-stretch_slim
 LABEL Comment="$COMMENT"
 
 RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    useradd -u $UID_ -g $GRP_ -m -d /$USERDIR_ -s /bin/bash -p '$USERPASS_' $USR_ && \\
     apt-get update && \\
     apt-get install -y gnupg2 apt-transport-https lsb-release software-properties-common dirmngr --no-install-recommends && \\
     AZ_REPO=\$(lsb_release -cs) && \\
