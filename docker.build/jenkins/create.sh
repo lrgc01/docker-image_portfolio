@@ -213,7 +213,7 @@ CMD ["/$LOCALBIN/jenkins"]
 EOF
 
 # Now build the image using docker build only if root is running
-if [ `whoami` = "root" -a "$BUILD_ENV" -ne "1" ]; then
+if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
 fi
 #
