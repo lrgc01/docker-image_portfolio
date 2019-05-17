@@ -7,7 +7,7 @@ LABEL Comment="etcd server over openssh-server image"
 
 COPY etcd.start /
 
-ADD https://storage.googleapis.com/etcd/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz /tmp/etcd.tgz
+ADD https://storage.googleapis.com/etcd/v3.3.13/etcd-v3.3.13-linux-amd64.tar.gz /tmp/etcd.tgz
 
 RUN mkdir /tmp/etcd.tmp && \
     tar -xf /tmp/etcd.tgz -C /tmp/etcd.tmp && \

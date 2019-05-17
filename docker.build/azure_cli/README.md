@@ -1,4 +1,4 @@
-### azure CLI container
+### Azure CLI container
 
  - Built using the installations instructions from Microsoft Azure itself.
    - See: [https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest)

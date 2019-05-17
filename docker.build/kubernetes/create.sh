@@ -25,19 +25,18 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="etcd server over openssh-server image"
-IMGNAME="etcd-ssh_stretch_slim"
+COMMENT="Simple Kubernetes environment for API server and client tasks"
+IMGNAME="kubernetes"
 
-ETCD_VER="v3.3.13"
-# choose either URL
-GOOGLE_URL=https://storage.googleapis.com/etcd
-GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
-BASE_URL=${GOOGLE_URL}
+# https://dl.k8s.io/v1.14.0/kubernetes-server-linux-amd64.tar.gz
+K8S_VER="v1.14.0"
+BASE_URL="https://dl.k8s.io"
 
-ETCD_URL="${BASE_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz"
+#K8S_URL="${BASE_URL}/${K8S_VER}/kubernetes-server-linux-amd64.tar.gz"
+K8S_URL="hyperkube-linux-amd64.tar.gz"
 
-START_CMD=${ETCD_START_CMD:-"etcd.start"}
-IPFILE=${ETCD_IPFILE:-"etcd.host"}
+START_CMD=${K8S_START_CMD:-"k8s.start"}
+IPFILE=${K8S_IPFILE:-"k8s.host"}
 
 # 
 # ---- Start command ----
@@ -76,11 +75,11 @@ LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
-ADD ${ETCD_URL} /tmp/etcd.tgz
+ADD ${K8S_URL} /tmp/k8s.tgz
 
-RUN mkdir /tmp/etcd.tmp && \\
-    tar -xf /tmp/etcd.tgz -C /tmp/etcd.tmp && \\
-    find /tmp/etcd.tmp -maxdepth 2 \( -name etcd -o -name etcdctl \) -type f -exec cp -p {} /usr/local/bin \\; && \\
+RUN mkdir /tmp/k8s.tmp && \\
+    tar -xf /tmp/k8s.tgz -C /tmp/k8s.tmp && \\
+    find /tmp/k8s.tmp -maxdepth 3 -name hyperkube -type f -exec cp -p {} /usr/local/bin \\; && \\
     rm -fr /tmp/etcd.tgz /tmp/etcd.tmp && \\
     chmod 755 /$START_CMD
 
