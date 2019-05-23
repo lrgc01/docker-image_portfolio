@@ -7,8 +7,11 @@ LABEL Comment="PHP and php-fpm software + server over openssh-server image"
 
 COPY php.start /
 
-RUN apt-get update && \
-    apt-get install -y php php-fpm php-mysql && \
+RUN groupadd -g 10002 jenkins && \
+    useradd -M -u 10002 -g jenkins -d /var/lib/jenkins jenkins && \
+    set -ex && \
+    apt-get update && \
+    apt-get install -y php php-fpm php-mysql --no-install-recommends && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \

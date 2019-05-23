@@ -49,7 +49,7 @@ TAR_BALL=temp_tarball.tgz
 #
 # This has to be always checked - use direct download because 
 # the download from apt repo is to slow
-JENKINS_PKG="jenkins_2.164.1_all.deb"
+JENKINS_PKG="jenkins_2.164.3_all.deb"
 if [ ! -f "$JENKINS_PKG" ]; then
    wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
 fi
@@ -173,6 +173,46 @@ do
 done )
 #
 # ---- end Node.js wrap ----
+
+# 
+# ---- PHP wrapper commands in bash ----
+#
+# This will be used by jenkins to find out the PHP host
+PHP_HOST_FILE=${PHP_HOST_FILE:-"php.host"}
+PHP_WRAP_FILE=${PHP_WRAP_FILE:-"php_wrap.sh"}
+# PHP commands to be linked to $PHP_WRAP_FILE
+PHP_FILES="php phpdismod phpenmod phpquery "
+
+if [ ! -d $LOCALBIN ]; then
+   mkdir -p $LOCALBIN
+fi
+cat > $LOCALBIN/$PHP_WRAP_FILE << EOF
+#!/bin/sh
+
+if [ -f ~/$PHP_HOST_FILE ]; then
+   PHP_HOST=\$(head -1 ~/$PHP_HOST_FILE)
+else
+   echo "Could not determine PHP server IP. No ~/$PHP_HOST_FILE file."
+   exit 1
+fi
+
+CWD="\`pwd\`"		# Should run in the same directory
+COMMAND=\`basename \$0\`	# Just want the command name itself
+
+ssh -o StrictHostKeyChecking=no \$PHP_HOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
+
+EOF
+
+# Don't forget to make it executable
+chmod 755 $LOCALBIN/$PHP_WRAP_FILE
+
+( cd $LOCALBIN 
+for phpfile in $PHP_FILES
+do
+   ln -sf $PHP_WRAP_FILE $phpfile
+done )
+#
+# ---- end PHP wrap ----
 
 #
 # ---- The jenkins CMD to start container ----

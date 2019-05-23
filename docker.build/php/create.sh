@@ -74,8 +74,11 @@ LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
-RUN apt-get update && \\
-    apt-get install -y php php-fpm php-mysql && \\
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    set -ex && \\
+    apt-get update && \\
+    apt-get install -y php php-fpm php-mysql --no-install-recommends && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
