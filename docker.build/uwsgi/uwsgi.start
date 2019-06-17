@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# workaround to get my ip
+grep -w $(hostname) /etc/hosts | awk '{print $1}' > "/var/lib/jenkins/uwsgi.host"
+
+# Start the uWSGI server (must change the /wsgi_server.py file to your needs)
+uwsgi --http :9090 --wsgi-file /wsgi_server.py --master --processes 4 --threads 2 --stats 0.0.0.0:9191
+
+# then start sshd
+/usr/sbin/sshd -D
+
