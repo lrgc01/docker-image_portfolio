@@ -5,10 +5,8 @@ FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="uWSGI via pip over openssh-server image"
 
-COPY uwsgi.start wsgi_server.py /
-
-RUN groupadd -g 10002 jenkins && \
-    useradd -M -u 10002 -g jenkins -d /var/lib/jenkins jenkins && \
+RUN groupadd -g 10020 uwsgi && \
+    useradd -m -u 10020 -g uwsgi -d /uwsgi.d uwsgi && \
     set -ex && \
     apt-get update && \
     apt-get install -y python-pip build-essential python-dev --no-install-recommends && \
@@ -17,11 +15,16 @@ RUN groupadd -g 10002 jenkins && \
     pip install uwsgi && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
-    rm -fr /usr/share/man/man* && \
-    chmod 755 /uwsgi.start
+    rm -fr /usr/share/man/man* 
+
+# After creating user homedir
+COPY --chown=10020:10020 uwsgi.start uwsgi_server.py uwsgi.ini /uwsgi.d/
+
+VOLUME ["/uwsgi.d"]
+
 
 # 9090 listen for connections / 9191 monitoring
 EXPOSE 9090 
 EXPOSE 9191
 
-CMD ["/uwsgi.start"]
+CMD ["sh","/uwsgi.d/uwsgi.start"]

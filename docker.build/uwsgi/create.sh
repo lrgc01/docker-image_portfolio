@@ -29,16 +29,36 @@ COMMENT="uWSGI via pip over openssh-server image"
 IMGNAME="uwsgi-stretch_slim_ssh"
 FROMIMG="lrgc01/ssh-stretch_slim"
 
-UID_=${JENKINS_UID:-102}
-GID_=${JENKINS_GID:-103}
-USR_=${JENKINS_USR:-pyuser}
-GRP_=${JENKINS_GRP:-pygrp}
-USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+UID_=${UWSGI_UID:-10020}
+GID_=${UWSGI_GID:-10020}
+USR_=${UWSGI_USR:-uwsgi}
+GRP_=${UWSGI_GRP:-uwsgi}
+USERDIR_=${UWSGI_HOMEDIR:-uwsgi.d}
 USERDIR_=${USERDIR_#/}
 
 START_CMD=${UWSGI_START_CMD:-"uwsgi.start"}
-PYWSGI_CMD=${UWSGI_PYWSGI_CMD:-"wsgi_server.py"}
+PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
+PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
+PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
 IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
+
+#
+# ---- INI file ----
+#
+cat > $PYWSGI_INI << EOF
+[uwsgi]
+http = :9090
+wsgi-file = /$USERDIR_/$PYWSGI_APP
+master = true
+processes = 4
+threads = 2
+stats = 0.0.0.0:9191
+uid = $USR_
+gid = $GRP_
+EOF
+
+#
+# ---- end INI file ----
 
 # 
 # ---- Start command ----
@@ -51,8 +71,9 @@ cat > $START_CMD << EOF
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
-# Start the uWSGI server (must change the /$PYWSGI_CMD file to your needs)
-uwsgi --http :9090 --wsgi-file /$PYWSGI_CMD --master --processes 4 --threads 2 --stats 0.0.0.0:9191
+# Start the uWSGI server (want to change the /$USERDIR_/$PYWSGI_APP file to fit your needs)
+#uwsgi --http :9090 --wsgi-file /$USERDIR_/$PYWSGI_APP --master --processes 4 --threads 2 --stats 0.0.0.0:9191 --uid $USR_ --gid $GRP_ --daemonize2 /$USERDIR_/$PYWSGI_LOG
+uwsgi /$USERDIR_/$PYWSGI_INI --daemonize2 /$USERDIR_/$PYWSGI_LOG
 
 # then start sshd
 /usr/sbin/sshd -D
@@ -67,11 +88,13 @@ chmod 755 $START_CMD
 #
 # Python uWSGI server main file
 #
-cat > $PYWSGI_CMD << EOF
+cat > $PYWSGI_APP << EOF
 def application(env, start_response):
     start_response('200 OK', [('Content-Type','text/html')])
     return [b"Hello World"]
 EOF
+#
+# ---- end uWSGI server file ----
 
 cat > ${DOCKERFILE} << EOF
 #
@@ -81,10 +104,8 @@ FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
-COPY $START_CMD $PYWSGI_CMD /
-
 RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
     apt-get install -y python-pip build-essential python-dev --no-install-recommends && \\
@@ -93,14 +114,19 @@ RUN groupadd -g $GID_ $GRP_ && \\
     pip install uwsgi && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
-    chmod 755 /$START_CMD
+    rm -fr /usr/share/man/man* 
+
+# After creating user homedir
+COPY --chown=$UID_:$GID_ $START_CMD $PYWSGI_APP $PYWSGI_INI /$USERDIR_/
+
+VOLUME ["/$USERDIR_"]
+
 
 # 9090 listen for connections / 9191 monitoring
 EXPOSE 9090 
 EXPOSE 9191
 
-CMD ["/$START_CMD"]
+CMD ["sh","/$USERDIR_/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running
@@ -110,6 +136,6 @@ fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD $PYWSGI_CMD
+   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD $PYWSGI_APP $PYWSGI_INI
 fi
 
