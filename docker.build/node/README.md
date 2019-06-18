@@ -2,6 +2,8 @@
 
 This image was built on top of lrgc01/ssh-stretch_slim, or debian:stretch-slim plus an openssh-server.
 
+Nothing really new. Just a copy of [https://github.com/nodejs/docker-node](https://github.com/nodejs/docker-node) plus some small changes. These changes include a new user named "jenkins/10002" to match the one in other containers that are planned to work together (link) and the ssh server explained above.
+
 The goal is to create an sshd server with Node.js commands to be used by another server from the same container set like Jenkins service from a docker-compose, for example.
 
 - See [https://lrc-tech.blogspot.com/2019/02/jenkins-in-docker-run-jenkins-python.html](https://lrc-tech.blogspot.com/2019/02/jenkins-in-docker-run-jenkins-python.html)
