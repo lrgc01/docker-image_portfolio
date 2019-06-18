@@ -26,7 +26,7 @@ else
 fi
 
 COMMENT="uWSGI via pip over openssh-server image"
-IMGNAME="uwsgi-stretch_slim_ssh"
+IMGNAME="uwsgi-stretch_slim"
 FROMIMG="lrgc01/ssh-stretch_slim"
 
 UID_=${UWSGI_UID:-10020}

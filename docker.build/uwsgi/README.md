@@ -11,8 +11,7 @@ This powerful server works both as a Web server or as an application server usin
  
  - docker run -d --name=uwsgiSocket -v uwsgicfg:/uwsgi.d --publish 0.0.0.0:3131:3131 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim_ssh
 
-Change /uwsgi.d/uwsgi.ini according to your needs (socket, web server, etc).
-
+Change /uwsgi.d/uwsgi.ini according to your needs (socket, port, web server, app to start, etc).
 
 Other similar docker examples together with some explanation can be found in:
 
