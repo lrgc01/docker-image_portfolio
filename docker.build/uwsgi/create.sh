@@ -47,7 +47,10 @@ IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
 #
 cat > $PYWSGI_INI << EOF
 [uwsgi]
+# Doesn't seem to work with more than one socket mode
+# Choose one at a time
 http = :9090
+#fastcgi-socket = /uwsgi.d/fast-uwsgi
 wsgi-file = /$USERDIR_/$PYWSGI_APP
 master = true
 processes = 4
