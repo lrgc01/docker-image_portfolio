@@ -25,18 +25,20 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Pytest n pyinstaller via pip3 over openssh-server image"
-IMGNAME="pytest_pyinstaller"
+COMMENT="Apache2 web server over openssh-server image"
+IMGNAME="apache2-stretch_slim"
 
+# Not used, just in case ...
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
 USR_=${JENKINS_USR:-pyuser}
 GRP_=${JENKINS_GRP:-pygrp}
+# This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${PY_START_CMD:-"python.start"}
-IPFILE=${PY_IPFILE:-"python.host"}
+START_CMD=${APACHE_START_CMD:-"apache2.start"}
+IPFILE=${APACHE_IPFILE:-"apache2.host"}
 
 # 
 # ---- Start command ----
@@ -46,9 +48,33 @@ IPFILE=${PY_IPFILE:-"python.host"}
 cat > $START_CMD << EOF
 #!/bin/bash
 
-# workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-# then start sshd
+CFG_DIR="/etc/apache2"
+MOD_AV_DIR="mods-available"
+MOD_EN_DIR="mods-enabled"
+
+# Basic initial configuration based on some env variables
+#
+# ----------------
+# APACHE2_MOD_LIST - module name (no suffix) space separated
+# ex.: APACHE2_MOD_LIST="mod_proxy mod_proxy_uwsgi"
+#
+if [ ! -z "\$APACHE2_MOD_LIST" ] ; then 
+     cd \$CFG_DIR/\$MOD_EN_DIR
+     for mod_ in \$APACHE2_MOD_LIST
+     do
+        [ -f "../\$MOD_AV_DIR/\${mod_}.load" ] && ln -fs "../\$MOD_AV_DIR/\${mod_}.load" .
+        [ -f "../\$MOD_AV_DIR/\${mod_}.conf" ] && ln -fs "../\$MOD_AV_DIR/\${mod_}.conf" .
+     done
+fi
+# ----------------
+
+cd /
+
+apachectl start
+
+# For testing purposes and to avoid using another daemon control, 
+# just call sshd to hold the terminal then start sshd without 
+# detach (but change off to on in apache2 call)
 /usr/sbin/sshd -D
 
 EOF
@@ -68,22 +94,23 @@ LABEL Comment="$COMMENT"
 
 COPY $START_CMD /
 
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    set -ex && \\
-    apt-get update && \\
-    apt-get install -y python-pip python3-pip && \\
+RUN apt-get update && \\
+    apt-get install -y apache2 libapache2-mod-fcgid libapache2-mod-proxy-uwsgi --no-install-recommends && \\
     apt-get clean && \\
-    pip install pytest pyinstaller && \\
-    pip3 install pytest pyinstaller && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
+    mkdir /run/php && \\
     chmod 755 /$START_CMD
 
-EXPOSE 22
+# Obvious Web ports
+EXPOSE 80
+EXPOSE 443
 
-CMD ["/$START_CMD"]
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  ["/etc/apache2", "/var/log/apache2", "/var/www/html"]
+
+CMD ["sh","/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running

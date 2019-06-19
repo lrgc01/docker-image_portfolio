@@ -90,7 +90,7 @@ EXPOSE 443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  ["/etc/nginx", "/var/log/nginx", "/var/www/html"]
 
-CMD ["/$START_CMD"]
+CMD ["sh","/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running

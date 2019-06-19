@@ -25,8 +25,8 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="uWSGI via pip over openssh-server image"
-IMGNAME="uwsgi-stretch_slim"
+COMMENT="python-dev over openssh-server image"
+IMGNAME="python_dev-stretch_slim"
 FROMIMG="lrgc01/ssh-stretch_slim"
 
 UID_=${UWSGI_UID:-10020}
@@ -38,7 +38,6 @@ USERDIR_=${USERDIR_#/}
 
 START_CMD=${UWSGI_START_CMD:-"uwsgi.start"}
 PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
-APPDIR="appdir"
 PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
 PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
 IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
@@ -48,16 +47,11 @@ IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
 #
 cat > $PYWSGI_INI << EOF
 [uwsgi]
-# Let's use 3 connection protocols
+# Doesn't seem to work with more than one socket mode
+# Choose one at a time
 http = :9090
-uwsgi-socket = /$USERDIR_/uwsgi.sock
-fastcgi-socket = /$USERDIR_/fastcgi.sock
-chmod-socket = 777
-# Could be a file only, but a complete app
-# in a defined path is more flexible
-#wsgi-file = /$USERDIR_/$APPDIR/$PYWSGI_APP
-pythonpath = /$USERDIR_/$APPDIR
-wsgi = ${PYWSGI_APP%.py}
+#fastcgi-socket = /uwsgi.d/fast-uwsgi
+wsgi-file = /$USERDIR_/$PYWSGI_APP
 master = true
 processes = 4
 threads = 2
@@ -80,8 +74,9 @@ cat > $START_CMD << EOF
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
-# Start the uWSGI server (might change the /$USERDIR_/$PYWSGI_INI file to fit your needs)
-/usr/local/bin/uwsgi /$USERDIR_/$PYWSGI_INI --daemonize2 /$USERDIR_/$PYWSGI_LOG
+# Start the uWSGI server (want to change the /$USERDIR_/$PYWSGI_APP file to fit your needs)
+#uwsgi --http :9090 --wsgi-file /$USERDIR_/$PYWSGI_APP --master --processes 4 --threads 2 --stats 0.0.0.0:9191 --uid $USR_ --gid $GRP_ --daemonize2 /$USERDIR_/$PYWSGI_LOG
+uwsgi /$USERDIR_/$PYWSGI_INI --daemonize2 /$USERDIR_/$PYWSGI_LOG
 
 # then start sshd
 /usr/sbin/sshd -D
@@ -99,7 +94,7 @@ chmod 755 $START_CMD
 cat > $PYWSGI_APP << EOF
 def application(env, start_response):
     start_response('200 OK', [('Content-Type','text/html')])
-    return ["Congrats! Your Python App Web server is working!\n"]
+    return [b"Hello World"]
 EOF
 #
 # ---- end uWSGI server file ----
@@ -114,7 +109,6 @@ LABEL Comment="$COMMENT"
 
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    mkdir -p /$USERDIR_/$APPDIR && chown -R $UID_:$GID_ /$USERDIR_/$APPDIR && \\
     set -ex && \\
     apt-get update && \\
     apt-get install -y python-pip build-essential python-dev --no-install-recommends && \\
@@ -126,8 +120,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     rm -fr /usr/share/man/man* 
 
 # After creating user homedir
-COPY --chown=$UID_:$GID_ $START_CMD $PYWSGI_INI /$USERDIR_/
-COPY --chown=$UID_:$GID_ $PYWSGI_APP /$USERDIR_/$APPDIR/
+COPY --chown=$UID_:$GID_ $START_CMD $PYWSGI_APP $PYWSGI_INI /$USERDIR_/
 
 VOLUME ["/$USERDIR_"]
 

@@ -7,6 +7,7 @@ LABEL Comment="uWSGI via pip over openssh-server image"
 
 RUN groupadd -g 10020 uwsgi && \
     useradd -m -u 10020 -g uwsgi -d /uwsgi.d uwsgi && \
+    mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d/appdir && \
     set -ex && \
     apt-get update && \
     apt-get install -y python-pip build-essential python-dev --no-install-recommends && \
@@ -18,7 +19,8 @@ RUN groupadd -g 10020 uwsgi && \
     rm -fr /usr/share/man/man* 
 
 # After creating user homedir
-COPY --chown=10020:10020 uwsgi.start uwsgi_server.py uwsgi.ini /uwsgi.d/
+COPY --chown=10020:10020 uwsgi.start uwsgi.ini /uwsgi.d/
+COPY --chown=10020:10020 uwsgi_server.py /uwsgi.d/appdir/
 
 VOLUME ["/uwsgi.d"]
 
