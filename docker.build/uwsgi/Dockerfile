@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM lrgc01/python_dev-stretch_slim
 
 LABEL Comment="uWSGI via pip over openssh-server image"
 
@@ -9,9 +9,6 @@ RUN groupadd -g 10020 uwsgi && \
     useradd -m -u 10020 -g uwsgi -d /uwsgi.d uwsgi && \
     mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d/appdir && \
     set -ex && \
-    apt-get update && \
-    apt-get install -y python-pip build-essential python-dev --no-install-recommends && \
-    apt-get clean && \
     pip install setuptools wheel && \
     pip install uwsgi && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \

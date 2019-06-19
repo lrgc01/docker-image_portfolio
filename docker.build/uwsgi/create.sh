@@ -27,7 +27,7 @@ fi
 
 COMMENT="uWSGI via pip over openssh-server image"
 IMGNAME="uwsgi-stretch_slim"
-FROMIMG="lrgc01/ssh-stretch_slim"
+FROMIMG="lrgc01/python_dev-stretch_slim"
 
 UID_=${UWSGI_UID:-10020}
 GID_=${UWSGI_GID:-10020}
@@ -116,9 +116,6 @@ RUN groupadd -g $GID_ $GRP_ && \\
     useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     mkdir -p /$USERDIR_/$APPDIR && chown -R $UID_:$GID_ /$USERDIR_/$APPDIR && \\
     set -ex && \\
-    apt-get update && \\
-    apt-get install -y python-pip build-essential python-dev --no-install-recommends && \\
-    apt-get clean && \\
     pip install setuptools wheel && \\
     pip install uwsgi && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\

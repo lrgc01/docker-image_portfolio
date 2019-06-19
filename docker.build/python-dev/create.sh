@@ -33,35 +33,14 @@ UID_=${UWSGI_UID:-10020}
 GID_=${UWSGI_GID:-10020}
 USR_=${UWSGI_USR:-uwsgi}
 GRP_=${UWSGI_GRP:-uwsgi}
-USERDIR_=${UWSGI_HOMEDIR:-uwsgi.d}
+USERDIR_=${UWSGI_HOMEDIR:-conf.d}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${UWSGI_START_CMD:-"uwsgi.start"}
+START_CMD=${UWSGI_START_CMD:-"fake.start"}
 PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
 PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
 PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
-IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
-
-#
-# ---- INI file ----
-#
-cat > $PYWSGI_INI << EOF
-[uwsgi]
-# Doesn't seem to work with more than one socket mode
-# Choose one at a time
-http = :9090
-#fastcgi-socket = /uwsgi.d/fast-uwsgi
-wsgi-file = /$USERDIR_/$PYWSGI_APP
-master = true
-processes = 4
-threads = 2
-stats = 0.0.0.0:9191
-uid = $USR_
-gid = $GRP_
-EOF
-
-#
-# ---- end INI file ----
+IPFILE=${UWSGI_IPFILE:-"fake.host"}
 
 # 
 # ---- Start command ----
@@ -74,30 +53,15 @@ cat > $START_CMD << EOF
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
-# Start the uWSGI server (want to change the /$USERDIR_/$PYWSGI_APP file to fit your needs)
-#uwsgi --http :9090 --wsgi-file /$USERDIR_/$PYWSGI_APP --master --processes 4 --threads 2 --stats 0.0.0.0:9191 --uid $USR_ --gid $GRP_ --daemonize2 /$USERDIR_/$PYWSGI_LOG
-uwsgi /$USERDIR_/$PYWSGI_INI --daemonize2 /$USERDIR_/$PYWSGI_LOG
-
-# then start sshd
 /usr/sbin/sshd -D
 
 EOF
+
 # Seems useless, because when COPY by Dockerfile it looses file mode
 chmod 755 $START_CMD
 
 #
 # ---- end start command ----
-
-#
-# Python uWSGI server main file
-#
-cat > $PYWSGI_APP << EOF
-def application(env, start_response):
-    start_response('200 OK', [('Content-Type','text/html')])
-    return [b"Hello World"]
-EOF
-#
-# ---- end uWSGI server file ----
 
 cat > ${DOCKERFILE} << EOF
 #
@@ -107,27 +71,13 @@ FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    set -ex && \\
+RUN set -ex && \\
     apt-get update && \\
     apt-get install -y python-pip build-essential python-dev --no-install-recommends && \\
     apt-get clean && \\
-    pip install setuptools wheel && \\
-    pip install uwsgi && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* 
-
-# After creating user homedir
-COPY --chown=$UID_:$GID_ $START_CMD $PYWSGI_APP $PYWSGI_INI /$USERDIR_/
-
-VOLUME ["/$USERDIR_"]
-
-
-# 9090 listen for connections / 9191 monitoring
-EXPOSE 9090 
-EXPOSE 9191
 
 CMD ["sh","/$USERDIR_/$START_CMD"]
 EOF
