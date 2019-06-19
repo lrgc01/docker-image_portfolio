@@ -6,11 +6,11 @@ This powerful server works both as a Web server or as an application server usin
 
 ### Suggested docker-run commands:
 
- - docker run -d --name=uwsgiAlone -v /var/run/uwsgi:/uwsgi.d --publish 0.0.0.0:80:9090 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim_ssh
+ - docker run -d --name=uwsgiAlone -v /var/run/uwsgi:/uwsgi.d --publish 0.0.0.0:80:9090 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim
 
- - docker run -d --name=uwsgiProxied -v uwsgicfg:/uwsgi.d --publish 0.0.0.0:9090:9090 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim_ssh
+ - docker run -d --name=uwsgiProxied -v uwsgicfg:/uwsgi.d --publish 0.0.0.0:9090:9090 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim
  
- - docker run -d --name=uwsgiSocket -v uwsgicfg:/uwsgi.d --publish 0.0.0.0:3131:3131 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim_ssh
+ - docker run -d --name=uwsgiSocket -v uwsgicfg:/uwsgi.d --publish 0.0.0.0:3131:3131 --publish 0.0.0.0:9191:9191 lrgc01/uwsgi-stretch_slim
 
 
 ### The main directory configuration
