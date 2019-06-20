@@ -22,7 +22,7 @@ This powerful server works both as a Web server or as an application server usin
    - Change /uwsgi.d/uwsgi.ini according to your needs (socket, port, web server, app to start, etc).
 
 
-### Further useful examples
+### Useful examples
  
 Other similar docker examples together with some explanation can be found in:
 

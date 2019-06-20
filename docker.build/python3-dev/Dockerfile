@@ -9,7 +9,7 @@ RUN set -ex && \
     apt-get update && \
     apt-get install -y python3-pip build-essential python3-dev --no-install-recommends && \
     apt-get clean && \
-    pip install setuptools wheel && \
+    pip3 install setuptools wheel && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
     rm -fr /usr/share/man/man* 
