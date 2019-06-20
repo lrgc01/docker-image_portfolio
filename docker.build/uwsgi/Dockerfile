@@ -9,7 +9,6 @@ RUN groupadd -g 10020 uwsgi && \
     useradd -m -u 10020 -g uwsgi -d /uwsgi.d uwsgi && \
     mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d/appdir && \
     set -ex && \
-    pip install setuptools wheel && \
     pip install uwsgi && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \

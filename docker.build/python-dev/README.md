@@ -1,4 +1,4 @@
-## python-dev intermediate image build over a ssh-stretch_slim image
+## python-dev - an intermediate image build over a ssh-stretch_slim image
 
 Instead of build FROM debian:stretch-slim this image is build over the same stretch-slim plus an openssh-server.
 

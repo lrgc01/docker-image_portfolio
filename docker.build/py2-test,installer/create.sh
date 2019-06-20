@@ -25,22 +25,19 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="python-dev over openssh-server image"
-IMGNAME="python_dev-stretch_slim"
-FROMIMG="lrgc01/ssh-stretch_slim"
+COMMENT="Pytest n pyinstaller (python2) via pip over a python-dev image over an openssh-server image"
+IMGNAME="py2test_installer"
+FROMIMG="lrgc01/python_dev-stretch_slim"
 
-UID_=${UWSGI_UID:-10020}
-GID_=${UWSGI_GID:-10020}
-USR_=${UWSGI_USR:-uwsgi}
-GRP_=${UWSGI_GRP:-uwsgi}
-USERDIR_=${UWSGI_HOMEDIR:-conf.d}
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${UWSGI_START_CMD:-"fake.start"}
-PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
-PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
-PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
-IPFILE=${UWSGI_IPFILE:-"fake.host"}
+START_CMD=${PY_START_CMD:-"python.start"}
+IPFILE=${PY_IPFILE:-"python.host"}
 
 # 
 # ---- Start command ----
@@ -52,16 +49,15 @@ cat > $START_CMD << EOF
 
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-
+# then start sshd
 /usr/sbin/sshd -D
 
 EOF
-
 # Seems useless, because when COPY by Dockerfile it looses file mode
 chmod 755 $START_CMD
 
 #
-# ---- end start command ----
+# ---- end workaround IP ----
 
 cat > ${DOCKERFILE} << EOF
 #
@@ -71,16 +67,20 @@ FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
-RUN set -ex && \\
-    apt-get update && \\
-    apt-get install -y python-pip build-essential python-dev --no-install-recommends && \\
-    apt-get clean && \\
-    pip install setuptools wheel && \\
+COPY $START_CMD /
+
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    set -ex && \\
+    pip install pytest pyinstaller && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* 
+    rm -fr /usr/share/man/man* && \\
+    chmod 755 /$START_CMD
 
-CMD ["sh","/$USERDIR_/$START_CMD"]
+EXPOSE 22
+
+CMD ["/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running
@@ -90,6 +90,6 @@ fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD $PYWSGI_APP $PYWSGI_INI
+   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD
 fi
 

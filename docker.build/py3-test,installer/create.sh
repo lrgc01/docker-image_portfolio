@@ -25,8 +25,9 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Pytest n pyinstaller via pip3 over openssh-server image"
-IMGNAME="pytest_pyinstaller"
+COMMENT="Pytest n pyinstaller via pip3 over python3-dev over openssh-server image"
+IMGNAME="py3test_installer"
+FROMIMG="lrgc01/python3_dev-stretch_slim"
 
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -62,7 +63,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
@@ -71,10 +72,6 @@ COPY $START_CMD /
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
-    apt-get update && \\
-    apt-get install -y python-pip python3-pip && \\
-    apt-get clean && \\
-    pip install pytest pyinstaller && \\
     pip3 install pytest pyinstaller && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
