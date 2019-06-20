@@ -7,7 +7,7 @@ Instead of build FROM debian:stretch-slim this image is build over the same stre
 
  - docker run -d --name=apache2Proxied -v apache2cfg:/etc/apache2 -v apache2html:/var/www/html -v apache2logs:/var/log/apache2 --publish 0.0.0.0:8880:80 --publish 0.0.0.0:4443:443 lrgc01/apache2-stretch\_slim 
 
-### Some environment variables are expected to set apache2 at startup:
+### Some environment variables may be set to set apache2 at startup:
 
  - APACHE2\_MOD\_LIST - Space separated module name without any suffix:
 
@@ -15,7 +15,7 @@ Instead of build FROM debian:stretch-slim this image is build over the same stre
 
 A container created from this image can share directories and connect to other containers to build a complete web server using, for instance, a php-fpm container server.
 
-### Further useful examples
+### Useful examples
 
 #### An approach that do similar container network is like this jenkins docker-compose:
  - See [https://lrc-tech.blogspot.com/2019/02/jenkins-in-docker-run-jenkins-python.html](https://lrc-tech.blogspot.com/2019/02/jenkins-in-docker-run-jenkins-python.html)
