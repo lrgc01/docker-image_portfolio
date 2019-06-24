@@ -36,6 +36,7 @@ GRP_=${JENKINS_GRP:-pygrp}
 # This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
+START_DIR="start"
 
 START_CMD=${NGINX_START_CMD:-"nginx.start"}
 IPFILE=${NGINX_IPFILE:-"nginx.host"}
@@ -72,16 +73,15 @@ FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="$COMMENT"
 
-COPY $START_CMD /
-
 RUN apt-get update && \\
     apt-get install -y nginx && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir /run/php && \\
-    chmod 755 /$START_CMD
+    mkdir -p /$START_DIR 
+
+COPY $START_CMD /$START_DIR/
 
 # Obvious Web ports
 EXPOSE 80
@@ -90,7 +90,7 @@ EXPOSE 443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  ["/etc/nginx", "/var/log/nginx", "/var/www/html"]
 
-CMD ["sh","/$START_CMD"]
+CMD ["sh","/$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running
