@@ -6,8 +6,8 @@ FROM lrgc01/python_dev-stretch_slim
 LABEL Comment="uWSGI via pip over openssh-server image"
 
 RUN groupadd -g 10020 uwsgi && \
-    useradd -m -u 10020 -g uwsgi -d /uwsgi.d uwsgi && \
-    mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d/appdir && \
+    useradd -m -u 10020 -g uwsgi -d /uwsgi.d/uwsgi uwsgi && \
+    mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d && \
     set -ex && \
     pip install uwsgi && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \

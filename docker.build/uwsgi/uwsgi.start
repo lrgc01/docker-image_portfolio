@@ -1,10 +1,29 @@
 #!/bin/bash
 
-# workaround to get my ip (head -1 = in case of duplicates)
-#grep -w $(hostname) /etc/hosts | head -1 | awk '{print $1}' > "/uwsgi.d/uwsgi.host"
+THIS="$0"
+
+BASEDIR=${DOCKER_BASEDIR:-"uwsgi.d"}
+RUNUSER=${DOCKER_RUNUSER:-"uwsgi"}
+
+cd $BASEDIR
+
+if [ $(whoami)x = "rootx" ] ; then
+   env > environment.rc
+   su -l $RUNUSER -s /bin/bash -c "sh $THIS $*"
+   exit 0
+fi
+
+#set -x
+
+[ -f "environment.rc" ] && . environment.rc
+export HOME=$BASEDIR
+export WORKDIR=$BASEDIR
+
 
 #
 # Receive (or not) some env variables from Docker container
+# All of them start with DOCKER_
+# The "UWSGI" ones go into INI file
 #
 START_CMD=${DOCKER_START_CMD:-"uwsgi.start"}
 UWSGI_LOG=${DOCKER_UWSGI_LOG:-"uwsgi.log"}
@@ -15,25 +34,31 @@ UWSGI_INI=${DOCKER_UWSGI_INI:-"uwsgi.ini"}
 UWSGI_PROCESSES=${DOCKER_UWSGI_PROCESSES:-"4"}
 UWSGI_THREADS=${DOCKER_UWSGI_THREADS:-"2"}
 UWSGI_STATS=${DOCKER_UWSGI_STATS:-"0.0.0.0:9191"}
-USERDIR_=${DOCKER_UWSGI_USERDIR:-"uwsgi.d"}
+USERDIR=${DOCKER_USERDIR:-"uwsgi.d/uwsgi"}
+CONFIGDIR=${DOCKER_CONFIGDIR:-"uwsgi.d"}
+LOGDIR=${DOCKER_LOGDIR:-"uwsgi.d"}
 USR_=${DOCKER_UWSGI_USR:-"uwsgi"}
 GRP_=${DOCKER_UWSGI_GRP:-"uwsgi"}
+
+
+# Make sure every directory is ready to do the job
+mkdir -p $USERDIR $CONFIGDIR $LOGDIR > /dev/null 2>&1
 
 #
 # ---- Build INI file ----
 #
 
-cat > $UWSGI_INI << ENDOF
+cat > $CONFIGDIR/$UWSGI_INI << ENDOF
 [uwsgi]
 # Let's use 3 connection protocols
 http = $UWSGI_HTTP
-uwsgi-socket = /$USERDIR_/uwsgi.sock
-fastcgi-socket = /$USERDIR_/fastcgi.sock
+uwsgi-socket = $BASEDIR/uwsgi.sock
+fastcgi-socket = $BASEDIR/fastcgi.sock
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
-#wsgi-file = /$USERDIR_/$UWSGI_APPDIR/$UWSGI_APP
-pythonpath = /$USERDIR_/$UWSGI_APPDIR
+#wsgi-file = $BASEDIR/$UWSGI_APPDIR/$UWSGI_APP
+pythonpath = $BASEDIR/$UWSGI_APPDIR
 wsgi = ${UWSGI_APP%.py}
 master = true
 processes = $UWSGI_PROCESSES
@@ -45,9 +70,12 @@ ENDOF
 #
 # ---- end INI file ----
 
-# Start the uWSGI server (might change the /$USERDIR_/$UWSGI_INI file to fit your needs)
-echo /usr/local/bin/uwsgi /$USERDIR_/$UWSGI_INI --daemonize2 /$USERDIR_/$UWSGI_LOG
+# Start the uWSGI server (might change the /$CONFIGDIR/$UWSGI_INI file to fit your needs)
+/usr/local/bin/uwsgi $CONFIGDIR/$UWSGI_INI --daemonize2 $LOGDIR/$UWSGI_LOG
+
+# workaround to get my ip (head -1 = in case of duplicates)
+grep -w $(hostname) /etc/hosts | head -1 | awk '{print $1}' > "$BASEDIR/uwsgi.host"
 
 # then start sshd
-#/usr/sbin/sshd -D
+/usr/sbin/sshd -D
 
