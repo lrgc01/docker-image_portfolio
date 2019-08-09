@@ -37,16 +37,16 @@ USERDIR_=${UWSGI_HOMEDIR:-uwsgi.d}
 USERDIR_=${USERDIR_#/}
 
 START_CMD=${UWSGI_START_CMD:-"uwsgi.start"}
-PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
+UWSGI_APP=${UWSGI_UWSGI_APP:-"uwsgi_server.py"}
 APPDIR="appdir"
-PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
-PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
+UWSGI_LOG=${UWSGI_UWSGI_LOG:-"uwsgi.log"}
+UWSGI_INI=${UWSGI_UWSGI_INI:-"uwsgi.ini"}
 IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
 
 #
 # ---- INI file ----
 #
-cat > $PYWSGI_INI << EOF
+cat > $UWSGI_INI << EOF
 [uwsgi]
 # Let's use 3 connection protocols
 http = :9090
@@ -55,9 +55,9 @@ fastcgi-socket = /$USERDIR_/fastcgi.sock
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
-#wsgi-file = /$USERDIR_/$APPDIR/$PYWSGI_APP
+#wsgi-file = /$USERDIR_/$APPDIR/$UWSGI_APP
 pythonpath = /$USERDIR_/$APPDIR
-wsgi = ${PYWSGI_APP%.py}
+wsgi = ${UWSGI_APP%.py}
 master = true
 processes = 4
 threads = 2
@@ -77,11 +77,53 @@ EOF
 cat > $START_CMD << EOF
 #!/bin/bash
 
-# workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
+# workaround to get my ip (head -1 = in case of duplicates)
+grep -w \$(hostname) /etc/hosts | head -1 | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
-# Start the uWSGI server (might change the /$USERDIR_/$PYWSGI_INI file to fit your needs)
-/usr/local/bin/uwsgi /$USERDIR_/$PYWSGI_INI --daemonize2 /$USERDIR_/$PYWSGI_LOG
+#
+# Receive (or not) some env variables from Docker container
+#
+START_CMD=\${DOCKER_START_CMD:-"$START_CMD"}
+UWSGI_LOG=\${DOCKER_UWSGI_LOG:-"$UWSGI_LOG"}
+UWSGI_HTTP=\${DOCKER_UWSGI_HTTP:-"0.0.0.0:9090"}
+UWSGI_APP=\${DOCKER_UWSGI_APP:-"$UWSGI_APP"}
+UWSGI_APPDIR=\${DOCKER_UWSGI_APPDIR:-"$APPDIR"}
+UWSGI_INI=\${DOCKER_UWSGI_INI:-"$UWSGI_INI"}
+UWSGI_PROCESSES=\${DOCKER_UWSGI_PROCESSES:-"4"}
+UWSGI_THREADS=\${DOCKER_UWSGI_THREADS:-"2"}
+UWSGI_STATS=\${DOCKER_UWSGI_STATS:-"0.0.0.0:9191"}
+USERDIR_=\${DOCKER_UWSGI_USERDIR:-"$USERDIR_"}
+USR_=\${DOCKER_UWSGI_USR:-"$USR_"}
+GRP_=\${DOCKER_UWSGI_GRP:-"$GRP_"}
+
+#
+# ---- Build INI file ----
+#
+
+cat > \$UWSGI_INI << ENDOF
+[uwsgi]
+# Let's use 3 connection protocols
+http = \$UWSGI_HTTP
+uwsgi-socket = /\$USERDIR_/uwsgi.sock
+fastcgi-socket = /\$USERDIR_/fastcgi.sock
+chmod-socket = 777
+# Could be a file only, but a complete app
+# in a defined path is more flexible
+#wsgi-file = /\$USERDIR_/\$UWSGI_APPDIR/\$UWSGI_APP
+pythonpath = /\$USERDIR_/\$UWSGI_APPDIR
+wsgi = \${UWSGI_APP%.py}
+master = true
+processes = \$UWSGI_PROCESSES
+threads = \$UWSGI_THREADS
+stats = \$UWSGI_STATS
+uid = \$USR_
+gid = \$GRP_
+ENDOF
+#
+# ---- end INI file ----
+
+# Start the uWSGI server (might change the /\$USERDIR_/\$UWSGI_INI file to fit your needs)
+/usr/local/bin/uwsgi /\$USERDIR_/\$UWSGI_INI --daemonize2 /\$USERDIR_/\$UWSGI_LOG
 
 # then start sshd
 /usr/sbin/sshd -D
@@ -96,7 +138,7 @@ chmod 755 $START_CMD
 #
 # Python uWSGI server main file
 #
-cat > $PYWSGI_APP << EOF
+cat > $UWSGI_APP << EOF
 def application(env, start_response):
     start_response('200 OK', [('Content-Type','text/html')])
     return ["Congrats! Your Python App Web server is working!\n"]
@@ -122,8 +164,8 @@ RUN groupadd -g $GID_ $GRP_ && \\
     rm -fr /usr/share/man/man* 
 
 # After creating user homedir
-COPY --chown=$UID_:$GID_ $START_CMD $PYWSGI_INI /$USERDIR_/
-COPY --chown=$UID_:$GID_ $PYWSGI_APP /$USERDIR_/$APPDIR/
+COPY --chown=$UID_:$GID_ $START_CMD $UWSGI_INI /$USERDIR_/
+COPY --chown=$UID_:$GID_ $UWSGI_APP /$USERDIR_/$APPDIR/
 
 VOLUME ["/$USERDIR_"]
 
@@ -142,6 +184,6 @@ fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD $PYWSGI_APP $PYWSGI_INI
+   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD $UWSGI_APP $UWSGI_INI
 fi
 
