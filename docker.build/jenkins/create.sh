@@ -49,7 +49,7 @@ TAR_BALL=temp_tarball.tgz
 #
 # This has to be always checked - use direct download because 
 # the download from apt repo is to slow
-JENKINS_PKG="jenkins_2.164.3_all.deb"
+JENKINS_PKG="jenkins_2.176.2_all.deb"
 if [ ! -f "$JENKINS_PKG" ]; then
    wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
 fi

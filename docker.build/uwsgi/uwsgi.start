@@ -2,20 +2,25 @@
 
 THIS="$0"
 
-BASEDIR=${DOCKER_BASEDIR:-"uwsgi.d"}
-RUNUSER=${DOCKER_RUNUSER:-"uwsgi"}
+export BASEDIR=${DOCKER_BASEDIR:-"/uwsgi.d"}
+export RUNUSER=${DOCKER_RUNUSER:-"uwsgi"}
+
+export UWSGI_DAEMON="no"
 
 cd $BASEDIR
 
 if [ $(whoami)x = "rootx" ] ; then
+   export UWSGI_DAEMON="yes"
    env > environment.rc
    su -l $RUNUSER -s /bin/bash -c "sh $THIS $*"
+   # then start sshd as root
+   /usr/sbin/sshd -D
    exit 0
 fi
 
 #set -x
 
-[ -f "environment.rc" ] && . environment.rc
+[ -f "./environment.rc" ] && . ./environment.rc
 export HOME=$BASEDIR
 export WORKDIR=$BASEDIR
 
@@ -29,14 +34,14 @@ START_CMD=${DOCKER_START_CMD:-"uwsgi.start"}
 UWSGI_LOG=${DOCKER_UWSGI_LOG:-"uwsgi.log"}
 UWSGI_HTTP=${DOCKER_UWSGI_HTTP:-"0.0.0.0:9090"}
 UWSGI_APP=${DOCKER_UWSGI_APP:-"uwsgi_server.py"}
-UWSGI_APPDIR=${DOCKER_UWSGI_APPDIR:-"appdir"}
+UWSGI_APPDIR=${DOCKER_UWSGI_APPDIR:-"/uwsgi.d/appdir"}
 UWSGI_INI=${DOCKER_UWSGI_INI:-"uwsgi.ini"}
 UWSGI_PROCESSES=${DOCKER_UWSGI_PROCESSES:-"4"}
 UWSGI_THREADS=${DOCKER_UWSGI_THREADS:-"2"}
 UWSGI_STATS=${DOCKER_UWSGI_STATS:-"0.0.0.0:9191"}
-USERDIR=${DOCKER_USERDIR:-"uwsgi.d/uwsgi"}
-CONFIGDIR=${DOCKER_CONFIGDIR:-"uwsgi.d"}
-LOGDIR=${DOCKER_LOGDIR:-"uwsgi.d"}
+USERDIR=${DOCKER_USERDIR:-"/uwsgi.d/uwsgi"}
+CONFIGDIR=${DOCKER_CONFIGDIR:-"/uwsgi.d"}
+LOGDIR=${DOCKER_LOGDIR:-"/uwsgi.d"}
 USR_=${DOCKER_UWSGI_USR:-"uwsgi"}
 GRP_=${DOCKER_UWSGI_GRP:-"uwsgi"}
 
@@ -57,8 +62,8 @@ fastcgi-socket = $BASEDIR/fastcgi.sock
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
-#wsgi-file = $BASEDIR/$UWSGI_APPDIR/$UWSGI_APP
-pythonpath = $BASEDIR/$UWSGI_APPDIR
+#wsgi-file = $UWSGI_APPDIR/$UWSGI_APP
+pythonpath = $UWSGI_APPDIR
 wsgi = ${UWSGI_APP%.py}
 master = true
 processes = $UWSGI_PROCESSES
@@ -70,12 +75,13 @@ ENDOF
 #
 # ---- end INI file ----
 
-# Start the uWSGI server (might change the /$CONFIGDIR/$UWSGI_INI file to fit your needs)
-/usr/local/bin/uwsgi $CONFIGDIR/$UWSGI_INI --daemonize2 $LOGDIR/$UWSGI_LOG
-
 # workaround to get my ip (head -1 = in case of duplicates)
 grep -w $(hostname) /etc/hosts | head -1 | awk '{print $1}' > "$BASEDIR/uwsgi.host"
 
-# then start sshd
-/usr/sbin/sshd -D
+# Start the uWSGI server (might change the /$CONFIGDIR/$UWSGI_INI file to fit your needs)
+if [ "$UWSGI_DAEMON" = "yes" ]; then 
+   /usr/local/bin/uwsgi $CONFIGDIR/$UWSGI_INI --daemonize2 $LOGDIR/$UWSGI_LOG
+else
+   /usr/local/bin/uwsgi $CONFIGDIR/$UWSGI_INI 
+fi
 

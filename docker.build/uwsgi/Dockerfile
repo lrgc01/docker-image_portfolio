@@ -1,11 +1,12 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/python_dev-stretch_slim
+FROM debian3:5000/python_dev-stretch_slim
 
 LABEL Comment="uWSGI via pip over openssh-server image"
 
-RUN groupadd -g 10020 uwsgi && \
+RUN mkdir -p /uwsgi.d && \
+    groupadd -g 10020 uwsgi && \
     useradd -m -u 10020 -g uwsgi -d /uwsgi.d/uwsgi uwsgi && \
     mkdir -p /uwsgi.d/appdir && chown -R 10020:10020 /uwsgi.d && \
     set -ex && \

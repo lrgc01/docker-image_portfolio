@@ -27,7 +27,8 @@ fi
 
 COMMENT="uWSGI via pip over openssh-server image"
 IMGNAME="uwsgi-stretch_slim"
-FROMIMG="lrgc01/python_dev-stretch_slim"
+#FROMIMG="lrgc01/python_dev-stretch_slim"
+FROMIMG="debian3:5000/python_dev-stretch_slim"
 
 UID_=${UWSGI_UID:-10020}
 GID_=${UWSGI_GID:-10020}
@@ -82,20 +83,25 @@ cat > $START_CMD << EOF
 
 THIS="\$0"
 
-BASEDIR=\${DOCKER_BASEDIR:-"$BASEDIR_"}
-RUNUSER=\${DOCKER_RUNUSER:-"$USR_"}
+export BASEDIR=\${DOCKER_BASEDIR:-"/$BASEDIR_"}
+export RUNUSER=\${DOCKER_RUNUSER:-"$USR_"}
+
+export UWSGI_DAEMON="no"
 
 cd \$BASEDIR
 
 if [ \$(whoami)x = "rootx" ] ; then
+   export UWSGI_DAEMON="yes"
    env > environment.rc
    su -l \$RUNUSER -s /bin/bash -c "sh \$THIS \$*"
+   # then start sshd as root
+   /usr/sbin/sshd -D
    exit 0
 fi
 
 #set -x
 
-[ -f "environment.rc" ] && . environment.rc
+[ -f "./environment.rc" ] && . ./environment.rc
 export HOME=\$BASEDIR
 export WORKDIR=\$BASEDIR
 
@@ -109,14 +115,14 @@ START_CMD=\${DOCKER_START_CMD:-"$START_CMD"}
 UWSGI_LOG=\${DOCKER_UWSGI_LOG:-"$UWSGI_LOG"}
 UWSGI_HTTP=\${DOCKER_UWSGI_HTTP:-"0.0.0.0:9090"}
 UWSGI_APP=\${DOCKER_UWSGI_APP:-"$UWSGI_APP"}
-UWSGI_APPDIR=\${DOCKER_UWSGI_APPDIR:-"$APPDIR"}
+UWSGI_APPDIR=\${DOCKER_UWSGI_APPDIR:-"/$BASEDIR_/$APPDIR"}
 UWSGI_INI=\${DOCKER_UWSGI_INI:-"$UWSGI_INI"}
 UWSGI_PROCESSES=\${DOCKER_UWSGI_PROCESSES:-"4"}
 UWSGI_THREADS=\${DOCKER_UWSGI_THREADS:-"2"}
 UWSGI_STATS=\${DOCKER_UWSGI_STATS:-"0.0.0.0:9191"}
-USERDIR=\${DOCKER_USERDIR:-"$USERDIR_"}
-CONFIGDIR=\${DOCKER_CONFIGDIR:-"$BASEDIR_"}
-LOGDIR=\${DOCKER_LOGDIR:-"$BASEDIR_"}
+USERDIR=\${DOCKER_USERDIR:-"/$USERDIR_"}
+CONFIGDIR=\${DOCKER_CONFIGDIR:-"/$BASEDIR_"}
+LOGDIR=\${DOCKER_LOGDIR:-"/$BASEDIR_"}
 USR_=\${DOCKER_UWSGI_USR:-"$USR_"}
 GRP_=\${DOCKER_UWSGI_GRP:-"$GRP_"}
 
@@ -137,8 +143,8 @@ fastcgi-socket = \$BASEDIR/fastcgi.sock
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
-#wsgi-file = \$BASEDIR/\$UWSGI_APPDIR/\$UWSGI_APP
-pythonpath = \$BASEDIR/\$UWSGI_APPDIR
+#wsgi-file = \$UWSGI_APPDIR/\$UWSGI_APP
+pythonpath = \$UWSGI_APPDIR
 wsgi = \${UWSGI_APP%.py}
 master = true
 processes = \$UWSGI_PROCESSES
@@ -150,14 +156,15 @@ ENDOF
 #
 # ---- end INI file ----
 
-# Start the uWSGI server (might change the /\$CONFIGDIR/\$UWSGI_INI file to fit your needs)
-/usr/local/bin/uwsgi \$CONFIGDIR/\$UWSGI_INI --daemonize2 \$LOGDIR/\$UWSGI_LOG
-
 # workaround to get my ip (head -1 = in case of duplicates)
 grep -w \$(hostname) /etc/hosts | head -1 | awk '{print \$1}' > "\$BASEDIR/$IPFILE"
 
-# then start sshd
-/usr/sbin/sshd -D
+# Start the uWSGI server (might change the /\$CONFIGDIR/\$UWSGI_INI file to fit your needs)
+if [ "\$UWSGI_DAEMON" = "yes" ]; then 
+   /usr/local/bin/uwsgi \$CONFIGDIR/\$UWSGI_INI --daemonize2 \$LOGDIR/\$UWSGI_LOG
+else
+   /usr/local/bin/uwsgi \$CONFIGDIR/\$UWSGI_INI 
+fi
 
 EOF
 # Seems useless, because when COPY by Dockerfile it looses file mode
@@ -185,7 +192,8 @@ FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
-RUN groupadd -g $GID_ $GRP_ && \\
+RUN mkdir -p /$BASEDIR_ && \\
+    groupadd -g $GID_ $GRP_ && \\
     useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     mkdir -p /$BASEDIR_/$APPDIR && chown -R $UID_:$GID_ /$BASEDIR_ && \\
     set -ex && \\
