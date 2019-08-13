@@ -44,6 +44,8 @@ START_CMD=${UWSGI_START_CMD:-"uwsgi.start"}
 UWSGI_APP=${UWSGI_UWSGI_APP:-"uwsgi_server.py"}
 APPDIR=${UWSGI_APPDIR:-"appdir"}
 UWSGI_LOG=${UWSGI_UWSGI_LOG:-"uwsgi.log"}
+UWSGI_SOCK=${UWSGI_UWSGI_SOCK:-"uwsgi.sock"}
+UWSGI_FSOCK=${UWSGI_UWSGI_FSOCK:-"fastcgi.sock"}
 UWSGI_INI=${UWSGI_UWSGI_INI:-"uwsgi.ini"}
 IPFILE=${UWSGI_IPFILE:-"uwsgi.host"}
 
@@ -54,8 +56,8 @@ cat > $UWSGI_INI << EOF
 [uwsgi]
 # Let's use 3 connection protocols
 http = :9090
-uwsgi-socket = /$BASEDIR_/uwsgi.sock
-fastcgi-socket = /$BASEDIR_/fastcgi.sock
+uwsgi-socket = /$BASEDIR_/$UWSGI_SOCK
+fastcgi-socket = /$BASEDIR_/$UWSGI_FSOCK
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
@@ -112,6 +114,8 @@ export WORKDIR=\$BASEDIR
 # The "UWSGI" ones go into INI file
 #
 START_CMD=\${DOCKER_START_CMD:-"$START_CMD"}
+UWSGI_SOCK=\${DOCKER_UWSGI_SOCK:-"$UWSGI_SOCK"}
+UWSGI_FSOCK=\${DOCKER_UWSGI_FSOCK:-"$UWSGI_FSOCK"}
 UWSGI_LOG=\${DOCKER_UWSGI_LOG:-"$UWSGI_LOG"}
 UWSGI_HTTP=\${DOCKER_UWSGI_HTTP:-"0.0.0.0:9090"}
 UWSGI_APP=\${DOCKER_UWSGI_APP:-"$UWSGI_APP"}
@@ -138,8 +142,8 @@ cat > \$CONFIGDIR/\$UWSGI_INI << ENDOF
 [uwsgi]
 # Let's use 3 connection protocols
 http = \$UWSGI_HTTP
-uwsgi-socket = \$BASEDIR/uwsgi.sock
-fastcgi-socket = \$BASEDIR/fastcgi.sock
+uwsgi-socket = \$BASEDIR/\$UWSGI_SOCK
+fastcgi-socket = \$BASEDIR/\$UWSGI_FSOCK
 chmod-socket = 777
 # Could be a file only, but a complete app
 # in a defined path is more flexible
