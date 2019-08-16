@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM debian3:5000/python_dev-stretch_slim
+FROM lrgc01/python_dev-stretch_slim
 
 LABEL Comment="uWSGI via pip over openssh-server image"
 

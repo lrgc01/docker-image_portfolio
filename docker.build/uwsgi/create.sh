@@ -27,8 +27,7 @@ fi
 
 COMMENT="uWSGI via pip over openssh-server image"
 IMGNAME="uwsgi-stretch_slim"
-#FROMIMG="lrgc01/python_dev-stretch_slim"
-FROMIMG="debian3:5000/python_dev-stretch_slim"
+FROMIMG="lrgc01/python_dev-stretch_slim"
 
 UID_=${UWSGI_UID:-10020}
 GID_=${UWSGI_GID:-10020}
