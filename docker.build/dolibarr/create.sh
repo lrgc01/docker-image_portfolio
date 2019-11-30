@@ -34,10 +34,10 @@ UID_=${DOLIB_UID:-10020}
 GID_=${DOLIB_GID:-10020}
 USR_=${DOLIB_USR:-"www-data"}
 GRP_=${DOLIB_GRP:-"www-data"}
-STARTDIR_=${DOLIB_STARTDIR:-/var/www/html}
-BASEDIR_=${DOLIB_BASEDIR:-/var/www}
+STARTDIR_=${DOLIB_STARTDIR:-/var/www/html} # not used by now
+BASEDIR_=${DOLIB_BASEDIR:-/data}
 BASEDIR_=${BASEDIR_#/}
-WORKDIR_=${DOLIB_WORKDIR:-$BASEDIR_}
+WORKDIR_=${DOLIB_WORKDIR:-$BASEDIR_/work}
 WORKDIR_=${WORKDIR_#/}
 
 START_CMD=${DOLIB_START_CMD:-"php.start"}
@@ -64,7 +64,7 @@ RUN mkdir -p /$WORKDIR_ && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* 
 
-VOLUME ["/$BASEDIR_"]
+VOLUME ["/$WORKDIR_"]
 
 #CMD ["sh","/$BASEDIR_/$START_CMD"]
 EOF
