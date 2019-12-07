@@ -48,14 +48,28 @@ IPFILE=${PHP_IPFILE:-"php.host"}
 cat > $START_CMD << EOF
 #!/bin/bash
 
+# Some environment variables that may be passed to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH}
+WORKDIR=\${DOCKER_WORKDIR:-"/startup.d"}
+
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 
 # First start the fpm server as a daemon
 /usr/sbin/php-fpm7.0 --daemonize --fpm-config /etc/php/7.0/fpm/php-fpm.conf
 
-# then start sshd without detach
-/usr/sbin/sshd -D
+# Start of the container main purpose app
+if [ -d "\$WORKDIR" ]; then
+   cd "\$WORKDIR"
+fi
+# If there is a application script, run it, otherwise run sshd below
+if [ -f "\$START_SH" ]; then
+   bash "\$START_SH"
+else
+   # -D to run the daemon in foreground
+   /usr/sbin/sshd -D
+fi
 
 EOF
 # Seems useless, because when COPY by Dockerfile it looses file mode
@@ -78,7 +92,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
-    apt-get install -y php php-fpm php-mysql --no-install-recommends && \\
+    apt-get install -q -y php php-fpm php-mysql php-gd iphp-curl php-mbstring php-intl php-xml php-mcrypt php-zip --no-install-recommends && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\

@@ -1,9 +1,8 @@
-### PHP + php-fpm build over a ssh-stretch_slim image
+### PHP composer using a PHP + php-fpm build over a ssh-stretch_slim image
 
-Instead of build FROM debian:stretch-slim this image is build over the same stretch-slim plus an openssh-server.
+Take a look in [https://hub.docker.com/repository/docker/lrgc01/php-stretch_slim](https://hub.docker.com/repository/docker/lrgc01/php-stretch_slim). 
 
-The goal is to create an sshd server with php software commands and php-fpm server to be used by another server 
-from the same set of containers like nginx, for instance. 
+This is just a more complete set o PHP tools (in this case with composer) to run a PHP server and / or start a specific application.
 
 Some variables that may be used when running this container:
 

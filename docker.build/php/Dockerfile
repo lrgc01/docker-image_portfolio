@@ -11,7 +11,7 @@ RUN groupadd -g 10002 jenkins && \
     useradd -M -u 10002 -g jenkins -d /var/lib/jenkins jenkins && \
     set -ex && \
     apt-get update && \
-    apt-get install -y php php-fpm php-mysql --no-install-recommends && \
+    apt-get install -q -y php php-fpm php-mysql php-gd iphp-curl php-mbstring php-intl php-xml php-mcrypt php-zip --no-install-recommends && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
