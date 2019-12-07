@@ -51,10 +51,25 @@ IPFILE=${NODE_IPFILE:-"nodejs.host"}
 cat > $START_CMD << EOF
 #!/bin/bash
 
+# Some environment variables expected to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH}
+WORKDIR=\${DOCKER_WORKDIR:-"/startup.d"}
+
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-# then start sshd
-/usr/sbin/sshd -D
+
+# Start of the container main purpose app
+if [ -d "\$WORKDIR" ]; then
+	cd "\$WORKDIR"
+fi
+# If there is a application script, run it, otherwise run sshd below
+if [ -f "\$START_SH" ]; then
+	bash "\$START_SH"
+else
+  # -D to run the daemon in foreground
+  /usr/sbin/sshd -D
+fi
 
 EOF
 # Seems useless, because when COPY by Dockerfile it looses file mode
@@ -63,6 +78,9 @@ chmod 755 $START_CMD
 #
 # ---- end workaround IP ----
 
+#
+# UNUSED for now
+#
 cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
@@ -96,8 +114,9 @@ if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f Dockerfile .
 fi
 
-if [ "$DOCKERFILE" != "Dockerfile" ] ; then
-   # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD
-fi
+# Don't clean
+#if [ "$DOCKERFILE" != "Dockerfile" ] ; then
+   ## Cleaning only if Dockerfile.tmp is the current one
+   #rm -fr ${OPTDIR} ${DOCKERFILE} $START_CMD
+#fi
 
