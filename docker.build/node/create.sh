@@ -56,17 +56,19 @@ cat > $START_CMD << EOF
 START_SH=\${DOCKER_START_SH}
 WORKDIR=\${DOCKER_WORKDIR:-"/startup.d"}
 
-# workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-
 # Start of the container main purpose app
 if [ -d "\$WORKDIR" ]; then
    cd "\$WORKDIR"
 fi
+
 # If there is a application script, run it, otherwise run sshd below
 if [ -f "\$START_SH" ]; then
    bash "\$START_SH"
 else
+   if [ -d "/$USERDIR_" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
+   fi
    # -D to run the daemon in foreground
    /usr/sbin/sshd -D
 fi

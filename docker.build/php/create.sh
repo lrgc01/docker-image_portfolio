@@ -53,9 +53,6 @@ cat > $START_CMD << EOF
 START_SH=\${DOCKER_START_SH}
 WORKDIR=\${DOCKER_WORKDIR:-"/startup.d"}
 
-# workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
-
 # First start the fpm server as a daemon
 /usr/sbin/php-fpm7.0 --daemonize --fpm-config /etc/php/7.0/fpm/php-fpm.conf
 
@@ -63,10 +60,15 @@ grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
 if [ -d "\$WORKDIR" ]; then
    cd "\$WORKDIR"
 fi
+
 # If there is a application script, run it, otherwise run sshd below
 if [ -f "\$START_SH" ]; then
    bash "\$START_SH"
 else
+   if [ -d "/$USERDIR_" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
+   fi
    # -D to run the daemon in foreground
    /usr/sbin/sshd -D
 fi
