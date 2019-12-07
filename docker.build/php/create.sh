@@ -92,7 +92,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
-    apt-get install -q -y php php-fpm php-mysql php-gd iphp-curl php-mbstring php-intl php-xml php-mcrypt php-zip --no-install-recommends && \\
+    apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-mcrypt php-zip --no-install-recommends && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
