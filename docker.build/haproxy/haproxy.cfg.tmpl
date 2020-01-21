@@ -44,6 +44,7 @@ defaults
 frontend main
     bind *:__FE_PORT_N_CERT__
     reqadd X-Forwarded-Proto:\ __PROTO__
+__FORCE_SSL__    redirect scheme https code 301 if !{ ssl_fc }
     default_backend         __BACKEND_NAME__
  
     # check for challenge and take other BE
@@ -60,7 +61,7 @@ frontend main
 
 backend __BACKEND_NAME__
     balance     roundrobin
-__FORCE_SSL__    redirect scheme https code 301 if !{ ssl_fc }
+#__FORCE_SSL__    redirect scheme https code 301 if !{ ssl_fc }
     cookie SRV_ID prefix 
 __BE_SERVER_LIST__
 
