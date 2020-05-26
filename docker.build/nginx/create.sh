@@ -26,7 +26,7 @@ else
 fi
 
 COMMENT="nginx web server over openssh-server image"
-IMGNAME="nginx-ssh_stretch_slim"
+IMGNAME="nginx"
 
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
@@ -36,7 +36,7 @@ GRP_=${JENKINS_GRP:-pygrp}
 # This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
-START_DIR="start"
+START_DIR="/start"
 
 START_CMD=${NGINX_START_CMD:-"nginx.start"}
 IPFILE=${NGINX_IPFILE:-"nginx.host"}
@@ -69,7 +69,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM lrgc01/ssh-buster_slim
 
 LABEL Comment="$COMMENT"
 
@@ -79,9 +79,9 @@ RUN apt-get update && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir -p /$START_DIR 
+    mkdir -p $START_DIR 
 
-COPY $START_CMD /$START_DIR/
+COPY $START_CMD $START_DIR/
 
 # Obvious Web ports
 EXPOSE 80
@@ -90,7 +90,7 @@ EXPOSE 443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  ["/etc/nginx", "/var/log/nginx", "/var/www/html"]
 
-CMD ["sh","/$START_DIR/$START_CMD"]
+CMD ["sh","$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running

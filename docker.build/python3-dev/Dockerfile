@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-debian_slim
+FROM lrgc01/ssh-stable_slim
 
 LABEL Comment="python3-dev over openssh-server image"
 
@@ -15,6 +15,6 @@ RUN set -ex && \
     rm -fr /usr/share/man/man* && \
     mkdir -p /start
 
-COPY start.sh /start
+COPY start.sh /start/
 
 CMD ["sh","/start/start.sh"]

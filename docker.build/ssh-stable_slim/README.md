@@ -1,4 +1,4 @@
-### This image is based on the official debian:buster-slim plus openssh-server
+### This image is based on the official debian:stable-slim plus openssh-server
 
 This image is intend to serve as base for command line only application that might be built as a separate container in order to be accessed by others linked inside the same dockerd environment.
 

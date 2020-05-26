@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:stable-slim
 
 RUN set -ex \
     && apt-get update && apt-get install -y openssh-server --no-install-recommends \

@@ -27,7 +27,7 @@ fi
 
 COMMENT="python3-dev over openssh-server image"
 IMGNAME="python3_dev-debian"
-FROMIMG="lrgc01/ssh-debian_slim"
+FROMIMG="lrgc01/ssh-stable_slim"
 
 UID_=${PYTHON3_UID:-10020}
 GID_=${PYTHON3_GID:-10020}
@@ -79,7 +79,7 @@ RUN set -ex && \\
     rm -fr /usr/share/man/man* && \\
     mkdir -p $START_DIR
 
-COPY $START_CMD $START_DIR
+COPY $START_CMD $START_DIR/
 
 CMD ["sh","$START_DIR/$START_CMD"]
 EOF
