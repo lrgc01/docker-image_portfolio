@@ -27,7 +27,7 @@ fi
 
 COMMENT="python3-dev over openssh-server image"
 IMGNAME="python3_dev-debian"
-FROMIMG="lrgc01/ssh-stable_slim"
+FROMIMG="lrgc01/ssh-debian_slim"
 
 UID_=${PYTHON3_UID:-10020}
 GID_=${PYTHON3_GID:-10020}
