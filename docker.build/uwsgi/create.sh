@@ -26,8 +26,8 @@ else
 fi
 
 COMMENT="uWSGI via pip over openssh-server image"
-IMGNAME="uwsgi-stretch_slim"
-FROMIMG="lrgc01/python_dev-stretch_slim"
+IMGNAME="uwsgi"
+FROMIMG="lrgc01/python3-dev"
 
 UID_=${UWSGI_UID:-10020}
 GID_=${UWSGI_GID:-10020}
@@ -200,7 +200,7 @@ RUN mkdir -p /$BASEDIR_ && \\
     useradd -m -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     mkdir -p /$BASEDIR_/$APPDIR && chown -R $UID_:$GID_ /$BASEDIR_ && \\
     set -ex && \\
-    pip install uwsgi && \\
+    pip3 install uwsgi && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* 
