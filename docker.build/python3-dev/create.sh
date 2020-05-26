@@ -26,21 +26,19 @@ else
 fi
 
 COMMENT="python3-dev over openssh-server image"
-IMGNAME="python3_dev-stretch_slim"
-FROMIMG="lrgc01/ssh-stretch_slim"
+IMGNAME="python3_dev-debian"
+FROMIMG="lrgc01/ssh-debian_slim"
 
-UID_=${UWSGI_UID:-10020}
-GID_=${UWSGI_GID:-10020}
-USR_=${UWSGI_USR:-uwsgi}
-GRP_=${UWSGI_GRP:-uwsgi}
-USERDIR_=${UWSGI_HOMEDIR:-conf.d}
+UID_=${PYTHON3_UID:-10020}
+GID_=${PYTHON3_GID:-10020}
+USR_=${PYTHON3_USR:-pyusr}
+GRP_=${PYTHON3_GRP:-pygrp}
+USERDIR_=${PYTHON3_HOMEDIR:-conf.d}
 USERDIR_=${USERDIR_#/}
 
-START_CMD=${UWSGI_START_CMD:-"fake.start"}
-PYWSGI_APP=${UWSGI_PYWSGI_APP:-"uwsgi_server.py"}
-PYWSGI_LOG=${UWSGI_PYWSGI_LOG:-"uwsgi.log"}
-PYWSGI_INI=${UWSGI_PYWSGI_INI:-"uwsgi.ini"}
-IPFILE=${UWSGI_IPFILE:-"fake.host"}
+START_CMD=${PYTHON3_START_CMD:-"start.sh"}
+START_DIR=${PYTHON3_START_DIR:-"/start"}
+IPFILE=${PYTHON3_IPFILE:-"host.ip"}
 
 # 
 # ---- Start command ----
@@ -51,7 +49,7 @@ cat > $START_CMD << EOF
 #!/bin/bash
 
 # workaround to get my ip
-grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "/$USERDIR_/$IPFILE"
+grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > "$START_DIR/$IPFILE"
 
 /usr/sbin/sshd -D
 
@@ -78,9 +76,12 @@ RUN set -ex && \\
     pip3 install setuptools wheel && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* 
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p $START_DIR
 
-CMD ["sh","/$USERDIR_/$START_CMD"]
+COPY $START_CMD $START_DIR
+
+CMD ["sh","$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running

@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM lrgc01/ssh-debian_slim
 
 LABEL Comment="python3-dev over openssh-server image"
 
@@ -12,6 +12,9 @@ RUN set -ex && \
     pip3 install setuptools wheel && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
-    rm -fr /usr/share/man/man* 
+    rm -fr /usr/share/man/man* && \
+    mkdir -p /start
 
-CMD ["sh","/conf.d/fake.start"]
+COPY start.sh /start
+
+CMD ["sh","/start/start.sh"]
