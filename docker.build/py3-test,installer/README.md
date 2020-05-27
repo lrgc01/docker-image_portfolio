@@ -1,6 +1,6 @@
-### pytest and pyinstaller on python3-pip
+### pytest and pyinstaller over python3-pip
 
-Simple image on top of lrgc01/ssh-stretch_slim or debian:stretch-slim plus openssh server.
+Simple image on top of lrgc01/ssh-debian_slim or debian:stable-slim plus openssh server.
 
 In this image was added python3-pip and then pip install pytest pyinstaller.
 

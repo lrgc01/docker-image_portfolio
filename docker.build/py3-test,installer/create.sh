@@ -25,9 +25,9 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Pytest n pyinstaller via pip3 over python3-dev over openssh-server image"
-IMGNAME="py3test_installer"
-FROMIMG="lrgc01/python3_dev-stretch_slim"
+COMMENT="Pytest and pyinstaller via pip3 over python3-dev over openssh-server image"
+IMGNAME="pytest_pyinstaller"
+FROMIMG="lrgc01/python3-dev"
 
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -37,6 +37,7 @@ USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
 START_CMD=${PY_START_CMD:-"python.start"}
+START_DIR=${PY_START_DIR:-"start"}
 IPFILE=${PY_IPFILE:-"python.host"}
 
 # 
@@ -67,8 +68,6 @@ FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
-COPY $START_CMD /
-
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
@@ -76,11 +75,13 @@ RUN groupadd -g $GID_ $GRP_ && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    chmod 755 /$START_CMD
+    mkdir -p $START_DIR
+
+COPY $START_CMD $START_DIR/
 
 EXPOSE 22
 
-CMD ["/$START_CMD"]
+CMD ["sh","$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running
