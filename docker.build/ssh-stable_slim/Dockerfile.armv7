@@ -1,4 +1,4 @@
-FROM --platform=linux/arm/v7 debian:stable-slim
+FROM debian:stable-slim@1684b2165cfb
 
 RUN set -ex \
     && apt-get update && apt-get install -y openssh-server --no-install-recommends \
