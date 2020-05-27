@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-buster_slim
+FROM lrgc01/ssh-debian_slim
 
 LABEL Comment="nginx web server over openssh-server image"
 

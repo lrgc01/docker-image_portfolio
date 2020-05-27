@@ -25,6 +25,7 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
+FROMIMG="lrgc01/ssh-debian_slim"
 COMMENT="nginx web server over openssh-server image"
 IMGNAME="nginx"
 
@@ -36,8 +37,8 @@ GRP_=${JENKINS_GRP:-pygrp}
 # This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
-START_DIR="/start"
 
+START_DIR="/start"
 START_CMD=${NGINX_START_CMD:-"nginx.start"}
 IPFILE=${NGINX_IPFILE:-"nginx.host"}
 
@@ -69,7 +70,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-buster_slim
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
