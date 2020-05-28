@@ -6,7 +6,7 @@ FROM lrgc01/ssh-debian_slim
 LABEL Comment="Ruby over openssh-server image"
 
 RUN groupadd --gid 10002 jenkins && \
-    useradd -M --uid 10002 -gid jenkins -s /bin/bash -d /var/lib/jenkins jenkins && \
+    useradd -M --uid 10002 --gid jenkins --shell /bin/bash -d /var/lib/jenkins jenkins && \
     mkdir -p /start
 
 COPY ruby.start /start/

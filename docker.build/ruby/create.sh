@@ -78,7 +78,7 @@ FROM $FROMIMG
 LABEL Comment=\"$COMMENT\"
 
 RUN groupadd --gid $GID_ $GRP_ && \\
-    useradd -M --uid $UID_ -gid $GRP_ -s /bin/bash -d /$USERDIR_ $USR_ && \\
+    useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
     mkdir -p $START_DIR
 
 COPY $START_CMD $START_DIR/
