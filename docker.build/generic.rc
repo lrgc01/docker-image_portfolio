@@ -34,3 +34,5 @@ PY_IPFILE="$JENKINS_PYHOST_FILE"
 # To nodejs image
 NODE_START_CMD="nodejs.start"
 NODE_IPFILE="nodejs.host"
+
+START_DIR="/start"

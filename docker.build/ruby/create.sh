@@ -19,11 +19,12 @@ BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 #####
 ##### this Dockerfile is built from nodejs official Docker
 ##### Don't overwrite here. Using .tmp to the future.
+DOCKERFILE_BODY="Dockerfile.body"
 if [ "$#" -gt 0 ]; then
    case "$1" in
       env|prepare|Dockerfile)
 	BUILD_ENV="1"
-        DOCKERFILE="Dockerfile.tmp"
+        DOCKERFILE="Dockerfile"
    ;;
    esac
 else
@@ -32,6 +33,7 @@ fi
 
 COMMENT="Ruby over openssh-server image"
 IMGNAME="ruby-strech_slim"
+FROMIMG="lrgc01/ssh-debian_slim"
 
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -42,6 +44,7 @@ USERDIR_=${USERDIR_#/}
 
 START_CMD=${RUBY_START_CMD:-"ruby.start"}
 IPFILE=${RUBY_IPFILE:-"ruby.host"}
+START_DIR="/start"
 
 # 
 # ---- Start command ----
@@ -63,37 +66,40 @@ chmod 755 $START_CMD
 #
 # ---- end workaround IP ----
 
-cat > ${DOCKERFILE} << EOF
+# 
+# ---- Dockerfile construction ----
 #
+# Begin head
+echo "#
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM $FROMIMG
 
-LABEL Comment="$COMMENT"
+LABEL Comment=\"$COMMENT\"
 
-COPY $START_CMD /
+RUN groupadd --gid $GID_ $GRP_ && \\
+    useradd -M --uid $UID_ -gid $GRP_ -s /bin/bash -d /$USERDIR_ $USR_ && \\
+    mkdir -p $START_DIR
 
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    set -ex && \\
-    apt-get update && \\
-    apt-get install -y python3-pip && \\
-    apt-get clean && \\
-    pip3 install pytest pyinstaller && \\
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
-    rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
-    chmod 755 /$START_CMD
+COPY $START_CMD $START_DIR/
+" > $DOCKERFILE
 
+# Body == middle
+cat $DOCKERFILE_BODY >> $DOCKERFILE
+
+# Bottom
+echo "
 EXPOSE 22
 
-CMD ["/$START_CMD"]
-EOF
+CMD [\"sh\",\"$START_DIR/$START_CMD\"]
+" >> $DOCKERFILE
+#
+# ---- end Dockerfile ----
+#
 
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
-  #docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
-  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f Dockerfile .
+  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile"  -a $BUILD_ENV != "1" ] ; then

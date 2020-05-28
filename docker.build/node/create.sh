@@ -19,17 +19,19 @@ BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 #####
 ##### this Dockerfile is built from nodejs official Docker
 ##### Don't overwrite here. Using .tmp to the future.
+DOCKERFILE_BODY="Dockerfile.body"
 if [ "$#" -gt 0 ]; then
    case "$1" in
       env|prepare|Dockerfile)
 	BUILD_ENV="1"
-        DOCKERFILE="Dockerfile.tmp"
+        DOCKERFILE="Dockerfile"
    ;;
    esac
 else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
+FROMIMG="lrgc01/ssh-debian_slim"
 COMMENT="Node.js and npm over openssh-server image"
 IMGNAME="nodejs"
 
@@ -42,6 +44,7 @@ USERDIR_=${USERDIR_#/}
 
 START_CMD=${NODE_START_CMD:-"nodejs.start"}
 IPFILE=${NODE_IPFILE:-"nodejs.host"}
+START_DIR="/start"
 
 # 
 # ---- Start command ----
@@ -80,40 +83,47 @@ chmod 755 $START_CMD
 #
 # ---- end workaround IP ----
 
+# 
+# ---- Dockerfile construction ----
 #
-# UNUSED for now
-#
-cat > ${DOCKERFILE} << EOF
-#
+# Begin head
+echo "#
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM $FROMIMG
 
-LABEL Comment="$COMMENT"
+LABEL Comment=\"$COMMENT\"
 
-COPY $START_CMD /
-
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    set -ex && \\
-    apt-get update && \\
-    apt-get install -y python3-pip && \\
+RUN groupadd --gid 1000 node && \\
+    useradd --uid 1000 --gid node --shell /bin/bash --create-home node && \\
+    groupadd --gid $GID_ $GRP_ && \\
+    useradd -M --uid $UID_ -gid $GRP_ -s /bin/bash -d /$USERDIR_ $USR_ && \\
+    apt-get update && apt-get install -y gpg curl && \\
     apt-get clean && \\
-    pip3 install pytest pyinstaller && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    chmod 755 /$START_CMD
+    mkdir -p $START_DIR
 
+COPY $START_CMD $START_DIR/
+" > $DOCKERFILE
+
+# Body == middle
+cat $DOCKERFILE_BODY >> $DOCKERFILE
+
+# Bottom
+echo "
 EXPOSE 22
 
-CMD ["/$START_CMD"]
-EOF
+CMD [\"sh\",\"$START_DIR/$START_CMD\"]
+" >> $DOCKERFILE
+#
+# ---- end Dockerfile ----
+#
 
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
-  #docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
-  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f Dockerfile .
+  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
 fi
 
 # Don't clean

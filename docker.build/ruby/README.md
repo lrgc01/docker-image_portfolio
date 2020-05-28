@@ -1,6 +1,6 @@
 ### Simple ruby from official *ruby* built over a openssh-server
 
-This image was built on top of lrgc01/ssh-stretch_slim, or debian:stretch-slim plus an openssh-server.
+This image was built on top of lrgc01/ssh-debian, or debian:debian-slim plus an openssh-server.
 
 Nothing is really new. Just a copy of [https://github.com/docker-library/ruby](https://github.com/docker-library/ruby) plus some small changes. These changes include a new user named "jenkins/10002" to match the one in other containers that are planned to work together (link) and the ssh server explained above.
 

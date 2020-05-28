@@ -1,16 +1,3 @@
-#
-# This is a Dockerfile made from create.sh script - don't change here
-#
-FROM lrgc01/ssh-debian_slim
-
-LABEL Comment="Ruby over openssh-server image"
-
-RUN groupadd --gid 10002 jenkins && \
-    useradd -M --uid 10002 -gid jenkins -s /bin/bash -d /var/lib/jenkins jenkins && \
-    mkdir -p /start
-
-COPY ruby.start /start/
-
 
 RUN set -eux; \
 	apt-get update; \
@@ -121,9 +108,4 @@ ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
 ENV PATH $GEM_HOME/bin:$PATH
 # adjust permissions of a few directories for running "gem install" as an arbitrary user
 RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
-
-
-EXPOSE 22
-
-CMD ["sh","/start/ruby.start"]
 
