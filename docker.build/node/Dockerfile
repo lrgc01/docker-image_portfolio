@@ -8,8 +8,8 @@ LABEL Comment="Node.js and npm over openssh-server image"
 RUN groupadd --gid 1000 node && \
     useradd --uid 1000 --gid node --shell /bin/bash --create-home node && \
     groupadd --gid 10002 jenkins && \
-    useradd -M --uid 10002 -gid jenkins -s /bin/bash -d /var/lib/jenkins jenkins && \
-    apt-get update && apt-get install -y gpg curl && \
+    useradd -M --uid 10002 --gid jenkins --shell /bin/bash -d /var/lib/jenkins jenkins && \
+    apt-get update && apt-get install -y xz-utils gpg curl && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
