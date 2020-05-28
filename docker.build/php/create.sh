@@ -39,6 +39,7 @@ USERDIR_=${USERDIR_#/}
 
 START_CMD=${PHP_START_CMD:-"php.start"}
 IPFILE=${PHP_IPFILE:-"php.host"}
+START_DIR=${PHP_START_DIR:-"/start"}
 
 # 
 # ---- Start command ----
@@ -88,8 +89,6 @@ FROM lrgc01/ssh-stretch_slim
 
 LABEL Comment="$COMMENT"
 
-COPY $START_CMD /
-
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
@@ -99,8 +98,9 @@ RUN groupadd -g $GID_ $GRP_ && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir /run/php && \\
-    chmod 755 /$START_CMD
+    mkdir -p /run/php $START_DIR
+
+COPY $START_CMD $START_DIR/
 
 # If someone wants TCP instead of socket
 EXPOSE 9000
@@ -108,7 +108,7 @@ EXPOSE 9000
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  ["/run/php","/etc/php"]
 
-CMD ["/$START_CMD"]
+CMD ["sh","$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running

@@ -1,6 +1,6 @@
-### PHP + php-fpm build over a ssh-stretch_slim image
+### PHP + php-fpm build over a ssh-debian_slim image
 
-Instead of build FROM debian:stretch-slim this image is build over the same stretch-slim plus an openssh-server.
+Instead of build FROM debian:debian-slim this image is build over the same debian-slim plus an openssh-server.
 
 The goal is to create an sshd server with php software commands and php-fpm server to be used by another server 
 from the same set of containers like nginx, for instance. 
