@@ -97,8 +97,8 @@ LABEL Comment=\"$COMMENT\"
 RUN groupadd --gid 1000 node && \\
     useradd --uid 1000 --gid node --shell /bin/bash --create-home node && \\
     groupadd --gid $GID_ $GRP_ && \\
-    useradd -M --uid $UID_ -gid $GRP_ -s /bin/bash -d /$USERDIR_ $USR_ && \\
-    apt-get update && apt-get install -y gpg curl && \\
+    useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
+    apt-get update && apt-get install -y xz-utils gpg curl && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
