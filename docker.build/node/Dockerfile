@@ -3,7 +3,12 @@ FROM lrgc01/ssh-debian_slim
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node && \
   groupadd --gid 10002 jenkins && \
-  useradd -M --uid 10002 --gid 10002 -s /bin/bash -d /var/lib/jenkins jenkins ; \
+  useradd -M --uid 10002 --gid 10002 -s /bin/bash -d /var/lib/jenkins jenkins && \
+  apt-get update && apt-get install -y gpg && \
+  apt-get clean && \
+  rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
+  rm -fr /var/lib/apt/lists/* && \
+  rm -fr /usr/share/man/man* && \
   mkdir -p /start
 
 COPY nodejs.start /start/
