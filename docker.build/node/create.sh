@@ -111,6 +111,7 @@ COPY $START_CMD $START_DIR/
 # Body == middle
 cat $DOCKERFILE_BODY >> $DOCKERFILE
 
+
 # Bottom
 echo "
 EXPOSE 22
