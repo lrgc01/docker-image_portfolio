@@ -13,7 +13,7 @@ RUN groupadd -g 10002 jenkins && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
-    rm -fr /usr/share/man/man* && \
+    rm -fr /usr/share/man/man*/* && \
     mkdir -p /run/php /start
 
 COPY php.start /start/

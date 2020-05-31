@@ -97,7 +97,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
+    rm -fr /usr/share/man/man*/* && \\
     mkdir -p /run/php $START_DIR
 
 COPY $START_CMD $START_DIR/
