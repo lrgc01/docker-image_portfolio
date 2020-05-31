@@ -27,6 +27,7 @@ fi
 
 COMMENT="Jenkins over base + jdk environment"
 IMGNAME="jenkins"
+FROMIMG="lrgc01/openjdk"
 
 # These are expected to be sourced from generic.rc
 UID_=${JENKINS_UID:-102}
@@ -49,12 +50,13 @@ TAR_BALL=temp_tarball.tgz
 #
 # This has to be always checked - use direct download because 
 # the download from apt repo is to slow
-JENKINS_PKG="jenkins_2.176.2_all.deb"
-if [ ! -f "$JENKINS_PKG" ]; then
-   wget https://pkg.jenkins.io/debian-stable/binary/${JENKINS_PKG}
+JENKINS_VER="2.222.4"
+if [ ! -f "$JENKINS_VER" ]; then
+   JENKINS_PKG="jenkins_${JENKINS_VER}_all.deb"
+   #wget -nc https://pkg.jenkins.io/debian-stable/binary/$JENKINS_PKG
 fi
 # Extracted contents go into tarball
-dpkg -x ${JENKINS_PKG} .
+#dpkg -x ${JENKINS_PKG} .
 #
 # ---- end Jenkins tree ----
 
@@ -229,26 +231,40 @@ chmod 755 $LOCALBIN/jenkins
 # ---- end jenkins CMD ----
 
 # Make tar ball that will contain usr and var trees
-tar -czf ${TAR_BALL} usr etc var
+[ -d usr ] && DIRLIST="$DIRLIST usr"
+[ -d etc ] && DIRLIST="$DIRLIST etc"
+[ -d var ] && DIRLIST="$DIRLIST var"
 # may add USERDIR_ when it is not inside var
-#tar -czf ${TAR_BALL} usr etc var "${USERDIR_}"
+#[ -d $USERDIR_ ] && DIRLIST="$DIRLIST $USERDIR_"
+tar -czf ${TAR_BALL} $DIRLIST
+
 # 
 # ---- Finally run docker build ----
 #
 cat > ${DOCKERFILE} << EOF
-FROM lrgc01/openjdk
+FROM $FROMIMG
+
 LABEL Comment="$COMMENT"
+
 ADD $TAR_BALL /
+
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     apt-get update && \\
-    apt-get install -y git && \\
+    apt-get install -y git wget && \\
     apt-get clean && \\
+    wget -nv https://pkg.jenkins.io/debian-stable/binary/$JENKINS_PKG && \\
+    dpkg -x ${JENKINS_PKG} / && \\
+    apt-get purge -y --autoremove wget && \\
+    rm -f ${JENKINS_PKG} && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -f /var/lib/apt/lists/*debian.org* && \\
-    rm -fr /usr/share/man/man* 
+    rm -fr /usr/share/man/man*/*
+
 EXPOSE 8080
+
 VOLUME  ["/$USERDIR_"]
+
 CMD ["/$LOCALBIN/jenkins"]
 EOF
 
@@ -261,6 +277,8 @@ fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
-   rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR_" usr var etc
+   rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} 
 fi
+# Remove temp directories
+rm -fr $USERDIR_ $DIRLIST
 
