@@ -26,8 +26,8 @@ else
 fi
 
 COMMENT="Apache2 web server over openssh-server image"
-IMGNAME="apache2-stretch_slim"
-
+IMGNAME="apache2"
+FROMIMG="lrgc01/ssh-debian_slim"
 # Not used, just in case ...
 UID_=${APACHE2_UID:-102}
 GID_=${APACHE2_GID:-103}
@@ -89,7 +89,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
@@ -98,7 +98,7 @@ RUN apt-get update && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
+    rm -fr /usr/share/man/man*/* && \\
     mkdir -p /run/php /$START_DIR 
 
 COPY $START_CMD /$START_DIR/
