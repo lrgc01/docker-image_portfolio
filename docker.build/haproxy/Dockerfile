@@ -6,7 +6,7 @@ FROM lrgc01/ssh-stable_slim
 LABEL Comment="HAproxy web loadbalancer over ssh-stretch_slim image"
 
 RUN apt-get update && \
-    apt-get install -y haproxy --no-install-recommends && \
+    apt-get install -q -y haproxy --no-install-recommends && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \

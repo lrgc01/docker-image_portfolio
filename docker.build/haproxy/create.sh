@@ -26,7 +26,7 @@ else
 fi
 
 COMMENT="HAproxy web loadbalancer over ssh-stretch_slim image"
-IMGNAME="haproxy-stretch_slim"
+IMGNAME="haproxy"
 FROM="lrgc01/ssh-stable_slim"
 
 # Not used, just in case ...
@@ -91,7 +91,7 @@ FROM $FROM
 LABEL Comment="$COMMENT"
 
 RUN apt-get update && \\
-    apt-get install -y haproxy --no-install-recommends && \\
+    apt-get install -q -y haproxy --no-install-recommends && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
