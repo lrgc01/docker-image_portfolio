@@ -75,7 +75,7 @@ FROM $FROMIMG
 LABEL Comment="$COMMENT"
 
 RUN apt-get update && \\
-    apt-get install -y nginx && \\
+    apt-get install -q -y nginx && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\

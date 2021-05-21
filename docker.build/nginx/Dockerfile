@@ -1,12 +1,12 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-debian_slim
+FROM lrgc01/ssh-stable_slim
 
 LABEL Comment="nginx web server over openssh-server image"
 
 RUN apt-get update && \
-    apt-get install -y nginx && \
+    apt-get install -q -y nginx && \
     apt-get clean && \
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \
     rm -fr /var/lib/apt/lists/* && \
