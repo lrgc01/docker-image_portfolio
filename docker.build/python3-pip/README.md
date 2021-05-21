@@ -1,4 +1,4 @@
-## python3-dev - an intermediate image build over a ssh-stable_slim image
+## python3-pip - an intermediate image build over a ssh-stable_slim image
 
 Instead of build FROM debian:stable-slim this image is build over the same debian-slim plus an openssh-server.
 
