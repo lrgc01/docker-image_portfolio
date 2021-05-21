@@ -25,8 +25,9 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
+FROMIMG="lrgc01/ssh-stable_slim"
 COMMENT="PHP and php-fpm software + server over openssh-server image"
-IMGNAME="php-stretch_slim_ssh"
+IMGNAME="php"
 
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
@@ -40,7 +41,7 @@ USERDIR_=${USERDIR_#/}
 START_CMD=${PHP_START_CMD:-"php.start"}
 IPFILE=${PHP_IPFILE:-"php.host"}
 START_DIR=${PHP_START_DIR:-"/start"}
-
+PHPVER="7.3"
 # 
 # ---- Start command ----
 #    ... with workaround to get IP 
@@ -55,7 +56,7 @@ START_SH=\${DOCKER_START_SH}
 WORKDIR=\${DOCKER_WORKDIR:-"/startup.d"}
 
 # First start the fpm server as a daemon
-/usr/sbin/php-fpm7.0 --daemonize --fpm-config /etc/php/7.0/fpm/php-fpm.conf
+/usr/sbin/php-fpm$PHPVER --daemonize --fpm-config /etc/php/$PHPVER/fpm/php-fpm.conf
 
 # Start of the container main purpose app
 if [ -d "\$WORKDIR" ]; then
@@ -85,7 +86,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stretch_slim
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
@@ -93,7 +94,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
-    apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-mcrypt php-zip --no-install-recommends && \\
+    apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-zip --no-install-recommends && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
