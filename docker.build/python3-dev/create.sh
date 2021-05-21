@@ -25,7 +25,7 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="python3-dev over openssh-server image"
+COMMENT="python3-dev over python3-pip image"
 IMGNAME="python3-dev"
 FROMIMG="lrgc01/python3-pip"
 
