@@ -36,3 +36,6 @@ NODE_START_CMD="nodejs.start"
 NODE_IPFILE="nodejs.host"
 
 START_DIR="/start"
+
+BIND_GID="102"
+BIND_UID="102"
