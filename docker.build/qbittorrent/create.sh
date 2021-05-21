@@ -25,7 +25,7 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="qbittorrent using python3-dev image"
+COMMENT="qbittorrent using python3-pip image"
 IMGNAME="qbittorrent"
 FROMIMG="lrgc01/python3-pip"
 

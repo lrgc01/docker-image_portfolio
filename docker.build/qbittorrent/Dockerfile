@@ -3,7 +3,7 @@
 #
 FROM lrgc01/python3-pip
 
-LABEL Comment="qbittorrent using python3-dev image"
+LABEL Comment="qbittorrent using python3-pip image"
 
 RUN set -ex && \
     groupadd -g 1000 qbittorrent && \
