@@ -26,8 +26,8 @@ else
 fi
 
 COMMENT="python3-dev over openssh-server image"
-IMGNAME="python3_dev-debian"
-FROMIMG="lrgc01/ssh-debian_slim"
+IMGNAME="python3-dev"
+FROMIMG="lrgc01/python3-pip"
 
 UID_=${PYTHON3_UID:-10020}
 GID_=${PYTHON3_GID:-10020}
@@ -71,9 +71,8 @@ LABEL Comment="$COMMENT"
 
 RUN set -ex && \\
     apt-get update && \\
-    apt-get install -y python3-pip build-essential python3-dev --no-install-recommends && \\
+    apt-get install -y build-essential python3-dev --no-install-recommends && \\
     apt-get clean && \\
-    pip3 install setuptools wheel && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
