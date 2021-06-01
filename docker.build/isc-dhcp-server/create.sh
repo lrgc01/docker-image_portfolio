@@ -27,7 +27,7 @@ fi
 
 COMMENT="ISC DHCP server"
 IMGNAME="isc-dhcp-server"
-FROM="lrgc01/ssh-stable_slim"
+FROM="lrgc01/net-stable_slim"
 
 # Not used, just in case ...
 UID_=${DHCP_UID:-67}
