@@ -27,7 +27,7 @@ fi
 
 COMMENT="bind9 DNS server"
 IMGNAME="dns-bind9"
-FROM="lrgc01/ssh-stable_slim"
+FROM="lrgc01/net-stable_slim"
 
 # Not used, just in case ...
 UID_=${BIND_UID:-53}
