@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stable_slim
+FROM debian:stable-slim
 
 LABEL Comment="HAproxy web loadbalancer over ssh-stretch_slim image"
 

@@ -27,7 +27,7 @@ fi
 
 COMMENT="HAproxy web loadbalancer over ssh-stretch_slim image"
 IMGNAME="haproxy"
-FROM="lrgc01/ssh-stable_slim"
+FROM="debian:stable-slim"
 
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
