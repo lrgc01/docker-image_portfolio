@@ -25,7 +25,7 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-FROMIMG="lrgc01/ssh-stable_slim"
+FROMIMG="debian:stable-slim"
 COMMENT="nginx web server over openssh-server image"
 IMGNAME="nginx"
 
