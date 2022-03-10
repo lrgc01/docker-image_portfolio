@@ -27,7 +27,7 @@ fi
 
 COMMENT="Apache2 web server over openssh-server image"
 IMGNAME="apache2"
-FROMIMG="lrgc01/ssh-debian_slim"
+#FROMIMG="lrgc01/ssh-debian_slim" # Using default from generic.rc
 # Not used, just in case ...
 UID_=${APACHE2_UID:-102}
 GID_=${APACHE2_GID:-103}
@@ -116,6 +116,10 @@ EOF
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  if [ $? -eq 0 ]; then
+     docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+     docker image rm ${FOLDER}${IMGNAME}${BUILD_VER}
+  fi
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
