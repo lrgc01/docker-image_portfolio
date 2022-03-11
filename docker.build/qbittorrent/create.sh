@@ -27,7 +27,7 @@ fi
 
 COMMENT="qbittorrent using python3-pip image"
 IMGNAME="qbittorrent"
-FROMIMG="lrgc01/python3-pip"
+FROMIMG="lrgc01/python3-pip:${ARCH}"
 
 UID_=${QBITTORRENT_UID:-1000}
 GID_=${QBITTORRENT_GID:-1000}
@@ -108,6 +108,10 @@ EOF
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  if [ $? -eq 0 ]; then
+     docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+     docker image rm ${FOLDER}${IMGNAME}${BUILD_VER}
+  fi
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then

@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/python3-pip
+FROM lrgc01/python3-pip:arm64
 
 LABEL Comment="qbittorrent using python3-pip image"
 
