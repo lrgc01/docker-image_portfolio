@@ -1,7 +1,7 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/ssh-stable_slim
+FROM lrgc01/ssh-stable_slim:arm64
 
 LABEL Comment="python3-pip over openssh-server image"
 
