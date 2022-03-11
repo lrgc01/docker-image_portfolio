@@ -25,10 +25,10 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="Dolibarr via PHP composer on top of php-stretch_slim image"
-IMGNAME="dolibarr-stretch_slim"
+COMMENT="Dolibarr via PHP composer on top of php (slim) image"
+IMGNAME="dolibarr"
 #FROMIMG="lrgc01/php-stretch_slim"
-FROMIMG="debian3:5000/php-stretch_slim"
+FROMIMG="lrgc01/php:${ARCH}"
 
 UID_=${DOLIB_UID:-10020}
 GID_=${DOLIB_GID:-10020}
@@ -72,6 +72,10 @@ EOF
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  if [ $? -eq 0 ]; then
+     docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+     docker image rm ${FOLDER}${IMGNAME}${BUILD_VER}
+  fi
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
