@@ -13,6 +13,8 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 # May change for own needs
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 
+ARCH=$(dpkg --print-architecture)
+
 # Optionaly this script can prepare the docker-build environment
 if [ "$#" -gt 0 ]; then
    case "$1" in
@@ -27,7 +29,7 @@ fi
 
 COMMENT="Azure linux CLI over openssh-server image"
 IMGNAME="azure_cli"
-FROMIMG="lrgc01/ssh-debian_slim"
+FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 
 UID_=${AZURE_UID:-10001}
 GID_=${AZURE_GID:-10001}
@@ -53,7 +55,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     apt-get install -y curl gnupg2 apt-transport-https lsb-release software-properties-common dirmngr ca-certificates --no-install-recommends && \\
     curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg && \\
     AZ_REPO=\$(lsb_release -cs) && \\
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ \$AZ_REPO main" > /etc/apt/sources.list.d/azure-cli.list && \\
+    echo "deb [arch=${ARCH}] https://packages.microsoft.com/repos/azure-cli/ \$AZ_REPO main" > /etc/apt/sources.list.d/azure-cli.list && \\
     apt-get update && \\
     apt-get install -y azure-cli --no-install-recommends && \\
     apt-get remove -y --autoremove curl gnupg2 apt-transport-https lsb-release software-properties-common dirmngr ca-certificates && \\
@@ -71,6 +73,11 @@ EOF
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+   if [ $? -eq 0 ]; then
+      docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+      docker image rm ${FOLDER}${IMGNAME}${BUILD_VER} 
+   fi
+
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
