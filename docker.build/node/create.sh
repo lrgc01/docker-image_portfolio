@@ -13,6 +13,8 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 # May change for own needs
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 
+ARCH=$(dpkg --print-architecture)
+
 # Optionaly this script can prepare the docker-build environment
 #
 ##### WARNING
@@ -31,7 +33,7 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-FROMIMG="lrgc01/ssh-debian_slim"
+FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 COMMENT="Node.js and npm over openssh-server image"
 IMGNAME="nodejs"
 
@@ -125,6 +127,11 @@ CMD [\"sh\",\"$START_DIR/$START_CMD\"]
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  if [ $? -eq 0 ]; then
+     docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+     docker image rm ${FOLDER}${IMGNAME}${BUILD_VER} 
+  fi
+
 fi
 
 # Don't clean

@@ -13,6 +13,8 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 # May change for own needs
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
 
+ARCH=$(dpkg --print-architecture)
+
 # Optionaly this script can prepare the docker-build environment
 if [ "$#" -gt 0 ]; then
    case "$1" in
@@ -97,6 +99,9 @@ EOF
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+  if [ $? -eq 0 ]; then
+     docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+  fi
 fi
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
