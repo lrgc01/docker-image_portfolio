@@ -42,3 +42,7 @@ BIND_UID="102"
 
 ARCH=$(dpkg --print-architecture)
 FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+
+START_CMD="container.start.sh"
+IPFILE="container.host"
+START_DIR="/start"
