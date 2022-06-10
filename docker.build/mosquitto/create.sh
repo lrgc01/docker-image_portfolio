@@ -90,26 +90,23 @@ LABEL Comment="$COMMENT"
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
-    apt-get update && apt-get install wget gnupg2 -y --no-install-recommends && \\
-    wget -q -O - http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key | apt-key add - && \\
-    cd /etc/apt/sources.list.d/ && wget -q http://repo.mosquitto.org/debian/mosquitto-buster.list && \\
     apt-get update && \\
     apt-get install -q -y --install-recommends mosquitto && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man*/* && \\
-    echo "socket_domain ipv4" > /etc/mosquitto/conf.d/socket_domain.conf && \\
     mkdir -p /run/mosquitto $START_DIR && chown mosquitto /run/mosquitto
 
 COPY mosquitto.start.sh $START_CMD $START_DIR/
 
 # If someone wants TCP instead of socket
 EXPOSE 1883 
+EXPOSE 8883 
 EXPOSE 22
 
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
-VOLUME  ["/var/log","/var/lib"]
+VOLUME  ["/var/log/mosquitto","/var/lib/mosquitto"]
 
 CMD ["sh","$START_DIR/$START_CMD"]
 EOF
