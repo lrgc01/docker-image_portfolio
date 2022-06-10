@@ -1,3 +1,4 @@
 debootstrap/build
 *.bkp*
 *.old*
+**/Dockerfile.tmp
