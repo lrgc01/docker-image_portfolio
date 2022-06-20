@@ -27,7 +27,7 @@ fi
 
 COMMENT="bind9 DNS server"
 IMGNAME="dns-bind9"
-FROM="lrgc01/net-stable_slim"
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
 
 # Not used, just in case ...
 UID_=${BIND_UID:-53}
@@ -87,7 +87,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM $FROM
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
@@ -112,8 +112,13 @@ EOF
 
 # Now build the image using docker build only if root is running
 if [ `whoami` = "root" -a "$BUILD_ENV" != "1" ]; then
-  docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+   docker build -t ${FOLDER}${IMGNAME}${BUILD_VER} -f ${DOCKERFILE} .
+   if [ $? -eq 0 ]; then
+      docker image tag ${FOLDER}${IMGNAME}${BUILD_VER} ${FOLDER}${IMGNAME}:${ARCH} 
+      docker image rm ${FOLDER}${IMGNAME}${BUILD_VER}
+   fi
 fi
+
 
 if [ "$DOCKERFILE" != "Dockerfile" ] ; then
    # Cleaning only if Dockerfile.tmp is the current one
