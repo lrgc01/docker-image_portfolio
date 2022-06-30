@@ -25,9 +25,9 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-COMMENT="HAproxy web loadbalancer over ssh-stretch_slim image"
+COMMENT="HAproxy web loadbalancer over ssh-stable_slim image"
 IMGNAME="haproxy"
-FROM="debian:stable-slim"
+FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
@@ -37,13 +37,13 @@ GRP_=${JENKINS_GRP:-pygrp}
 # This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
-START_DIR="start.d"
+START_DIR=${START_DIR:-"/start.d"}
 
-START_CMD=${HAPROXY_START_CMD:-"haproxy.start"}
+START_CMD=${START_CMD:-"bootstrap.haproxy.sh"}
 IPFILE=${HAPROXY_IPFILE:-"haproxy.host"}
 # These two will be used in a base startup run
-HA_START_SCRIPT="haproxy_cfg.start.sh"
-HA_TMPL="haproxy.cfg.tmpl"
+HA_START_SCRIPT="haproxy.start.sh"
+HA_CFG_MAKER="haproxy.cfg.sh"
 
 # 
 # ---- Start command ----
@@ -55,8 +55,8 @@ cat > $START_CMD << EOF
 
 # Some environment variables that may be passed to the container
 # Any file/script can be uploaded inside a volume using the Docker Host
-START_SH=\${DOCKER_START_SH:-"haproxy_cfg.start.sh"}
-WORKDIR=\${DOCKER_WORKDIR:-"/$START_DIR"}
+START_SH=\${DOCKER_START_SH:-"haproxy.start.sh"}
+WORKDIR=\${DOCKER_WORKDIR:-"$START_DIR"}
 
 # Start of the container main purpose app
 if [ -d "\$WORKDIR" ]; then
@@ -86,7 +86,7 @@ cat > ${DOCKERFILE} << EOF
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM $FROM
+FROM $FROMIMG
 
 LABEL Comment="$COMMENT"
 
@@ -96,9 +96,10 @@ RUN apt-get update && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir -p /$START_DIR 
+    mkdir -p $START_DIR 
 
-COPY $START_CMD $HA_TMPL $HA_START_SCRIPT /$START_DIR/
+COPY $START_CMD $HA_CFG_MAKER $HA_START_SCRIPT $START_DIR/
+COPY conf.d /etc/haproxy/conf.d/
 
 # Obvious Web ports and others
 EXPOSE 80
@@ -110,7 +111,7 @@ EXPOSE 8443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  ["/etc/haproxy", "/var/log/haproxy" ]
 
-CMD ["sh","/$START_DIR/$START_CMD"]
+CMD ["sh","$START_DIR/$START_CMD"]
 EOF
 
 # Now build the image using docker build only if root is running
