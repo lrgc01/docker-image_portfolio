@@ -1,29 +1,42 @@
 #!/bin/sh
 
-ARCH=`dpkg --print-architecture`
-NAME="mosquitto"
+NAME=${NAME:-"mosquitto"}
+SSLPORT=${SSLPORT:-"8883"}
+# Example to use bridge
+#BRIDGEADDR="172.17.0.3:1883"
+
+CERTDIR=${CERTDIR:-"/home/luiz/start.d/certs"}
 DOCKERCERTDIR="/etc/mosquitto/certs"
 DOCKERCACERTPATH="/etc/mosquitto/ca_certificates"
-CERTDIR="/home/luiz/start.d/certs"
+
 # To new certs:
-CASUBJ="/C=BR/ST=RJ/L=Rio\ de\ Janeiro/O=Living/OU=CA-cert/CN=sddc.living-consultoria.com.br"
-CERTSUBJ="/C=BR/ST=RJ/L=Rio\ de\ Janeiro/O=Aeroporto\ Galeao/OU=IoT-GIG/CN=mqtt.sddc.living-consultoria.com.br"
+CASUBJ=${CASUBJ:-"/C=BR/ST=RJ/L=Rio\ de\ Janeiro/O=Living/OU=CA-cert/CN=sddc.living-consultoria.com.br"}
+CERTSUBJ=${CERTSUBJ:-"/C=BR/ST=RJ/L=Rio\ de\ Janeiro/O=Aeroporto\ Galeao/OU=IoT-GIG/CN=mqtt.sddc.living-consultoria.com.br"}
 #CASUBJ='/C=BR/ST=RJ/L=Rio de Janeiro/O=Living/OU=CA-cert/CN=armubuntu2'
 #CERTSUBJ='/C=BR/ST=RJ/L=Rio de Janeiro/O=Aeroporto Galeao/OU=IoT-GIG/CN=oci-armubuntu2'
 
+ARCH=`dpkg --print-architecture`
+
+USE_BRIDGE="no"
+if [ ! -z $BRIDGEADDR ]; then
+    USE_BRIDGE="yes"
+    MOSQUITTO_BRIDGE="-e DOCKER_BRIDGEADDR=$BRIDGEADDR"
+fi
 
 if [ `whoami` != "root" ]; then
-	SUDO="sudo"
+    SUDO="sudo"
 fi
 
 $SUDO docker create \
   --name=$NAME \
   --restart unless-stopped \
-  -e DOCKER_START_SH=/start/mosquitto.start.sh \
-  -v etc_mosquitto:/etc/mosquitto \
-  -v log_mosquitto:/var/log/mosquitto \
-  -v lib_mosquitto:/var/lib/mosquitto \
-  --publish 0.0.0.0:8883:8883 \
+  -e DOCKER_START_SH="/start/mosquitto.start.sh" \
+  -e DOCKER_USE_BRIDGE="$USE_BRIDGE" \
+  $MOSQUITTO_BRIDGE \
+  -v etc_$NAME:/etc/mosquitto \
+  -v log_$NAME:/var/log/mosquitto \
+  -v lib_$NAME:/var/lib/mosquitto \
+  --publish 0.0.0.0:$SSLPORT:8883 \
   lrgc01/mosquitto:${ARCH}
 
 if [ ! -d "$CERTDIR" ] ; then
