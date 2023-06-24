@@ -1,5 +1,66 @@
+#!/bin/bash
 # Generic definition to be used in create.sh scripts 
 # in all image definition under this directory.
+
+CheckImgDependency() {
+   _ERROR=0
+   unset _LASTID
+   unset _DOCKERFILE
+   unset _USEDID
+
+   if [ `whoami` != "root" ]; then
+        _SUDO="sudo"
+   fi
+
+   while [ $# -gt 0 ]
+   do
+      case $1 in
+         --[lL][iI][dD]|-[lL]) _LASTID="$2"
+             shift 2
+         ;;
+         --[dD][oO][cC][kK][fF]|-[fF]) _DOCKERFILE="$2"
+             shift 2
+         ;;
+         --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
+             _DRYRUN='echo [DryRun] Would run:'
+             shift 1
+         ;;
+         --[hH][eE][lL][pP]|-[hH])
+             #Usage
+             exit
+         ;;
+         *) shift
+         ;;
+      esac
+   done
+
+   if [ -z "$_LASTID" ]; then
+      echo "Must specify -l <last img id or file with id used>"
+      _ERROR=1
+   elif [ -f "$_LASTID" ]; then 
+      _USEDID=$(cat "$_LASTID")
+   elif [ "$(echo $_LASTID | grep '^sha')" != "" ]; then
+      _USEDID="$_LASTID"
+   fi
+
+   if [ -z "$_DOCKERFILE" -o "$_ERROR" -eq 1 ]; then
+      echo "Must specify -f <dockerfile>"
+      _ERROR=1
+   else
+      _BASEIMG=$(grep -e "^FROM " $_DOCKERFILE | sed -e 's/FROM //')
+      _CURID=$($_DRYRUN $_SUDO docker inspect --format "{{.Id}}" $_BASEIMG)
+      echo $_CURID
+      if [ "$_CURID" != "$_USEDID" ]; then
+         return 1
+      else
+         return 0
+      fi
+   fi
+
+   return $_ERROR
+
+}
+
 
 BASE_FOLDER="lrgc01/"
 
