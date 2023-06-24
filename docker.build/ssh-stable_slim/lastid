@@ -1,0 +1,1 @@
+[DryRun] Would run: echo [DryRun] Would run: sudo docker inspect --format {{.Id}} debian:stable-slim
