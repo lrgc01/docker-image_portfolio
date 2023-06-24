@@ -107,3 +107,8 @@ FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 START_CMD="bootstrap.container.sh"
 IPFILE="container.host"
 START_DIR="/start.d"
+
+# Versioning in order to keep a copy if running more than once
+# Note the ":" in the formated output
+# May change for own needs
+BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
