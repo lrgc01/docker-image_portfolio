@@ -89,11 +89,11 @@ NODE_HOST_FILE="nodejs.host"
 NODE_WRAP_FILE="nodejs_warp.sh"
 
 # To python image
-PY_START_CMD="python.start"
+PY_STARTFILE="python.start"
 PY_IPFILE="$JENKINS_PYHOST_FILE"
 
 # To nodejs image
-NODE_START_CMD="nodejs.start"
+NODE_STARTFILE="nodejs.start"
 NODE_IPFILE="nodejs.host"
 
 START_DIR="/start"
@@ -104,7 +104,7 @@ BIND_UID="102"
 ARCH=$(dpkg --print-architecture)
 FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 
-START_CMD="bootstrap.container.sh"
+STARTFILE="bootstrap.container.sh"
 IPFILE="container.host"
 START_DIR="/start.d"
 
@@ -112,3 +112,9 @@ START_DIR="/start.d"
 # Note the ":" in the formated output
 # May change for own needs
 BUILD_VER=${GLOBAL_TAG_VER:-$(date +:%Y%m%d%H%M)}
+
+CURDIR=$(pwd)
+_TAG=$(basename $CURDIR)
+
+DOCKERFILE="Dockerfile"
+LASTIDFILE="./lastid"

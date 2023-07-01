@@ -2,9 +2,6 @@
 
 # docker inspect --format {{.Id}} $docker_image_name
 
-RCFILE="../generic.rc"
-[ -f "$RCFILE" ] && . $RCFILE
-
 Usage() {
         echo "Basic image build"
         echo "Usage: $0 -d (Dry Run - no arg)"
@@ -12,12 +9,14 @@ Usage() {
 
 WORKDIR="$(dirname $0)"
 cd "$WORKDIR"
-CURDIR=$(pwd)
-_TAG=$(basename $CURDIR)
+
+RCFILE="../scripts/generic.rc"
+[ -f "$RCFILE" ] && . $RCFILE
+
+#CURDIR=$(pwd)
+#_TAG=$(basename $CURDIR)
 
 TAGNAME="${BASE_FOLDER%/}/$_TAG:latest"
-DOCKERFILE="Dockerfile"
-LASTIDFILE="./lastid"
 
 if [ `whoami` != "root" ]; then
 	SUDO="sudo"
@@ -54,6 +53,7 @@ DIFFLASTID=$?
 
 if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
 	echo "No need to update container chain"
+	EXITCODE=1
 else
 	$DRYRUN $SUDO docker build -f $DOCKERFILE -t $TAGNAME .
 	if [ $? -eq 0 ]; then
@@ -62,3 +62,5 @@ else
 	   $DRYRUN $SUDO docker image prune -f
 	fi
 fi
+
+exit $EXITCODE
