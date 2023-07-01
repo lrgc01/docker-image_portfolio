@@ -56,7 +56,7 @@ EXPOSE 443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  [\"/etc/nginx\", \"/var/log/nginx\", \"/var/www/html\"]
 
-CMD [\"sh\",\"$START_DIR/$START_CMD\"]"
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
 
 IFS="$OLD_IFS"
 
