@@ -53,7 +53,7 @@ DIFFLASTID=$?
 
 if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
 	echo "No need to update container chain"
-	EXITCODE=1
+	EXITCODE=111
 else
 	$DRYRUN $SUDO docker build -f $DOCKERFILE -t $TAGNAME .
 	if [ $? -eq 0 ]; then

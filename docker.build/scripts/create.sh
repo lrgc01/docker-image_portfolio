@@ -75,7 +75,7 @@ DIFFLASTID=$?
 
 if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
         echo "No need to update container chain"
-        EXITCODE=1
+        EXITCODE=111
 else
 	# Now build the image using docker build only if root is running
 	if [ "$BUILD_ENV" != "1" ]; then
@@ -92,3 +92,4 @@ else
 	fi
 fi
 # ---- end docker build ----
+exit $EXITCODE
