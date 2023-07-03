@@ -1,0 +1,90 @@
+COMMENT="bind9 DNS server"
+IMGNAME="dns-bind9"
+FROMIMG="lrgc01/net-stable_slim"
+
+UID_=${BIND_UID:-53}
+GID_=${BIND_GID:-53}
+USR_=${BIND_USR:-bind}
+GRP_=${BIND_GRP:-bind}
+
+USERDIR_=${BIND_HOMEDIR:-/etc/bind}
+USERDIR_=${USERDIR_#/}
+
+STARTFILE=${BIND_START_CMD:-"bind.bootstrap"}
+IPFILE=${BIND_IPFILE:-"bind.host"}
+START_DIR="start.d"
+BIND_DIR=${BIND_DIR:-"/etc/bind"}
+# These two will be used in a base startup run
+#START_SCRIPT="bind.start.sh"
+#TMPL="bind.cfg.tmpl"
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+
+_STARTBODY="#!/bin/bash
+
+# Some environment variables that may be passed to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH:-\"$START_SCRIPT\"}
+WORKDIR=\${DOCKER_WORKDIR:-\"/$START_DIR\"}
+
+# Start of the container main purpose app
+if [ -d \"\$WORKDIR\" ]; then
+   cd \"\$WORKDIR\"
+fi
+
+# If there is a application script, run it, otherwise run sshd below
+if [ -f \"\$START_SH\" ]; then
+   bash \"\$START_SH\"
+else
+   if [ -d \"/$USERDIR_\" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+   fi
+   # -D to run the daemon in foreground
+   /usr/sbin/sshd -D
+fi
+"
+
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt-get update && \\
+    apt-get install -y bind9 --no-install-recommends && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p /$START_DIR 
+
+COPY $STARTFILE $TMPL $START_SCRIPT /$START_DIR/
+
+# Obvious Web ports and others
+EXPOSE 53
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"$BIND_DIR\", \"/var/log/$USR_\" ]
+
+CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
+"
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
