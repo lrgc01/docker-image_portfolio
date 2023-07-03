@@ -1,0 +1,89 @@
+COMMENT="Apache2 web server over openssh-server image"
+IMGNAME="apache2"
+#FROMIMG="lrgc01/ssh-debian_slim" # Using default from generic.rc
+
+USERDIR_=${APACHE2_HOMEDIR:-var/lib/apache2}
+USERDIR_=${USERDIR_#/}
+START_DIR="start"
+
+STARTFILE=${APACHE_START_CMD:-"apache2.start"}
+IPFILE=${APACHE_IPFILE:-"apache2.host"}
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+CFG_DIR=\"/etc/apache2\"
+MOD_AV_DIR=\"mods-available\"
+MOD_EN_DIR=\"mods-enabled\"
+
+# Basic initial configuration based on some env variables
+#
+# ----------------
+# APACHE2_MOD_LIST - module name (no suffix) space separated
+# ex.: APACHE2_MOD_LIST=\"mod_proxy mod_proxy_uwsgi\"
+#
+if [ ! -z \"\$APACHE2_MOD_LIST\" ] ; then 
+     cd \$CFG_DIR/\$MOD_EN_DIR
+     for mod_ in \$APACHE2_MOD_LIST
+     do
+        [ -f \"../\$MOD_AV_DIR/\${mod_}.load\" ] && ln -fs \"../\$MOD_AV_DIR/\${mod_}.load\" .
+        [ -f \"../\$MOD_AV_DIR/\${mod_}.conf\" ] && ln -fs \"../\$MOD_AV_DIR/\${mod_}.conf\" .
+     done
+fi
+# ----------------
+
+cd /
+
+apachectl start
+
+# For testing purposes and to avoid using another daemon control, 
+# just call sshd to hold the terminal then start sshd without 
+# detach (but change off to on in apache2 call)
+/usr/sbin/sshd -D
+
+"
+
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt-get update && \\
+    apt-get install -y apache2 libapache2-mod-fcgid libapache2-mod-proxy-uwsgi --no-install-recommends && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man*/* && \\
+    mkdir -p /run/php /$START_DIR 
+
+COPY $STARTFILE /$START_DIR/
+
+# Obvious Web ports
+EXPOSE 80
+EXPOSE 443
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"/etc/apache2\", \"/var/log/apache2\", \"/var/www/html\"]
+
+CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
