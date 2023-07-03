@@ -1,7 +1,6 @@
 COMMENT="Adding jdk on top of base image"
 
 # Folder is optional - end with a slash
-IMGNAME="openjdk"
 FROMIMG="lrgc01/ssh-debian_slim"
 
 # 
