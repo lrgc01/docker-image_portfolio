@@ -102,7 +102,8 @@ BIND_GID="102"
 BIND_UID="102"
 
 ARCH=$(dpkg --print-architecture)
-FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+#FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+FROMIMG="lrgc01/ssh-stable_slim"
 
 STARTFILE="bootstrap.container.sh"
 IPFILE="container.host"
