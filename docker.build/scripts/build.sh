@@ -7,6 +7,8 @@ Usage() {
         echo "Usage: $0 -d (Dry Run - no arg)"
 }
 
+EXITCODE=0
+
 WORKDIR="$(dirname $0)"
 cd "$WORKDIR"
 

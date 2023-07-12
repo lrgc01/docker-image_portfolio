@@ -5,6 +5,7 @@ Usage() {
 	echo "Usage: $0 -p <prepare env (Dockerfile,etc)> -f <use alternate name for Dockerfile> -t <tag image as> -d (Dry Run - no arg)"
 }
 
+EXITCODE=0
 
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
