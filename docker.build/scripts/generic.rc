@@ -118,4 +118,4 @@ CURDIR=$(pwd)
 _TAG=$(basename $CURDIR)
 
 DOCKERFILE="Dockerfile"
-LASTIDFILE="./lastid"
+LASTIDFILE="./lastid.${ARCH}"

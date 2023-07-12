@@ -23,7 +23,7 @@ done
 
 # Folder is optional - end with a slash
 FOLDER=${BASE_FOLDER:-"lrgc01/"}
-_TAGLATEST="${FOLDER%/}/$_TAG:latest"
+_TAGLATEST="${FOLDER%/}/$_TAG"
 
 if [ `whoami` != "root" ]; then
         SUDO="sudo"

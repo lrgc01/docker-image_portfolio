@@ -18,7 +18,7 @@ RCFILE="../scripts/generic.rc"
 #CURDIR=$(pwd)
 #_TAG=$(basename $CURDIR)
 
-TAGNAME="${BASE_FOLDER%/}/$_TAG:latest"
+TAGNAME="${BASE_FOLDER%/}/$_TAG"
 
 if [ `whoami` != "root" ]; then
 	SUDO="sudo"
