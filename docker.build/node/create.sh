@@ -33,7 +33,8 @@ else
    DOCKERFILE="Dockerfile.tmp"
 fi
 
-FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+#FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+FROMIMG="lrgc01/ssh-stable_slim"
 COMMENT="Node.js and npm over openssh-server image"
 IMGNAME="nodejs"
 
@@ -96,8 +97,8 @@ FROM $FROMIMG
 
 LABEL Comment=\"$COMMENT\"
 
-RUN groupadd --gid 1000 node && \\
-    useradd --uid 1000 --gid node --shell /bin/bash --create-home node && \\
+RUN groupadd --gid 1001 node && \\
+    useradd --uid 1001 --gid node --shell /bin/bash --create-home node && \\
     groupadd --gid $GID_ $GRP_ && \\
     useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
     apt-get update && apt-get install -y xz-utils gpg curl && \\
