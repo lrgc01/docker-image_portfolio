@@ -45,9 +45,9 @@ do
           [ -f ./build.sh ] && $DRYRUN ./build.sh 
           [ -f ./create.sh ] && $DRYRUN ./create.sh $PREPARE
   	)
-	if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
-		break
-	fi
+	#if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
+	#	break
+	#fi
 done
 
 $DRYRUN $SUDO docker builder prune -f
