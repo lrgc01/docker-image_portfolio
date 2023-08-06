@@ -4,11 +4,7 @@ debootstrap/build
 **/Dockerfile.tmp
 **/apache2/Dockerfile
 **/dns-bind9/Dockerfile
-**/haproxy/Dockerfile
 **/jenkins/temp_tarball.tgz
-**/mariadb/Dockerfile
-**/node/Dockerfile
 **/openjdk/Dockerfile
 **/openjre/Dockerfile
-**/postgresql/Dockerfile
 **/python3-pip/Dockerfile
