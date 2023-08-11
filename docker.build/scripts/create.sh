@@ -85,11 +85,15 @@ else
 			$DRYRUN $SUDO docker image tag ${FOLDER}${_TAG}${BUILD_VER} $_TAGLATEST
 			$DRYRUN $SUDO docker image rm ${FOLDER}${_TAG}${BUILD_VER}
            		$DRYRUN $SUDO docker push $_TAGLATEST
-           		$DRYRUN echo $NEWID > $LASTIDFILE
+			if [ ! -z "$DRYRUN" ]; then
+           			$DRYRUN echo $NEWID 
+			else
+           			echo $NEWID > $LASTIDFILE
+			fi
            		$DRYRUN $SUDO docker image prune -f
 		fi
 		# Cleaning
-		rm -fr ${OPTDIR} ${DOCKERFILE} ${TAR_BALL} "$USERDIR_" usr var etc
+		rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
 	fi
 fi
 # ---- end docker build ----
