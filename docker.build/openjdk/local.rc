@@ -1,7 +1,7 @@
 COMMENT="Adding jdk on top of net-stable_slim image"
 
 # Folder is optional - end with a slash
-FROMIMG="lrgc01/net-stable_slim"
+FROMIMG="lrgc01/openjre"
 
 # 
 # Dockerfile
