@@ -80,13 +80,16 @@ if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
 else
 	# Now build the image using docker build only if root is running
 	if [ "$BUILD_ENV" != "1" ]; then
-		$DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}${BUILD_VER} -f ${DOCKERFILE} .
+		$DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
 		if [ $? -eq 0 ]; then
-			$DRYRUN $SUDO docker image tag ${FOLDER}${_TAG}${BUILD_VER} $_TAGLATEST
-			$DRYRUN $SUDO docker image rm ${FOLDER}${_TAG}${BUILD_VER}
-           		$DRYRUN $SUDO docker push $_TAGLATEST
+			#$DRYRUN $SUDO docker image tag ${FOLDER}${_TAG}${BUILD_VER} $_TAGLATEST
+			#$DRYRUN $SUDO docker image rm ${FOLDER}${_TAG}${BUILD_VER}
+           		#$DRYRUN $SUDO docker push $_TAGLATEST
+           		$DRYRUN $SUDO docker push ${FOLDER}${_TAG}:${ARCH}
+           		#$DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:${ARCH}
+           		#$DRYRUN $SUDO docker manifest push ${FOLDER}${_TAG}:latest 
 			if [ ! -z "$DRYRUN" ]; then
-           			$DRYRUN echo $NEWID 
+           			echo "Would write NEWID according to: $NEWID"
 			else
            			echo $NEWID > $LASTIDFILE
 			fi

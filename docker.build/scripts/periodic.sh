@@ -32,22 +32,22 @@ do
 done
 
 if [ $(whoami) != "root" ]; then
-	SUDO="sudo"
+	_SUDO="sudo"
 fi
 
 # Order is VERY important here
-BUILDLIST="ssh-stable_slim net-stable_slim dns-bind9 python3-pip nginx mariadb apache2 openjre openjdk jenkins"
+BUILDLIST="ssh-stable_slim net-stable_slim dns-bind9 python3-pip nginx mariadb apache2 openjre openjdk "
 
 for bld in $BUILDLIST
 do
 	echo "Running in $BASEDIR/$bld"
 	( cd $BASEDIR/$bld 
-          [ -f ./build.sh ] && $DRYRUN ./build.sh 
-          [ -f ./create.sh ] && $DRYRUN ./create.sh $PREPARE
+          [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
+          [ -f ./create.sh ] && $DRYRUN $_SUDO ./create.sh $PREPARE
   	)
 	#if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
 	#	break
 	#fi
 done
 
-$DRYRUN $SUDO docker builder prune -f
+$DRYRUN $_SUDO docker builder prune -f
