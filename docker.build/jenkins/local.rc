@@ -1,6 +1,6 @@
 COMMENT="Jenkins over base + jdk environment"
 
-FROMIMG="lrgc01/openjdk"
+FROMIMG="lrgc01/openjdk:${ARCH}"
 
 # These are expected to be sourced from generic.rc
 UID_=${JENKINS_UID:-102}

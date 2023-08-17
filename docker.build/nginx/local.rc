@@ -1,4 +1,4 @@
-FROMIMG="debian:stable-slim"
+#FROMIMG="debian:stable-slim" # Using from generic.rc
 COMMENT="nginx web server over openssh-server image"
 
 # This is globally used
