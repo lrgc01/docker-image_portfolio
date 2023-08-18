@@ -18,7 +18,7 @@ RCFILE="../scripts/generic.rc"
 #CURDIR=$(pwd)
 #_TAG=$(basename $CURDIR)
 
-TAGNAME="${BASE_FOLDER%/}/$_TAG:$ARCH"
+TAGNAME="${BASE_FOLDER%/}/$_TAG"
 
 if [ `whoami` != "root" ]; then
 	SUDO="sudo"
@@ -57,10 +57,13 @@ if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
 	echo "No need to update container chain"
 	EXITCODE=111
 else
-	$DRYRUN $SUDO docker build -f $DOCKERFILE -t $TAGNAME .
+	$DRYRUN $SUDO docker build -f $DOCKERFILE -t $TAGNAME:${ARCH} .
 	if [ $? -eq 0 ]; then
-	   $DRYRUN $SUDO docker push $TAGNAME
+	   $DRYRUN $SUDO docker push $TAGNAME:${ARCH}
 	   $DRYRUN echo $NEWID > $LASTIDFILE
+           $DRYRUN $SUDO docker manifest rm ${TAGNAME}:latest
+	   $DRYRUN $SUDO docker manifest create ${TAGNAME}:latest --amend ${TAGNAME}:amd64 --amend ${TAGNAME}:arm64
+           $DRYRUN $SUDO docker manifest push ${TAGNAME}:latest
 	   $DRYRUN $SUDO docker image prune -f
 	fi
 fi
