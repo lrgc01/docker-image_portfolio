@@ -3,7 +3,7 @@
 # with little improve
 #
 
-FROM lrgc01/ssh-stretch_slim
+FROM lrgc01/ssh-stable_slim
 
 # Install and keep thin
 # Note: here we use &&\ to run commands one after the other - the \
