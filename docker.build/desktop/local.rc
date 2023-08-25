@@ -1,0 +1,51 @@
+FROMIMG="lrgc01/debian-nox11:${ARCH}"
+#FROMIMG="debian:latest"
+COMMENT="Debian desktop image"
+
+STARTFILE="bootstrap.container.sh"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+rm -f /run/dbus/pid  /var/run/xrdp/xrdp-sesman.pid /var/run/xrdp/xrdp.pid /run/avahi-daemon/pid
+syslogd
+dbus-daemon --system
+/usr/sbin/avahi-daemon -s -D
+#/usr/libexec/polkitd --no-debug
+/usr/lib/polkit-1/polkitd --no-debug &
+lightdm &
+xrdp-sesman
+xrdp
+"
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+COPY ${STARTFILE#/} /
+
+RUN set -ex \\
+    && apt-get update \\
+    && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
+    && apt-get install -q -y gnome fuse3 gvfs-fuse \\
+    && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 mpv \\
+    && apt-get purge -y --auto-remove \\
+    && apt-get clean 
+
+CMD [ \"/${STARTFILE#/}\" ]
+
+ENTRYPOINT ["/init"]
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+

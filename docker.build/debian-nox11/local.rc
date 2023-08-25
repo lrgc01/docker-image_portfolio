@@ -1,0 +1,46 @@
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+COMMENT="Debian desktop image"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+ARG S6_OVERLAY_VERSION=3.1.5.0
+
+#COPY ${STARTFILE#/} /
+
+RUN set -ex \\
+    && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && apt-get update \\
+    && apt-get install -q -y --reinstall man coreutils net-tools tcpdump iproute2 openssh-server \\
+    && apt-get install -q -y xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
+    && apt-get install -q -y git unzip p7zip-full netcat-traditional \\
+    && apt-get purge -y --auto-remove \\
+    && apt-get clean 
+
+#CMD [ \"/${STARTFILE#/}\" ]
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && tar -C / -Jxpf /tmp/s6-overlay-${MACHINE}.tar.xz \\
+    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz
+
+ENTRYPOINT ["/init"]
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
