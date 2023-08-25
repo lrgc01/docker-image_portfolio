@@ -103,7 +103,8 @@ START_DIR="/start"
 BIND_GID="102"
 BIND_UID="102"
 
-ARCH=$(dpkg --print-architecture)
+MACHINE=$(uname -m)  # aarch64, x86_64, etc
+ARCH=$(dpkg --print-architecture)  # amd64, arm64, etc
 FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 #FROMIMG="lrgc01/ssh-stable_slim"
 
