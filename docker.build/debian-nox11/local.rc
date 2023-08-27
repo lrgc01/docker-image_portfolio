@@ -21,11 +21,12 @@ RUN set -ex \\
     && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
     && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
     && apt-get update \\
-    && apt-get install -q -y --reinstall man coreutils net-tools tcpdump iproute2 openssh-server \\
-    && apt-get install -q -y xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
-    && apt-get install -q -y git unzip p7zip-full netcat-traditional \\
-    && apt-get purge -y --auto-remove \\
-    && apt-get clean 
+    && DPKGLIST=\"\$(dpkg-query --show --showformat='\${Package}')\" \\
+    && apt install --reinstall \$DPKGLIST \\
+    && apt install -q -y xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
+    && apt install -q -y git unzip p7zip-full netcat-traditional \\
+    && apt purge -y --auto-remove \\
+    && apt clean 
 
 #CMD [ \"/${STARTFILE#/}\" ]
 
