@@ -15,6 +15,9 @@ cd "$WORKDIR"
 RCFILE="../scripts/generic.rc"
 [ -f "$RCFILE" ] && . $RCFILE
 
+# Overwrite DOCKERFILE with special Dockerfile.build which is permanent, i.e. no generated, but static
+DOCKERFILE="Dockerfile.build"
+
 #CURDIR=$(pwd)
 #_TAG=$(basename $CURDIR)
 
