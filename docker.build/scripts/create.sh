@@ -15,6 +15,7 @@ Usage() {
 EXITCODE=0
 
 _FORCE=0
+_CLEAN_ENV=1
 
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
@@ -49,18 +50,20 @@ do
           shift 2
       ;;
       --[pP][rR][eE][pP][aA]*|-[pP]) 
-          BUILD_ENV="1"
+          _ENV_ONLY="1"
+	  _CLEAN_ENV="0"
           DOCKERFILE="Dockerfile"
           shift 1
       ;;
       --[cC][lL][eE][aA][nN]|-[cC]) 
-          BUILD_ENV="1"
+          _ENV_ONLY="1"
 	  _CLEAN_ENV="1"
           DOCKERFILE="Dockerfile"
           shift 1
       ;;
       --[fF][oO][rR][cC][eE]) 
-          BUILD_ENV="1"
+          _ENV_ONLY="0"
+	  _CLEAN_ENV="1"
           DOCKERFILE="Dockerfile"
 	  _FORCE="1"
           shift 1
@@ -96,11 +99,10 @@ DIFFLASTID=$?
 
 if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
         echo "No need to update container chain"
-	rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
         EXITCODE=111
 else
 	# Now build the image using docker build only if root is running
-	if [ "$BUILD_ENV" != "1" ]; then
+	if [ "$_ENV_ONLY" != "1" ]; then
 		$DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
 		if [ $? -eq 0 ]; then
 			#$DRYRUN $SUDO docker image tag ${FOLDER}${_TAG}:${ARCH} ${FOLDER}${_TAG}:latest
@@ -116,12 +118,11 @@ else
 			fi
            		$DRYRUN $SUDO docker image prune -f
 		fi
-		# Cleaning
-		rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
 	fi
 fi
-if [ "$CLEAN_ENV" = "1" ];then
-	rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
+# Cleaning
+if [ "$_CLEAN_ENV" = "1" ];then
+	rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc
 fi
 # ---- end docker build ----
 exit $EXITCODE
