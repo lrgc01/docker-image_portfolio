@@ -2,10 +2,19 @@
 
 Usage() {
         echo "Build image or make env to build"
-	echo "Usage: $0 -p <prepare env (Dockerfile,etc)> -f <use alternate name for Dockerfile> -t <tag image as> -d (Dry Run - no arg)"
+	echo "Usage: $0"
+        echo "	-p <prepare env (Dockerfile,etc)>"
+        echo "	-c <clean env (Dockerfile,etc)>"
+        echo "	-f <use alternate name for Dockerfile>"
+	echo "	-t <tag image as>"
+	echo "	-h this help"
+	echo "	--force force build even if it is up to date"
+        echo "	-d (Dry Run - no arg)"
 }
 
 EXITCODE=0
+
+_FORCE=0
 
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
@@ -46,8 +55,14 @@ do
       ;;
       --[cC][lL][eE][aA][nN]|-[cC]) 
           BUILD_ENV="1"
-	  CLEAN_ENV="1"
+	  _CLEAN_ENV="1"
           DOCKERFILE="Dockerfile"
+          shift 1
+      ;;
+      --[fF][oO][rR][cC][eE]) 
+          BUILD_ENV="1"
+          DOCKERFILE="Dockerfile"
+	  _FORCE="1"
           shift 1
       ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
@@ -79,8 +94,9 @@ UPTODATE=$($DRYRUN $SUDO docker pull $PULLIMG | grep -e 'up to date')
 NEWID=$(CheckImgDependency -l $LASTIDFILE -f $DOCKERFILE $_MINUSD)
 DIFFLASTID=$?
 
-if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 ]; then
+if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
         echo "No need to update container chain"
+	rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
         EXITCODE=111
 else
 	# Now build the image using docker build only if root is running
