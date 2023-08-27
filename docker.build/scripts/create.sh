@@ -44,6 +44,12 @@ do
           DOCKERFILE="Dockerfile"
           shift 1
       ;;
+      --[cC][lL][eE][aA][nN]|-[cC]) 
+          BUILD_ENV="1"
+	  CLEAN_ENV="1"
+          DOCKERFILE="Dockerfile"
+          shift 1
+      ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
           DRYRUN='echo [DryRun] Would run:'
           _MINUSD="-d"
@@ -97,6 +103,9 @@ else
 		# Cleaning
 		rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
 	fi
+fi
+if [ "$CLEAN_ENV" = "1" ];then
+	rm -fr ${OPTDIR} ${DOCKERFILE} ${TOCLEAN} "$USERDIR_" usr var etc
 fi
 # ---- end docker build ----
 exit $EXITCODE
