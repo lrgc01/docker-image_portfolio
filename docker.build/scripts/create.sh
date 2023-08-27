@@ -105,16 +105,14 @@ else
 	if [ "$_ENV_ONLY" != "1" ]; then
 		$DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
 		if [ $? -eq 0 ]; then
-			#$DRYRUN $SUDO docker image tag ${FOLDER}${_TAG}:${ARCH} ${FOLDER}${_TAG}:latest
            		$DRYRUN $SUDO docker push ${FOLDER}${_TAG}:${ARCH}
-           		#$DRYRUN $SUDO docker push ${FOLDER}${_TAG}:latest
            		$DRYRUN $SUDO docker manifest rm ${FOLDER}${_TAG}:latest 
            		$DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:arm64 --amend ${FOLDER}${_TAG}:amd64
            		$DRYRUN $SUDO docker manifest push ${FOLDER}${_TAG}:latest 
 			if [ ! -z "$DRYRUN" ]; then
            			echo "Would write NEWID according to: $NEWID"
 			else
-           			echo $NEWID > $LASTIDFILE
+           			echo $NEWID | $SUDO tee $LASTIDFILE
 			fi
            		$DRYRUN $SUDO docker image prune -f
 		fi
