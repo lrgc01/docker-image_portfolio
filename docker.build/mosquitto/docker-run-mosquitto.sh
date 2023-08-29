@@ -1,11 +1,13 @@
 #!/bin/sh
 
 NAME=${NAME:-"mosquitto"}
+PORT=${PORT:-"1883"}
 SSLPORT=${SSLPORT:-"8883"}
 # Example to use bridge
-#BRIDGEADDR="172.17.0.3:1883"
+#BRIDGEADDR="mqtt.internal.domain.com:1884"
 
 CERTDIR=${CERTDIR:-"/home/luiz/start.d/certs"}
+LOCALSTARTSH=${LOCALSTARTSH:-"/home/luiz/start.d/mosquitto.start.sh"}
 DOCKERCERTDIR="/etc/mosquitto/certs"
 DOCKERCACERTPATH="/etc/mosquitto/ca_certificates"
 
@@ -30,13 +32,14 @@ fi
 $SUDO docker create \
   --name=$NAME \
   --restart unless-stopped \
-  -e DOCKER_START_SH="/start/mosquitto.start.sh" \
+  -e DOCKER_START_SH="/start.d/mosquitto.start.sh" \
   -e DOCKER_USE_BRIDGE="$USE_BRIDGE" \
   $MOSQUITTO_BRIDGE \
   -v etc_$NAME:/etc/mosquitto \
   -v log_$NAME:/var/log/mosquitto \
   -v lib_$NAME:/var/lib/mosquitto \
   --publish 0.0.0.0:$SSLPORT:8883 \
+  --publish 0.0.0.0:$PORT:1883 \
   lrgc01/mosquitto:${ARCH}
 
 if [ ! -d "$CERTDIR" ] ; then
@@ -63,5 +66,5 @@ fi
    done
 )
 
-$SUDO docker cp "mosquitto.start.sh" $NAME:/start
+$SUDO docker cp "$LOCALSTARTSH" $NAME:/start.d
 $SUDO docker start $NAME

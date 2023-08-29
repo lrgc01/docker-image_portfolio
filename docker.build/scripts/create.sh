@@ -120,7 +120,7 @@ else
 fi
 # Cleaning
 if [ "$_CLEAN_ENV" = "1" ];then
-	rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc
+	rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
 fi
 # ---- end docker build ----
 exit $EXITCODE
