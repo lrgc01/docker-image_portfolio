@@ -1,0 +1,30 @@
+FROMIMG="ghcr.io/oracle/oci-cli:latest" 
+#FROMIMG="oraclelinux:8-slim"
+COMMENT="Oracle oci-cli with which command"
+
+#
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+USER root
+
+RUN set -ex \\
+    dnf update && dnf install -y which 
+
+CMD ["/bin/bash"]
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
