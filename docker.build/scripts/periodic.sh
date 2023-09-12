@@ -50,4 +50,4 @@ do
 	#fi
 done
 
-$DRYRUN $_SUDO docker builder prune -f
+#$DRYRUN $_SUDO docker image prune -f
