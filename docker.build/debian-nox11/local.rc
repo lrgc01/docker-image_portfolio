@@ -23,6 +23,7 @@ RUN set -ex \\
     && apt-get update \\
     && DPKGLIST=\"\$(dpkg-query --show --showformat='\${Package} ')\" \\
     && apt install --reinstall \$DPKGLIST \\
+    && apt install -q -y locales  \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
     && apt install -q -y xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
     && apt install -q -y git unzip p7zip-full netcat-traditional \\
