@@ -25,7 +25,7 @@ RUN set -ex \\
     && apt install --reinstall \$DPKGLIST \\
     && apt install -q -y locales  \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
-    && apt install -q -y xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
+    && apt install -q -y inetutils-syslogd xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
     && apt install -q -y git unzip p7zip-full netcat-traditional \\
     && apt purge -y --auto-remove \\
     && apt clean 

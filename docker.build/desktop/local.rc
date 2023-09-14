@@ -12,6 +12,9 @@ IFS=""
 
 _STARTBODY="#!/bin/bash
 rm -f /run/dbus/pid  /var/run/xrdp/xrdp-sesman.pid /var/run/xrdp/xrdp.pid /run/avahi-daemon/pid
+if [ ! -d /run/dbus ]; then
+   mkdir -p /run/dbus 
+fi
 syslogd
 dbus-daemon --system
 /usr/sbin/avahi-daemon -s -D
