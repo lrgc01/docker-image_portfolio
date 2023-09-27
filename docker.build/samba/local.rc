@@ -1,0 +1,87 @@
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+COMMENT="samba CIFS server"
+#IMGNAME="samba"
+
+# This is globally used
+USERDIR_=${SAMBA_HOMEDIR:-/etc/samba}
+USERDIR_=${USERDIR_#/}
+
+STARTFILE=${SAMBA_BOOT_CMD:-"samba.bootstrap"}
+IPFILE=${SAMBA_IPFILE:-"bind.host"}
+START_DIR="start.d"
+CFG_DIR=${SAMBA_CFG_DIR:-"/etc/samba"}
+# These two will be used in a base startup run
+DEFAULT_START_SCRIPT="samba.start.sh"
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# Some environment variables that may be passed to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH:-\"$DEFAULT_START_SCRIPT\"}
+WORKDIR=\${DOCKER_WORKDIR:-\"/$START_DIR\"}
+
+# Start of the container main purpose app
+if [ -d \"\$WORKDIR\" ]; then
+   cd \"\$WORKDIR\"
+fi
+
+# If there is a application script, run it, otherwise run sshd below
+if [ -f \"\$START_SH\" ]; then
+   bash \"\$START_SH\"
+else
+   if [ -d \"/$USERDIR_\" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+   fi
+   /etc/init.d/smbd start
+   /etc/init.d/nmbd start
+   export WINBINDD_OPTS=\"-F\" # Runs in foreground
+   /etc/init.d/winbind start
+   # -D to run the daemon in foreground
+   #/usr/sbin/sshd -D
+fi
+"
+
+#
+# ---- end workaround IP ----
+
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt-get update && \\
+    apt-get install -y samba winbind smbclient && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p /$START_DIR 
+
+COPY $STARTFILE /$START_DIR/
+
+# Obvious Web ports and others
+EXPOSE 137
+EXPOSE 138
+EXPOSE 139
+EXPOSE 445
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"$CFG_DIR\", \"/var/log/samba\" ]
+
+CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
+"
+
+IFS="$OLD_IFS"
