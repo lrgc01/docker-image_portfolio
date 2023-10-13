@@ -36,7 +36,7 @@ if [ $(whoami) != "root" ]; then
 fi
 
 # Order is VERY important here
-BUILDLIST="ssh-stable_slim net-stable_slim dns-bind9 python3-pip nginx mariadb apache2 openjre openjdk "
+BUILDLIST="ssh-stable_slim net-stable_slim dns-bind9 python3-pip nginx mariadb apache2 samba openjre openjdk debian-nox11"
 
 for bld in $BUILDLIST
 do
