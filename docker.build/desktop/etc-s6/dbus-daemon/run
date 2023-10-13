@@ -1,0 +1,11 @@
+#!/bin/bash
+DBUSRUNDIR=/run/dbus
+DBUSPID="$DBUSRUNDIR/pid"
+if [ -f "$DBUSPID" ]; then
+   rm -f /run/dbus/pid 
+fi
+if [ ! -d "$DBUSRUNDIR" ]; then
+   mkdir /run/dbus
+fi
+/bin/dbus-daemon --nofork --syslog --system
+

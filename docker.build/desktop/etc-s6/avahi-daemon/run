@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -f /run/avahi-daemon/pid
+/sbin/avahi-daemon --syslog
+

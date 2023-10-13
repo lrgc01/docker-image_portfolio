@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+/usr/lib/polkit-1/polkitd --no-debug
+
