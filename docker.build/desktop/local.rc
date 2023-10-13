@@ -24,6 +24,12 @@ lightdm &
 xrdp-sesman
 xrdp
 "
+# Extra for amd64 only
+if [ "$ARCH" = "amd64" ]; then
+    _AMD64_CHROME_SNIPPET="ADD https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp
+RUN apt install /tmp/google-chrome-stable_current_amd64.deb -y ; rm -f /tmp/google-chrome-stable_current_amd64.deb
+"
+fi
 #
 # Dockerfile
 #
@@ -39,6 +45,10 @@ RUN set -ex \\
     && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 mpv \\
     && apt-get purge -y --auto-remove \\
     && apt-get clean 
+
+$_AMD64_CHROME_SNIPPET
+
+COPY etc-s6/. /etc/s6-overlay/s6-rc.d/
 
 CMD [ \"/${STARTFILE#/}\" ]
 
