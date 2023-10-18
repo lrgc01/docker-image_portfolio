@@ -36,6 +36,7 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERL
 ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && tar -C / -Jxpf /tmp/s6-overlay-${MACHINE}.tar.xz \\
     && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz
+    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
 ENTRYPOINT ["/init"]
 
