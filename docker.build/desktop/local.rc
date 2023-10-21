@@ -10,20 +10,6 @@ STARTFILE="bootstrap.container.sh"
 OLD_IFS="$IFS"
 IFS=""
 
-_STARTBODY="#!/bin/bash
-rm -f /run/dbus/pid  /var/run/xrdp/xrdp-sesman.pid /var/run/xrdp/xrdp.pid /run/avahi-daemon/pid
-if [ ! -d /run/dbus ]; then
-   mkdir -p /run/dbus 
-fi
-syslogd
-dbus-daemon --system
-/usr/sbin/avahi-daemon -s -D
-#/usr/libexec/polkitd --no-debug
-/usr/lib/polkit-1/polkitd --no-debug &
-lightdm &
-xrdp-sesman
-xrdp
-"
 # Extra for amd64 only
 if [ "$ARCH" = "amd64" ]; then
     _AMD64_CHROME_SNIPPET="ADD https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp
@@ -42,7 +28,7 @@ RUN set -ex \\
     && apt-get update \\
     && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
     && apt-get install -q -y gnome fuse3 gvfs-fuse \\
-    && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 mpv \\
+    && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 mpv xtightvncviewer \\
     && apt-get purge -y --auto-remove \\
     && apt-get clean 
 
