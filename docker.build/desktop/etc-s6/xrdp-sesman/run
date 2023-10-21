@@ -1,4 +1,0 @@
-#!/bin/bash
-rm -f /var/run/xrdp/xrdp-sesman.pid > /dev/null 2>&1
-/usr/sbin/xrdp-sesman --nodaemon
-
