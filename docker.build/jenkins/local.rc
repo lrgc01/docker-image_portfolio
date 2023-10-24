@@ -2,6 +2,10 @@ COMMENT="Jenkins over base + jdk environment"
 
 FROMIMG="lrgc01/openjdk:${ARCH}"
 
+if [ `whoami` != "root" ]; then
+        SUDO="sudo"
+fi
+
 # These are expected to be sourced from generic.rc
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -45,9 +49,6 @@ IdentityFile ~/.ssh/$KEY_FILE
 User $USR_
 StrictHostKeyChecking no
 EOF
-# Proper settings to ensure ssh running
-chown -R $UID_:$GID_ "$USERDIR_"
-chmod -R go-rwx "$USERDIR_"
 #
 # ---- end SSH ----
 
@@ -55,8 +56,6 @@ chmod -R go-rwx "$USERDIR_"
 # ---- other user configs ----
 echo export PATH=$BASEPATH > "$USERDIR_"/.profile
 echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
-chown $UID_:$GID_ "$USERDIR_"/.profile
-chown $UID_:$GID_ "$USERDIR_"/.bashrc
 # ---- end configs ----
 
 # 
@@ -199,18 +198,23 @@ chmod 755 $LOCALBIN/jenkins
 #
 # ---- end jenkins CMD ----
 
+# Before packing, ensure proper settings to ensure ssh running
+$SUDO chown -R $UID_:$GID_ "$USERDIR_"
+$SUDO chmod -R go-rwx "$USERDIR_"
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.profile
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.bashrc
 # Make tar ball that will contain usr and var trees
 [ -d usr ] && DIRLIST="$DIRLIST usr"
 [ -d etc ] && DIRLIST="$DIRLIST etc"
 [ -d var ] && DIRLIST="$DIRLIST var"
 # may add USERDIR_ when it is not inside var
 #[ -d $USERDIR_ ] && DIRLIST="$DIRLIST $USERDIR_"
-tar -czf ${TAR_BALL} $DIRLIST
+$SUDO tar -czf ${TAR_BALL} $DIRLIST
+
 
 # 
 # ---- Finally Dockerfile ----
 #
-#cat > ${DOCKERFILE} << EOF
 OLD_IFS="$IFS"
 IFS=""
 _DOCKERBODY="FROM $FROMIMG
