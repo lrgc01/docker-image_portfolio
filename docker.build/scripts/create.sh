@@ -20,6 +20,10 @@ _CLEAN_ENV=1
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
 
+if [ `whoami` != "root" ]; then
+        export SUDO="sudo"
+fi
+
 # The generic and then local definition
 for RCFILE in "../scripts/generic.rc" "./local.rc"
 do
@@ -33,10 +37,6 @@ done
 
 # Folder is optional - end with a slash
 FOLDER=${BASE_FOLDER:-"lrgc01/"}
-
-if [ `whoami` != "root" ]; then
-        SUDO="sudo"
-fi
 
 DOCKERFILE="Dockerfile.tmp"
 
@@ -120,7 +120,7 @@ else
 fi
 # Cleaning
 if [ "$_CLEAN_ENV" = "1" ];then
-	rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
+	$SUDO rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
 fi
 # ---- end docker build ----
 exit $EXITCODE
