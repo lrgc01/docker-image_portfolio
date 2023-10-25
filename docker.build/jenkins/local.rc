@@ -17,8 +17,9 @@ USERDIR_=${USERDIR_#/}
 KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
 BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
 LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
-JENKINS_WAR=${JENKINS_WAR:-"/usr/share/jenkins/jenkins.war"}
-JENKINS_SRCPATH="get.jenkins.io/war-stable/latest/jenkins.war"
+JENKINS_WAR_PATH=${JENKINS_WAR_PATH:-"/usr/share/jenkins"}
+JENKINS_WAR=${JENKINS_WAR:-"$JENKINS_WAR_PATH/jenkins.war"}
+JENKINS_URL="https://get.jenkins.io/war-stable/latest/jenkins.war"
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
@@ -28,7 +29,7 @@ TOCLEAN="$TAR_BALL jenkins.war "
 # ---- Jenkins tree ----
 #
 # Jenkins itself (will copy into image later)
-$DRYRUN wget -o /dev/null --show-progress "https://$JENKINS_SRCPATH"
+#$DRYRUN wget -o /dev/null --show-progress "$JENKINS_URL"
 #
 # ---- end Jenkins tree ----
 
@@ -222,8 +223,7 @@ _DOCKERBODY="FROM $FROMIMG
 LABEL Comment=\"$COMMENT\"
 
 ADD $TAR_BALL /
-
-COPY jenkins.war $JENKINS_WAR
+#COPY jenkins.war $JENKINS_WAR
 
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
@@ -233,7 +233,10 @@ RUN groupadd -g $GID_ $GRP_ && \\
     apt-get purge -y --autoremove && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -f /var/lib/apt/lists/*debian.org* && \\
-    rm -fr /usr/share/man/man*/*
+    rm -fr /usr/share/man/man*/* && \\
+    mkdir -p $JENKINS_WAR_PATH
+
+ADD $JENKINS_URL $JENKINS_WAR_PATH
 
 EXPOSE 8080
 
