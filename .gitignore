@@ -1,6 +1,7 @@
 debootstrap/build
 *.bkp*
 *.old*
+*.tmp
 **/Dockerfile.tmp
 **/Dockerfile
 **/jenkins/temp_tarball.tgz
