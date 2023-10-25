@@ -1,0 +1,151 @@
+#!/bin/bash
+
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+COMMENT="Node.js and npm over openssh-server image"
+IMGNAME="nodejs"
+
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+USERDIR_=${USERDIR_#/}
+
+STARTFILE=${NODE_START_CMD:-"nodejs.start"}
+IPFILE=${NODE_IPFILE:-"nodejs.host"}
+START_DIR="/start.d"
+
+NODE_VERSION="$(curl --silent 'https://nodejs.org/dist/latest-v20.x/SHASUMS256.txt' | \
+ grep 'node-.*linux-x64.tar.xz' | sed -e 's/.* node-v\(.*\)-linux.*/\1/')"
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# Some environment variables that may be passed to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH}
+WORKDIR=\${DOCKER_WORKDIR:-\"/startup.d\"}
+
+# Start of the container main purpose app
+if [ -d \"\$WORKDIR\" ]; then
+   cd \"\$WORKDIR\"
+fi
+
+# If there is a application script, run it, otherwise run sshd below
+if [ -f \"\$START_SH\" ]; then
+   bash \"\$START_SH\"
+else
+   if [ -d \"/$USERDIR_\" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+   fi
+   # -D to run the daemon in foreground
+   /usr/sbin/sshd -D
+fi
+"
+#
+# ---- end workaround IP ----
+
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN groupadd --gid 1001 node && \\
+    useradd --uid 1001 --gid node --shell /bin/bash --create-home node && \\
+    groupadd --gid $GID_ $GRP_ && \\
+    useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
+    apt-get update && apt-get install -y xz-utils gpg curl && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p $START_DIR
+
+COPY $STARTFILE $START_DIR/
+
+ENV NODE_VERSION $NODE_VERSION
+
+RUN ARCH= && dpkgArch=\"\$(dpkg --print-architecture)\" \\
+  && case \"\${dpkgArch##*-}\" in \\
+    amd64) ARCH='x64';; \\
+    ppc64el) ARCH='ppc64le';; \\
+    s390x) ARCH='s390x';; \\
+    arm64) ARCH='arm64';; \\
+    armhf) ARCH='armv7l';; \\
+    i386) ARCH='x86';; \\
+    *) echo \"unsupported architecture\"; exit 1 ;; \\
+  esac \\
+  # gpg keys listed at https://github.com/nodejs/node#release-keys
+  && set -ex \\
+  && for key in \\
+    4ED778F539E3634C779C87C6D7062848A1AB005C \\
+    141F07595B7B3FFE74309A937405533BE57C7D57 \\
+    74F12602B6F1C4E913FAA37AD3A89613643B6201 \\
+    DD792F5973C6DE52C432CBDAC77ABFA00DDBF2B7 \\
+    61FC681DFB92A079F1685E77973F295594EC4689 \\
+    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \\
+    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \\
+    890C08DB8579162FEE0DF9DB8BEAB4DFCF555EF4 \\
+    C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \\
+    108F52B48DB57BB0CC439B2997B01419BD92F80A \\
+  ; do \\
+      gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys \"\$key\" || \\
+      gpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"\$key\" ; \\
+  done \\
+  && curl -fsSLO --compressed \"https://nodejs.org/dist/v\$NODE_VERSION/node-v\$NODE_VERSION-linux-\$ARCH.tar.xz\" \\
+  && curl -fsSLO --compressed \"https://nodejs.org/dist/v\$NODE_VERSION/SHASUMS256.txt.asc\" \\
+  && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \\
+  && grep \" node-v\$NODE_VERSION-linux-\$ARCH.tar.xz\$\" SHASUMS256.txt | sha256sum -c - \\
+  && tar -xJf \"node-v\$NODE_VERSION-linux-\$ARCH.tar.xz\" -C /usr/local --strip-components=1 --no-same-owner \\
+  && rm \"node-v\$NODE_VERSION-linux-\$ARCH.tar.xz\" SHASUMS256.txt.asc SHASUMS256.txt \\
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs \\
+  # smoke tests
+  && node --version \\
+  && npm --version
+
+ENV YARN_VERSION 1.22.19
+
+RUN set -ex \\
+  && for key in \\
+    6A010C5166006599AA17F08146C2130DFD2497F5 \\
+  ; do \\
+    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys \"\$key\" || \\
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys \"\$key\" ; \\
+  done \\
+  && curl -fsSLO --compressed \"https://yarnpkg.com/downloads/\$YARN_VERSION/yarn-v\$YARN_VERSION.tar.gz\" \\
+  && curl -fsSLO --compressed \"https://yarnpkg.com/downloads/\$YARN_VERSION/yarn-v\$YARN_VERSION.tar.gz.asc\" \\
+  && gpg --batch --verify yarn-v\$YARN_VERSION.tar.gz.asc yarn-v\$YARN_VERSION.tar.gz \\
+  && mkdir -p /opt \\
+  && tar -xzf yarn-v\$YARN_VERSION.tar.gz -C /opt/ \\
+  && ln -s /opt/yarn-v\$YARN_VERSION/bin/yarn /usr/local/bin/yarn \\
+  && ln -s /opt/yarn-v\$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \\
+  && rm yarn-v\$YARN_VERSION.tar.gz.asc yarn-v\$YARN_VERSION.tar.gz \\
+  # smoke test
+  && yarn --version
+
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT [\"docker-entrypoint.sh\"]
+
+EXPOSE 22
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]
+"
+
+IFS="$OLD_IFS"
+
+#
+# ---- end Dockerfile ----
+#
+
