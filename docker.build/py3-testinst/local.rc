@@ -1,0 +1,57 @@
+COMMENT="Pytest and pyinstaller via pip3 over python3-dev over openssh-server image"
+FROMIMG="lrgc01/python3-dev:${ARCH}"
+
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+USERDIR_=${USERDIR_#/}
+
+STARTFILE=${PY_START_CMD:-"python.start"}
+START_DIR=${PY_START_DIR:-"start"}
+IPFILE=${PY_IPFILE:-"python.host"}
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# workaround to get my ip
+grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+# then start sshd
+/usr/sbin/sshd -D
+"
+#
+# ---- end start command ----
+#
+# ---- Dockerfile ----
+#
+_DOCKERBODY="#
+
+#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    set -ex && \\
+    pip3 install pytest pyinstaller && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p $START_DIR
+
+COPY $STARTFILE $START_DIR/
+
+EXPOSE 22
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]
+"
