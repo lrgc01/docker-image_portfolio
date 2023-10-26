@@ -230,18 +230,14 @@ LABEL Comment=\"$COMMENT\"
 ADD $TAR_BALL /
 #COPY jenkins.war $JENKINS_WAR
 
+# Check https://docs.docker.com/engine/reference/builder/#add to see the useless behavior of ADD --chmod when donwloading from URL
+# BUT works on arm64 platforms...
+
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
-    apt-get update && \\
-    apt-get install -y git && \\
-    apt-get clean && \\
-    apt-get purge -y --autoremove && \\
-    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
-    rm -f /var/lib/apt/lists/*debian.org* && \\
-    rm -fr /usr/share/man/man*/* && \\
-    mkdir -p $JENKINS_WAR_PATH
-
-ADD --chown=$UID_:$GID_ --chmod=755 $JENKINS_URL $JENKINS_WAR
+    mkdir -p $JENKINS_WAR_PATH && \\
+    curl --location --output $JENKINS_WAR $JENKINS_URL && \\
+    chmod 755 $JENKINS_WAR && chown $UID_:$GID_ $JENKINS_WAR
 
 EXPOSE 8080
 

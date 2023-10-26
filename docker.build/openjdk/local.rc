@@ -1,4 +1,4 @@
-COMMENT="Adding jdk on top of net-stable_slim image"
+COMMENT="Adding jdk on top of openjre image"
 
 # Folder is optional - end with a slash
 FROMIMG="lrgc01/openjre:${ARCH}"

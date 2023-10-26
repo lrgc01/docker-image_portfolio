@@ -1,7 +1,7 @@
-COMMENT="Adding jre on top of net-stable_slim image"
+COMMENT="Adding jre on top of git/net-stable_slim image"
 
 # Folder is optional - end with a slash
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/git:${ARCH}"
 
 # 
 # Dockerfile
