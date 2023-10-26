@@ -17,7 +17,7 @@ USERDIR_=${USERDIR_#/}
 KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
 BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
 LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
-JENKINS_WAR_PATH=${JENKINS_WAR_PATH:-"/usr/share/jenkins"}
+JENKINS_WAR_PATH=${JENKINS_WAR_PATH:-"/$USERDIR_/bin"}
 JENKINS_WAR=${JENKINS_WAR:-"$JENKINS_WAR_PATH/jenkins.war"}
 JENKINS_URL="https://get.jenkins.io/war-stable/latest/jenkins.war"
 
@@ -192,11 +192,36 @@ cat > $LOCALBIN/jenkins << EOF
 PATH=$BASEPATH
 export PATH
 umask 022
-if [ \$(whoami) = "root" ]; then
-   su -l jenkins -c "java -jar $JENKINS_WAR --httpPort=8080" &
-   /usr/sbin/sshd -D
+JENKINS_WAR="$JENKINS_WAR"
+URL="$JENKINS_URL"
+
+# check for WAR. If not found, donwload and try.
+if [ -f "\$JENKINS_WAR" ]; then
+   _FOUND_JENKINS=1
 else
-   java -jar $JENKINS_WAR --httpPort=8080
+   mkdir -p "\$(dirname \$JENKINS_WAR)"
+   # Download
+   if [ "\$(which curl)" != "" ]; then
+      echo "\$(date): Downloading \$URL to \$JENKINS_WAR with curl"
+      curl --silent --location --output \$JENKINS_WAR \$URL && _FOUND_JENKINS=1
+      echo "\$(date): Downloaded."
+   elif [ "\$(which wget)" != "" ]; then
+      echo "\$(date): Downloading \$URL to \$JENKINS_WAR with wget"
+      wget -q -O \$JENKINS_WAR \$URL && _FOUND_JENKINS=1
+      echo "\$(date): Downloaded."
+   fi   
+fi
+
+if [ "\$_FOUND_JENKINS" = "1" ]; then
+   if [ \$(whoami) = "root" ]; then
+      su -l jenkins -c "java -jar \$JENKINS_WAR --httpPort=8080" &
+      /usr/sbin/sshd -D
+   else
+      java -jar \$JENKINS_WAR --httpPort=8080
+   fi
+else
+   echo "Jenkins not found and could not be downloaded. Aborting."
+   exit 2
 fi
 EOF
 
@@ -228,7 +253,6 @@ _DOCKERBODY="FROM $FROMIMG
 LABEL Comment=\"$COMMENT\"
 
 ADD $TAR_BALL /
-#COPY jenkins.war $JENKINS_WAR
 
 # Check https://docs.docker.com/engine/reference/builder/#add to see the useless behavior of ADD --chmod when donwloading from URL
 # BUT works on arm64 platforms...
@@ -236,8 +260,7 @@ ADD $TAR_BALL /
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     mkdir -p $JENKINS_WAR_PATH && \\
-    curl --location --output $JENKINS_WAR $JENKINS_URL && \\
-    chmod 755 $JENKINS_WAR && chown $UID_:$GID_ $JENKINS_WAR
+    chmod 755 $JENKINS_WAR_PATH && chown $UID_:$GID_ $JENKINS_WAR_PATH
 
 EXPOSE 8080
 
