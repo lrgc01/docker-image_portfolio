@@ -1,5 +1,5 @@
 COMMENT="python3-pip over openssh-server image"
-#FROMIMG="lrgc01/ssh-stable_slim" # Using from generic.rc
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
 
 STARTFILE=${PYTHON3_START_CMD:-"start.sh"}
 START_DIR=${PYTHON3_START_DIR:-"/start"}
