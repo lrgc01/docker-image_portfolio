@@ -32,7 +32,6 @@ grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
 # ---- Dockerfile ----
 #
 _DOCKERBODY="#
-
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
@@ -43,7 +42,9 @@ LABEL Comment=\"$COMMENT\"
 RUN groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
-    pip3 install pytest pyinstaller && \\
+    apt-get update && \\
+    apt-get install -y python3-pytest && \\
+    apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
