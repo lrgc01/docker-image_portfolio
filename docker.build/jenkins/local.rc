@@ -64,7 +64,7 @@ echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
 #
 # This will be used by jenkins to find out the python host
 PYHOST_FILE=${PYHOST_FILE:-"python.host"}
-PYWRAP_FILE=${PYWRAP_FILE:-"py_wrap.sh"}
+PYWRAP_FILE=${PYWRAP_FILE:-"python_wrap.sh"}
 # python commands to be linked to $PYWRAP_FILE
 PYFILES="python python3 pytest py.test pyinstaller"
 
@@ -192,7 +192,12 @@ cat > $LOCALBIN/jenkins << EOF
 PATH=$BASEPATH
 export PATH
 umask 022
-java -jar $JENKINS_WAR --httpPort=8080
+if [ \$(whoami) = "root" ]; then
+   su -l jenkins -c "java -jar $JENKINS_WAR --httpPort=8080" &
+   /usr/sbin/sshd -D
+else
+   java -jar $JENKINS_WAR --httpPort=8080
+fi
 EOF
 
 chmod 755 $LOCALBIN/jenkins
