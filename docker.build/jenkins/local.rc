@@ -236,7 +236,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     rm -fr /usr/share/man/man*/* && \\
     mkdir -p $JENKINS_WAR_PATH
 
-ADD $JENKINS_URL $JENKINS_WAR_PATH
+ADD -chmod=755 $JENKINS_URL $JENKINS_WAR_PATH
 
 EXPOSE 8080
 
