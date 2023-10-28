@@ -1,6 +1,8 @@
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
-COMMENT="Debian desktop image"
+FROMIMG="lrgc01/git:${ARCH}"
+COMMENT="Complete Debian with no desktop package"
 
+S6_NOARCH="/tmp/s6-noarch.tar.xz"
+S6_MACH="/tmp/s6-machine.tar.xz"
 # 
 # ---- Start script / command ----
 #
@@ -15,8 +17,6 @@ FROM $FROMIMG
 
 ARG S6_OVERLAY_VERSION=3.1.5.0
 
-#COPY ${STARTFILE#/} /
-
 RUN set -ex \\
     && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
     && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
@@ -25,18 +25,23 @@ RUN set -ex \\
     && apt install --reinstall \$DPKGLIST \\
     && apt install -q -y locales  \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
-    && apt install -q -y inetutils-syslogd xz-utils net-tools tcpdump screen tmux sudo apt-utils vim bc \\
-    && apt install -q -y git unzip p7zip-full netcat-traditional \\
+    && apt install -q -y inetutils-syslogd xz-utils screen tmux sudo apt-utils bc \\
+    && apt install -q -y unzip p7zip-full \\
     && apt purge -y --auto-remove \\
-    && apt clean 
-
-#CMD [ \"/${STARTFILE#/}\" ]
-
-ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && tar -C / -Jxpf /tmp/s6-overlay-${MACHINE}.tar.xz \\
-    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz \\
+    && apt clean \\
+    && curl --location --output $S6_NOARCH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz \\
+    && curl --location --output $S6_MACH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz \\
+    && tar -C / -Jxpf $S6_NOARCH && tar -C / -Jxpf $S6_MACH \\
+    && rm -f $S6_NOARCH $S6_MACH \\
     && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
+
+#ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+#ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz /tmp
+#RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && tar -C / -Jxpf /tmp/s6-overlay-${MACHINE}.tar.xz \\
+#    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz \\
+#    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
 ENTRYPOINT ["/init"]
 
