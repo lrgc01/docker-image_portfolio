@@ -1,6 +1,6 @@
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
 COMMENT="Apache2 web server over openssh-server image"
 IMGNAME="apache2"
-#FROMIMG="lrgc01/ssh-debian_slim" # Using default from generic.rc
 
 USERDIR_=${APACHE2_HOMEDIR:-var/lib/apache2}
 USERDIR_=${USERDIR_#/}

@@ -11,7 +11,7 @@ _DOCKERBODY="#
 FROM $FROMIMG
 
 RUN set -ex \\
-    && apt-get update && apt-get install -q -y net-tools tcpdump iproute2 bind9-host iputils-ping \\
+    && apt-get update && apt-get install -q -y net-tools tcpdump bind9-host iputils-ping netcat-traditional \\
     && apt-get install -q -y curl \\
     && apt-get purge -y --auto-remove \\
     && rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin  \\
