@@ -98,8 +98,6 @@ PY_IPFILE="$JENKINS_PYHOST_FILE"
 NODE_STARTFILE="nodejs.start"
 NODE_IPFILE="nodejs.host"
 
-START_DIR="/start"
-
 BIND_GID="102"
 BIND_UID="102"
 
@@ -110,7 +108,8 @@ FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
 
 STARTFILE="bootstrap.container.sh"
 IPFILE="container.host"
-START_DIR="/start.d"
+#START_DIR="/start.d"
+START_DIR="/start"
 
 # Versioning in order to keep a copy if running more than once
 # Note the ":" in the formated output
