@@ -1,8 +1,8 @@
 COMMENT="Google Cloud CLI over python3-pip"
 FROMIMG="lrgc01/python3-pip:${ARCH}"
 
-STARTFILE=${PYTHON3_START_CMD:-"start.sh"}
-START_DIR=${PYTHON3_START_DIR:-"/start"}
+STARTFILE=${STARTFILE:-"start.sh"}
+START_DIR=${START_DIR:-"/start"}
 IPFILE=${PYTHON3_IPFILE:-"host.ip"}
 
 # 
@@ -38,6 +38,7 @@ RUN set -ex && \\
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \\
     | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \\
     apt-get update -y && apt-get install google-cloud-cli -y && \\
+    /usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/python3 -m pip install numpy && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
