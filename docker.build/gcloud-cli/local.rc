@@ -1,0 +1,56 @@
+COMMENT="Google Cloud CLI over python3-pip"
+FROMIMG="lrgc01/python3-pip:${ARCH}"
+
+STARTFILE=${PYTHON3_START_CMD:-"start.sh"}
+START_DIR=${PYTHON3_START_DIR:-"/start"}
+IPFILE=${PYTHON3_IPFILE:-"host.ip"}
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# workaround to get my ip
+grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"$START_DIR/$IPFILE\"
+
+/usr/sbin/sshd -D
+"
+#
+# ---- end start command ----
+#
+# ---- Dockerfile ----
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN set -ex && \\
+    apt update && apt install gnupg -y && \\
+    echo \"deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main\" \\
+    | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \\
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \\
+    | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \\
+    apt-get update -y && apt-get install google-cloud-cli -y && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p $START_DIR
+
+COPY $STARTFILE $START_DIR/
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+#
+# ---- end Dockerfile ----
+#
+
+IFS="$OLD_IFS"
+
