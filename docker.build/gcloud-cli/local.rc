@@ -1,5 +1,7 @@
-COMMENT="Google Cloud CLI over python3-pip"
-FROMIMG="lrgc01/python3-pip:${ARCH}"
+#COMMENT="Google Cloud CLI over python3-pip"
+#FROMIMG="lrgc01/python3-pip:${ARCH}"
+COMMENT="Google Cloud CLI over net-stable_slim"
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
 
 STARTFILE=${STARTFILE:-"start.sh"}
 START_DIR=${START_DIR:-"/start"}
