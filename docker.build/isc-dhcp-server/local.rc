@@ -10,7 +10,9 @@ STARTFILE=${DHCP_START_CMD:-"dhcp.bootstrap"}
 IPFILE=${DHCP_IPFILE:-"dhcp.host"}
 START_DIR="start.d"
 DHCP_DIR=${DHCP_DIR:-"/etc/dhcp"}
-
+DHCP_LIBDIR=${DHCP_LIBDIR:-"/var/lib/dhcp"}
+DHCP_LOGDIR=${DHCP_LOGDIR:-"/var/log/dhcp"}
+DHCP_LEASES=${DHCP_LEASES:-"$DHCP_LIBDIR/dhcpd.leases"}
 # 
 # ---- Start command ----
 #    ... with workaround to get IP 
@@ -25,6 +27,8 @@ _STARTBODY="#!/bin/bash
 START_SH=\${DOCKER_START_SH:-\"$START_SCRIPT\"}
 WORKDIR=\${DOCKER_WORKDIR:-\"/$START_DIR\"}
 
+IFACE=\${DOCKER_IFACE:-\"eth0\"}
+
 # Start of the container main purpose app
 if [ -d \"\$WORKDIR\" ]; then
    cd \"\$WORKDIR\"
@@ -38,10 +42,13 @@ else
       # workaround to get my ip
       grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
    fi
+   if [ ! -f \"$DHCP_LEASES\" ]; then
+      touch \"$DHCP_LEASES\"
+   fi
    # -f runs in foreground
-   /usr/sbin/dhcpd -4 -q -cf /etc/dhcp/dhcpd.conf -f eth0
+   /usr/sbin/dhcpd -4 -q -cf /etc/dhcp/dhcpd.conf -f \$IFACE
    # -D to run the daemon in foreground
-   /usr/sbin/sshd -D
+   #/usr/sbin/sshd -D
 fi
 "
 #
@@ -71,7 +78,7 @@ EXPOSE 67
 EXPOSE 68
 
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
-VOLUME  [\"$DHCP_DIR\", \"/var/log/$USR_\" ]
+VOLUME  [\"$DHCP_DIR\", \"$DHCP_LIBDIR\", \"$DHCP_LOGDIR\" ]
 
 CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
 "
