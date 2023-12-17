@@ -14,9 +14,9 @@ STARTFILE=${BIND_START_CMD:-"bind.bootstrap"}
 IPFILE=${BIND_IPFILE:-"bind.host"}
 START_DIR="start.d"
 BIND_DIR=${BIND_DIR:-"/etc/bind"}
-# These two will be used in a base startup run
-#START_SCRIPT="bind.start.sh"
-#TMPL="bind.cfg.tmpl"
+BIND_LOGDIR=${BIND_LOGDIR:-"/var/log/bind"}
+BIND_LIBDIR=${BIND_LIBDIR:-"/var/lib/bind"}
+BIND_CONF=${BIND_CONF:-"$BIND_DIR/named.conf"}
 
 # 
 # ---- Start command ----
@@ -42,12 +42,20 @@ fi
 if [ -f \"\$START_SH\" ]; then
    bash \"\$START_SH\"
 else
-   if [ -d \"/$USERDIR_\" ];  then
-      # workaround to get my ip
-      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
-   fi
+   for dir in \"$BIND_DIR\" \"$BIND_LOGDIR\" \"$BIND_LIBDIR\"
+   do
+      if [ -d \"\$dir\" ];  then
+         chown -R bind:bind \"\$dir\"
+      fi
+   done
+
+   # workaround to get my ip
+   #grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+
+   # -f to run in foreground
+   /usr/sbin/named -u $USR_ -c $BIND_CONF -f
    # -D to run the daemon in foreground
-   /usr/sbin/sshd -D
+   #/usr/sbin/sshd -D
 fi
 "
 
@@ -78,7 +86,7 @@ COPY $STARTFILE $TMPL $START_SCRIPT /$START_DIR/
 EXPOSE 53
 
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
-VOLUME  [\"$BIND_DIR\", \"/var/log/$USR_\" ]
+VOLUME  [\"$BIND_DIR\", \"$BIND_LOGDIR\", \"$BIND_LIBDIR\" ]
 
 CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
 "
