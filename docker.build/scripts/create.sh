@@ -107,7 +107,7 @@ else
 		if [ $? -eq 0 ]; then
            		$DRYRUN $SUDO docker push ${FOLDER}${_TAG}:${ARCH}
            		$DRYRUN $SUDO docker manifest rm ${FOLDER}${_TAG}:latest 
-           		$DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:arm64 --amend ${FOLDER}${_TAG}:amd64
+           		$DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:arm64 --amend ${FOLDER}${_TAG}:amd64 --amend ${FOLDER}${_TAG}:armhf
            		$DRYRUN $SUDO docker manifest push ${FOLDER}${_TAG}:latest 
 			if [ ! -z "$DRYRUN" ]; then
            			echo "Would write NEWID according to: $NEWID"
