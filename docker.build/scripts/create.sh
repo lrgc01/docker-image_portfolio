@@ -43,8 +43,15 @@ DOCKERFILE="Dockerfile.tmp"
 while [ $# -gt 0 ]
 do
    case $1 in
-      -[fF]) DOCKERFILE="$2"
-          shift 2
+      -[fF]) 
+          if [ "$2" != "" ]; then
+             DOCKERFILE="$2"
+             shift 2
+          else
+             echo "Expecting file name after -f"
+             Usage
+             exit 1
+          fi
       ;;
       -[tT]) _TAG="$2"
           shift 2
