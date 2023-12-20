@@ -36,7 +36,7 @@ if [ $(whoami) != "root" ]; then
 fi
 
 # Order is VERY important here
-BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins debian-nox11"}
+BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins debian-nox11"}
 
 for bld in $BUILDLIST
 do
