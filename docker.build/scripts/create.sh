@@ -3,10 +3,11 @@
 Usage() {
         echo "Build image or make env to build"
 	echo "Usage: $0"
-        echo "	-p <prepare env (Dockerfile,etc)>"
-        echo "	-c <clean env (Dockerfile,etc)>"
-        echo "	-f <use alternate name for Dockerfile>"
-	echo "	-t <tag image as>"
+        echo "	-p (prepare env (Dockerfile,etc))"
+        echo "	-c (clean env (Dockerfile,etc))"
+        echo "	-f <filename> (use alternate name for Dockerfile)"
+        echo "	-m (run manifest ONLY)"
+	echo "	-t <img_tag> (tag image as)"
 	echo "	-h this help"
 	echo "	--force force build even if it is up to date"
         echo "	-d (Dry Run - no arg)"
@@ -40,6 +41,8 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 
 DOCKERFILE="Dockerfile.tmp"
 
+_RUN_MANIFEST=0
+
 while [ $# -gt 0 ]
 do
    case $1 in
@@ -59,6 +62,12 @@ do
       --[pP][rR][eE][pP][aA]*|-[pP]) 
           _ENV_ONLY="1"
 	  _CLEAN_ENV="0"
+          DOCKERFILE="Dockerfile"
+          shift 1
+      ;;
+      --[mM][aA][nN][iI][fF]*|-[mM]) 
+          _RUN_MANIFEST="1"
+	  _CLEAN_ENV="1"
           DOCKERFILE="Dockerfile"
           shift 1
       ;;
@@ -109,25 +118,30 @@ if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
         EXITCODE=111
 else
 	# Now build the image using docker build only if root is running
-	if [ "$_ENV_ONLY" != "1" ]; then
+	if [ "$_ENV_ONLY" != "1" -a "$_RUN_MANIFEST" != "1" ]; then
 		$DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
 		if [ $? -eq 0 ]; then
-           		$DRYRUN $SUDO docker push ${FOLDER}${_TAG}:${ARCH}
-           		$DRYRUN $SUDO docker manifest rm ${FOLDER}${_TAG}:latest 
-           		$DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:arm64 --amend ${FOLDER}${_TAG}:amd64 --amend ${FOLDER}${_TAG}:armhf
-           		$DRYRUN $SUDO docker manifest push ${FOLDER}${_TAG}:latest 
 			if [ ! -z "$DRYRUN" ]; then
            			echo "Would write NEWID according to: $NEWID"
 			else
-           			echo $NEWID | $SUDO tee $LASTIDFILE
+        			echo $NEWID | $SUDO tee $LASTIDFILE
 			fi
-           		$DRYRUN $SUDO docker image prune -f
+			_RUN_MANIFEST=1
 		fi
 	fi
 fi
+
+if [ "$_RUN_MANIFEST" = "1" ]; then
+        $DRYRUN $SUDO docker push ${FOLDER}${_TAG}:${ARCH}
+        $DRYRUN $SUDO docker manifest rm ${FOLDER}${_TAG}:latest 
+        $DRYRUN $SUDO docker manifest create ${FOLDER}${_TAG}:latest --amend ${FOLDER}${_TAG}:arm64 --amend ${FOLDER}${_TAG}:amd64 --amend ${FOLDER}${_TAG}:armhf
+        $DRYRUN $SUDO docker manifest push ${FOLDER}${_TAG}:latest 
+fi
+
 # Cleaning
 if [ "$_CLEAN_ENV" = "1" ];then
 	$SUDO rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
+	$DRYRUN $SUDO docker image prune -f
 fi
 # ---- end docker build ----
 exit $EXITCODE
