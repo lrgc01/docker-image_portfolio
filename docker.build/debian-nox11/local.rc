@@ -9,6 +9,10 @@ S6_MACH="/tmp/s6-machine.tar.xz"
 OLD_IFS="$IFS"
 IFS=""
 
+# for S6, MACHINE is ARCH
+if [ "$MACHINE" = "armv7l" ]; then
+    MACHINE="$ARCH"
+fi
 #
 # Dockerfile
 #
