@@ -1,0 +1,55 @@
+FROMIMG="lrgc01/kali-git:${ARCH}"
+COMMENT="Complete Kali with no desktop package"
+
+S6_NOARCH="/tmp/s6-noarch.tar.xz"
+S6_MACH="/tmp/s6-machine.tar.xz"
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+# for S6, MACHINE is ARCH
+if [ "$MACHINE" = "armv7l" ]; then
+    MACHINE="$ARCH"
+fi
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+ARG S6_OVERLAY_VERSION=3.1.5.0
+
+RUN set -ex \\
+    && apt-get update \\
+    && apt install -q -y locales  \\
+    && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
+    && apt install -q -y inetutils-syslogd xz-utils screen tmux sudo apt-utils bc \\
+    && apt install -q -y unzip p7zip-full \\
+    && apt purge -y --auto-remove \\
+    && apt clean \\
+    && curl --location --output $S6_NOARCH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz \\
+    && curl --location --output $S6_MACH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz \\
+    && tar -C / -Jxpf $S6_NOARCH && tar -C / -Jxpf $S6_MACH \\
+    && rm -f $S6_NOARCH $S6_MACH \\
+    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
+
+#ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+#ADD https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz /tmp
+#RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && tar -C / -Jxpf /tmp/s6-overlay-${MACHINE}.tar.xz \\
+#    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz \\
+#    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
+
+ENTRYPOINT ["/init"]
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
