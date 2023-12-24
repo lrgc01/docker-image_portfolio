@@ -24,7 +24,8 @@ FROM $FROMIMG
 RUN set -ex \\
     && export DEBIAN_FRONTEND=noninteractive \\
     && apt-get update \\
-    && apt-get install -q -y kali-desktop-gnome kali-desktop-xfce lightdm xrdp mpv \\
+    && apt-get install -q -y kali-desktop-gnome kali-desktop-xfce lightdm xrdp \\
+    && apt-get install -q -y libreoffice freerdp2-x11 mpv xtightvncviewer \\
     && apt-get purge -y --auto-remove \\
     && apt-get clean 
 
