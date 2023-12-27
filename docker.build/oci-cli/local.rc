@@ -1,8 +1,10 @@
 #FROMIMG="ghcr.io/oracle/oci-cli:latest" 
-#FROMIMG="oraclelinux:8-slim"
+FROMIMG="lrgc01/python3-pip:${ARCH}"
+FROMBUILDIMG="lrgc01/python3-dev:${ARCH}"
 COMMENT="Oracle oci-cli installed on non-oracle linux"
 
-VENVDIR=/python_env
+VENVDIR=/oci-cli
+TARPACK="oci.tgz"
 
 #
 # Dockerfile
@@ -13,24 +15,36 @@ IFS=""
 _DOCKERBODY="#
 # This is a Dockerfile made from create.sh script - don't change here
 #
+FROM $FROMBUILDIMG AS buildimg
+
+USER root
+
+RUN set -ex && \\
+    apt update && \\
+    apt install -q -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev && \\
+    apt install -q -y python3-venv pkg-config && \\
+    mkdir -p $VENVDIR && python3 -m venv $VENVDIR && \\
+    export PATH=$VENVDIR/bin:\$PATH && \\
+    cd $VENVDIR && \\
+    pip install --upgrade pip && \\
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \\
+    pip install oci-cli && \\
+    tar -czf $VENVDIR/$TARPACK $VENVDIR/bin $VENVDIR/lib $VENVDIR/*.cfg 
+
 FROM $FROMIMG
 
 LABEL Comment=\"$COMMENT\"
 
 USER root
 
-RUN set -ex \\
-    apt update && \\
-    apt install -s -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev && \\
-    apt install -s -y python3-venv pkg-config && \\
-    python3 -m venv $VENVDIR && \\
-    export PATH=$VENVDIR/bin:$PATH && \\
-    cd $VENVDIR && \\
-    pip install --upgrade pip && \\
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh && \\
-    pip install oci-cli
+COPY --from=buildimg $VENVDIR/$TARPACK $VENVDIR/
 
-VOLUME [\"/python_env\"]
+RUN set -ex && \\
+    tar -xzf $VENVDIR/$TARPACK -C / && \\
+    chown -R admin:admin $VENVDIR && \\
+    rm -f $VENVDIR/$TARPACK
+
+VOLUME [\"$VENVDIR\"]
 
 CMD ["/bin/bash"]
 "
