@@ -48,7 +48,7 @@ CheckImgDependency() {
       echo "Must specify -f <dockerfile>"
       _ERROR=1
    else
-      _BASEIMG=$(grep -e "^FROM " $_DOCKERFILE | sed -e 's/FROM //')
+      _BASEIMG=$(grep -e "^FROM " $_DOCKERFILE | sed -e 's/FROM //' -e 's/ AS .*//' | head -1)
       $_DRYRUN $_SUDO docker pull $_BASEIMG > /dev/null 2>&1
       _CURRID=$($_DRYRUN $_SUDO docker inspect --format "{{.Id}}" $_BASEIMG)
       echo "$_CURRID"

@@ -107,7 +107,7 @@ if [ ! -z "$_STARTBODY" ]; then
    chmod 755 $STARTFILE
 fi
 
-PULLIMG=$(grep -e "^FROM " $DOCKERFILE | sed -e 's/FROM //')
+PULLIMG=$(grep -e "^FROM " $DOCKERFILE | sed -e 's/FROM //' -e 's/ AS .*//' | head -1)
 UPTODATE=$($DRYRUN $SUDO docker pull $PULLIMG | grep -e 'up to date')
 
 NEWID=$(CheckImgDependency -l $LASTIDFILE -f $DOCKERFILE $_MINUSD)
