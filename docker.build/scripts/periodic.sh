@@ -38,7 +38,7 @@ fi
 # Order is VERY important here
 BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins"}
 # The list is getting to long for smaller machines - try divide in crontab
-#BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins debian-nox11 kali-ssh kali-net kali-git kali-nox11"}
+#BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins debian-nox11 kali-ssh kali-net kali-git kali-nox11 oci-cli"}
 
 for bld in $BUILDLIST
 do
