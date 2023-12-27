@@ -28,6 +28,7 @@ RUN set -ex && \\
     cd $VENVDIR && \\
     pip install --upgrade pip && \\
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \\
+    export PATH=\"\$HOME/.cargo/bin:\$PATH\" && \\
     pip install oci-cli && \\
     tar -czf $VENVDIR/$TARPACK $VENVDIR/bin $VENVDIR/lib $VENVDIR/*.cfg 
 
