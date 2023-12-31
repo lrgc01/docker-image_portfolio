@@ -1,0 +1,27 @@
+FROMIMG="lrgc01/ubuntu-net:$ARCH" # Using from generic.rc
+COMMENT="base dev git stuff over net utils using openssh-server image"
+
+#
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN set -ex \\
+    && apt-get update && apt-get install -q -y git vim \\
+    && apt-get purge -y --auto-remove \\
+    && rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin  \\
+    && rm -rf /var/lib/apt/lists/* 
+
+CMD [ \"/usr/sbin/sshd\",\"-D\" ]
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
