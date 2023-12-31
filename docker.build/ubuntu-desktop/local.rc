@@ -1,0 +1,44 @@
+FROMIMG="lrgc01/ubuntu-nox11:${ARCH}"
+COMMENT="Ubuntu desktop image"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+# Extra for amd64 only
+if [ "$ARCH" = "amd64" ]; then
+    _AMD64_CHROME_SNIPPET="ADD https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp
+RUN apt install /tmp/google-chrome-stable_current_amd64.deb -y ; rm -f /tmp/google-chrome-stable_current_amd64.deb
+"
+fi
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN set -ex \\
+    && export DEBIAN_FRONTEND=noninteractive \\
+    && apt-get update \\
+    && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
+    && apt-get install -q -y gnome fuse3 gvfs-fuse \\
+    && apt-get install -q -y firefox libreoffice freerdp2-x11 mpv xtightvncviewer mesa-utils-bin \\
+    && apt-get purge -y --auto-remove \\
+    && apt-get clean 
+
+$_AMD64_CHROME_SNIPPET
+
+ADD etc-s6.tgz /etc/s6-overlay/s6-rc.d/
+
+ENTRYPOINT ["/init"]
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
