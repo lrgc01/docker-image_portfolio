@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/ubuntu-net:${ARCH}"
 COMMENT="PHP and php-fpm software + server over openssh-server image"
 
 # Not used, just in case ...
@@ -15,7 +15,7 @@ USERDIR_=${USERDIR_#/}
 STARTFILE=${PHP_START_CMD:-"php.start"}
 IPFILE=${PHP_IPFILE:-"php.host"}
 START_DIR=${PHP_START_DIR:-"/start.d"}
-PHPVER="8.2"
+PHPVER="8.1"
 
 # 
 # ---- Start command ----
@@ -64,11 +64,12 @@ FROM $FROMIMG
 
 LABEL Comment=\"$COMMENT\"
 
-RUN groupadd -g $GID_ $GRP_ && \\
+RUN export DEBIAN_FRONTEND=noninteractive && \\
+    groupadd -g $GID_ $GRP_ && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
-    apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-zip php-imagick && \\
+    apt-get install -q -y php$PHPVER php$PHPVER-fpm php$PHPVER-mysql php$PHPVER-gd php$PHPVER-curl php$PHPVER-mbstring php$PHPVER-intl php$PHPVER-xml php$PHPVER-zip php$PHPVER-imagick && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
