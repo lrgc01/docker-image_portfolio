@@ -77,8 +77,7 @@ cat > $LOCALBIN/$PYWRAP_FILE << EOF
 if [ -f ~/$PYHOST_FILE ]; then
    PYHOST=\$(head -1 ~/$PYHOST_FILE)
 else
-   echo "Could not determine python server IP. No ~/$PYHOST_FILE file."
-   exit 1
+   PYHOST=python
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
@@ -122,8 +121,7 @@ cat > $LOCALBIN/$NODE_WRAP_FILE << EOF
 if [ -f ~/$NODE_HOST_FILE ]; then
    NODE_HOST=\$(head -1 ~/$NODE_HOST_FILE)
 else
-   echo "Could not determine python server IP. No ~/$NODE_HOST_FILE file."
-   exit 1
+   NODE_HOST=node
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
@@ -162,8 +160,7 @@ cat > $LOCALBIN/$PHP_WRAP_FILE << EOF
 if [ -f ~/$PHP_HOST_FILE ]; then
    PHP_HOST=\$(head -1 ~/$PHP_HOST_FILE)
 else
-   echo "Could not determine PHP server IP. No ~/$PHP_HOST_FILE file."
-   exit 1
+   PHP_HOST=php
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
@@ -194,6 +191,7 @@ export PATH
 umask 022
 JENKINS_WAR="$JENKINS_WAR"
 URL="$JENKINS_URL"
+JPORT=\${DOCKER_JENKINS_PORT:-8080}
 
 # check for WAR. If not found, donwload and try.
 if [ -f "\$JENKINS_WAR" ]; then
@@ -214,10 +212,10 @@ fi
 
 if [ "\$_FOUND_JENKINS" = "1" ]; then
    if [ \$(whoami) = "root" ]; then
-      su -l jenkins -c "java -jar \$JENKINS_WAR --httpPort=8080" &
+      su -l jenkins -c "java -jar \$JENKINS_WAR --httpPort=\$JPORT" &
       /usr/sbin/sshd -D
    else
-      java -jar \$JENKINS_WAR --httpPort=8080
+      java -jar \$JENKINS_WAR --httpPort=\$JPORT
    fi
 else
    echo "Jenkins not found and could not be downloaded. Aborting."
