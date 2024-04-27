@@ -2,7 +2,13 @@
 
 Usage() {
         echo "Make periodic build across all container definitions"
-        echo "Usage: $0 -p <prepare env (Dockerfile,etc)> -f <force build> -d (Dry Run - no arg)"
+        echo "
+  Usage: $0 
+   -p prepare env (Dockerfile,etc) 
+   -f force build 
+   -l <build list> (space separated and quoted)
+   -d (Dry Run - no arg)
+"
 }
 
 SCRIPTDIR=$(dirname $0)
@@ -11,11 +17,14 @@ BASEDIR="$SCRIPTDIR/.."
 while [ $# -gt 0 ]
 do
    case $1 in
+      -[pP]) PREPARE="-p"
+          shift 1
+      ;;
       -[fF]) FORCE="-f"
           shift 1
       ;;
-      -[pP]) PREPARE="-p"
-          shift 1
+      -[lL]) BUILDLIST="$2"
+          shift 2
       ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
           DRYRUN='echo [DryRun] Would run:'
