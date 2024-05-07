@@ -1,0 +1,69 @@
+FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+COMMENT="nginx web server over openssh-server image"
+
+# This is globally used
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+USERDIR_=${USERDIR_#/}
+
+START_DIR="/start"
+STARTFILE=${NGINX_STARTFILE:-"nginx.start"}
+IPFILE=${NGINX_IPFILE:-"nginx.host"}
+
+# 
+# ---- Start script / command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# workaround to get my ip
+#grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+
+# Up to now is running only the nginx itself - may use sshd in the future
+/usr/sbin/nginx -g \"daemon off;\" -c /etc/nginx/nginx.conf
+
+# then start sshd without detach (but change off to on in nginx call)
+#/usr/sbin/sshd -D
+"
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt-get update && \\
+    apt-get install -q -y nginx && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    rm -fr /usr/share/man/man* && \\
+    mkdir -p $START_DIR 
+
+COPY $STARTFILE $START_DIR/
+
+# Obvious Web ports
+EXPOSE 80
+EXPOSE 443
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"/etc/nginx\", \"/var/log/nginx\", \"/var/www/html\"]
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
+# Seems useless, because when COPY by Dockerfile it looses file mode
+#chmod 755 $START_CMD
+
