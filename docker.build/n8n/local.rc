@@ -1,0 +1,66 @@
+FROMIMG="lrgc01/node:${ARCH}"
+COMMENT="n8n workflow nvm-node web server"
+
+# This is globally used
+USERDIR_=${N8N_HOMEDIR:-/home/admin}
+USERDIR=${USERDIR_#/}
+
+START_DIR="/start.d"
+STARTFILE=${N8N_STARTFILE:-"n8n.start.sh"}
+IPFILE=${N8N_IPFILE:-"n8n.host"}
+
+# 
+# ---- Start script / command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+DEBUG=\${DOCKER_DEBUG:-\"0\"}
+ENVFILE=\${DOCKER_ENV_FILE:-\"\$USERDIR_/env.rc\"}
+
+[ \"\$DEBUG\" != \"0\" ] && set -x
+
+# NVM stuff
+#export NVM_DIR=\"\$USERDIR_/.nvm\"
+#[ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"  # This loads nvm
+#[ -s \"\$NVM_DIR/bash_completion\" ] && . \"\$NVM_DIR/bash_completion\"  # This loads nvm bash_completion
+
+[ -f \"\$ENVFILE\" ] && . \"\$ENVFILE\"
+
+which n8n > /dev/null 2>&1
+[ \"\$?\" != \"0\" ] && npm install n8n -g
+
+n8n start
+"
+
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN npm install n8n -g
+
+COPY $STARTFILE $START_DIR/
+
+EXPOSE 5678
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"/$USERDIR/.n8n\"]
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
