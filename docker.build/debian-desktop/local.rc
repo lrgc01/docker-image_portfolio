@@ -33,6 +33,7 @@ RUN set -ex \\
 $_AMD64_CHROME_SNIPPET
 
 ADD etc-s6.tgz /etc/s6-overlay/s6-rc.d/
+ADD lightdm.conf /etc/lightdm/
 
 ENTRYPOINT ["/init"]
 
