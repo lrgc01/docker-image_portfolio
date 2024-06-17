@@ -34,7 +34,9 @@ if [ -f \"\$START_SH\" ]; then
 else
    if [ -d \"/$USERDIR_\" ];  then
       # workaround to get my ip
-      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+      #grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+      which m365 > /dev/null 2>&1
+      [ \"\$?\" != \"0\" ] && npm i -g @pnp/cli-microsoft365
    fi
    # -D to run the daemon in foreground
    /usr/sbin/sshd -D
@@ -57,10 +59,7 @@ RUN npm install m365 -g
 
 COPY $STARTFILE $START_DIR/
 
-EXPOSE 5678
-
-# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
-VOLUME  [\"/$USERDIR\"]
+EXPOSE 22
 
 CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
 
