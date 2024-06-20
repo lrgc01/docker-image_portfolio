@@ -1,0 +1,33 @@
+FROMIMG="ubuntu:jammy"
+COMMENT="Ubuntu Jammy Jellyfish with ssh"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN set -ex \\
+    && apt update && apt install -q -y openssh-server --no-install-recommends \\
+    && apt purge -y --auto-remove \\
+    && useradd -m -s /bin/bash admin \\
+    && rm -rf /var/lib/apt/lists/* \\
+    && rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin  \\
+    && mkdir /run/sshd
+
+EXPOSE 22
+
+CMD [ \"/usr/sbin/sshd\",\"-D\" ]
+"
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
