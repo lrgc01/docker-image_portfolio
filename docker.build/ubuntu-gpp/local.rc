@@ -1,0 +1,28 @@
+COMMENT="Adding g++ on top of git/net image"
+
+# Folder is optional - end with a slash
+FROMIMG="lrgc01/ubuntu-git:${ARCH}"
+
+# 
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+_DOCKERBODY="FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+# Workaround to avoid install error when linking man page
+RUN apt-get update && \\
+    mkdir -p /usr/share/man/man1 ; \\
+    apt-get install -y g++ && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -f /var/lib/apt/lists/*debian.org* && \\
+    rm -fr /usr/share/man/man*/*
+
+EXPOSE 22
+
+CMD [\"/usr/sbin/sshd\",\"-D\"]"
+IFS="$OLD_IFS"
+
