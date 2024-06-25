@@ -58,7 +58,9 @@ for bld in $BUILDLIST
 do
   _skip="$(echo $SKIPLIST | grep -w $bld)"
   if [ -z "$_skip" ] ; then
-    echo "Running in $BASEDIR/$bld"
+    echo "----------------------------------------------"
+    echo "   -----   Running in $BASEDIR/$bld   ------  "
+    echo "----------------------------------------------"
     ( cd $BASEDIR/$bld 
       [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
       [ -f ./create.sh ] && $_SUDO ./create.sh $_MINUSD $PREPARE
