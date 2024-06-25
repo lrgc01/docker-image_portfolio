@@ -42,6 +42,7 @@ FOLDER=${BASE_FOLDER:-"lrgc01/"}
 DOCKERFILE="Dockerfile.tmp"
 
 _RUN_MANIFEST=0
+_TAG="$DIRBASEDTAG"
 
 while [ $# -gt 0 ]
 do

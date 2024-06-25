@@ -45,16 +45,17 @@ if [ $(whoami) != "root" ]; then
 fi
 
 # Order is VERY important here
-BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest gplusplus openjre openjdk jenkins"}
-# The list is getting to long for smaller machines - try divide in crontab
-#BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest openjre openjdk jenkins debian-nox11 kali-ssh kali-net kali-git kali-nox11 oci-cli"}
+#BUILDLIST=${BUILDLIST:-"ssh-stable_slim net-stable_slim isc-dhcp-server dns-bind9 nginx mariadb apache2 samba git nvm node php python3-pip python3-dev python3-pytest gplusplus openjre openjdk jenkins"}
+#( cd "$BASEDIR" && _DIRBUILDLIST="$(/bin/ls -d [0-9][0-9][-0-9]*)" ; echo $_DIRBUILDLIST)
+cd "$BASEDIR" && _DIRBUILDLIST="$(/bin/ls -d [0-9][0-9][-0-9]*)" && cd -
+BUILDLIST=${BUILDLIST:-"$(echo $_DIRBUILDLIST)"}
 
 for bld in $BUILDLIST
 do
 	echo "Running in $BASEDIR/$bld"
 	( cd $BASEDIR/$bld 
           [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
-          [ -f ./create.sh ] && $DRYRUN $_SUDO ./create.sh $PREPARE
+          [ -f ./create.sh ] && $_SUDO ./create.sh $_MINUSD $PREPARE
   	)
 	#if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
 	#	break
