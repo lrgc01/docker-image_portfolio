@@ -13,6 +13,7 @@ Usage() {
 
 SCRIPTDIR=$(dirname $0)
 BASEDIR="$SCRIPTDIR/.."
+SKIPLIST="_none_"
 
 while [ $# -gt 0 ]
 do
@@ -24,6 +25,9 @@ do
           shift 1
       ;;
       -[lL]) BUILDLIST="$2"
+          shift 2
+      ;;
+      -[sS]) SKIPLIST="$2"
           shift 2
       ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
@@ -52,14 +56,19 @@ BUILDLIST=${BUILDLIST:-"$(echo $_DIRBUILDLIST)"}
 
 for bld in $BUILDLIST
 do
-	echo "Running in $BASEDIR/$bld"
-	( cd $BASEDIR/$bld 
-          [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
-          [ -f ./create.sh ] && $_SUDO ./create.sh $_MINUSD $PREPARE
-  	)
-	#if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
-	#	break
-	#fi
+  _skip="$(echo $SKIPLIST | grep -w $bld)"
+  if [ -z "$_skip" ] ; then
+    echo "Running in $BASEDIR/$bld"
+    ( cd $BASEDIR/$bld 
+      [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
+      [ -f ./create.sh ] && $_SUDO ./create.sh $_MINUSD $PREPARE
+    )
+    #if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
+    #	break
+    #fi
+  else
+    echo "Skipping $bld"
+  fi
 done
 
 #$DRYRUN $_SUDO docker image prune -f
