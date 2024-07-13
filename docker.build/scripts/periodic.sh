@@ -7,6 +7,7 @@ Usage() {
    -p prepare env (Dockerfile,etc) 
    -f force build 
    -l <build list> (space separated and quoted)
+   -s <skip list> (space separated and quoted)
    -d (Dry Run - no arg)
 "
 }
