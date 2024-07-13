@@ -103,7 +103,7 @@ BIND_UID="102"
 
 MACHINE=$(uname -m)  # aarch64, x86_64, etc
 ARCH=$(dpkg --print-architecture)  # amd64, arm64, etc
-FROMIMG="lrgc01/ssh-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-ssh:${ARCH}"
 #FROMIMG="lrgc01/ssh-stable_slim"
 
 STARTFILE="bootstrap.container.sh"

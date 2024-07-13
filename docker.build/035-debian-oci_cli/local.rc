@@ -1,6 +1,6 @@
 #FROMIMG="ghcr.io/oracle/oci-cli:latest" 
-FROMIMG="lrgc01/python3-pip:${ARCH}"
-FROMBUILDIMG="lrgc01/python3-dev:${ARCH}"
+FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
+FROMBUILDIMG="lrgc01/debian-python3_dev:${ARCH}"
 COMMENT="Oracle oci-cli installed on non-oracle linux"
 
 VENVDIR=/oci-cli

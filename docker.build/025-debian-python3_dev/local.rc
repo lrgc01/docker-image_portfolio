@@ -1,5 +1,5 @@
 COMMENT="python3-dev over python3-pip image"
-FROMIMG="lrgc01/python3-pip:${ARCH}"
+FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
 
 UID_=${PYTHON3_UID:-10020}
 GID_=${PYTHON3_GID:-10020}
