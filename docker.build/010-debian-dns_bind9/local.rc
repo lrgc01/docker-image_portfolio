@@ -1,6 +1,6 @@
 COMMENT="bind9 DNS server"
 IMGNAME="dns-bind9"
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 
 UID_=${BIND_UID:-53}
 GID_=${BIND_GID:-53}
