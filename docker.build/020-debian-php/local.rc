@@ -1,6 +1,4 @@
-#!/bin/bash
-
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="PHP and php-fpm software + server over openssh-server image"
 
 # Not used, just in case ...

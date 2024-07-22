@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/net-stable_slim:$ARCH" # Using from generic.rc
+FROMIMG="lrgc01/debian-net:$ARCH" # Using from generic.rc
 COMMENT="base dev git stuff over net utils using openssh-server image"
 
 #

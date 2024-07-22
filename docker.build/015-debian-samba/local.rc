@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="samba CIFS server"
 #IMGNAME="samba"
 

@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Apache2 web server over openssh-server image"
 IMGNAME="apache2"
 

@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="nginx web server over openssh-server image"
 
 # This is globally used
