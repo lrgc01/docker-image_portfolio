@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/git:${ARCH}"
+FROMIMG="lrgc01/debian-git:${ARCH}"
 COMMENT="Complete Debian with no desktop package"
 
 S6_NOARCH="/tmp/s6-noarch.tar.xz"
