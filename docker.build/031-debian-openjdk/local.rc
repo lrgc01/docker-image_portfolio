@@ -1,7 +1,7 @@
 COMMENT="Adding jdk on top of openjre image"
 
 # Folder is optional - end with a slash
-FROMIMG="lrgc01/openjre:${ARCH}"
+FROMIMG="lrgc01/debian-openjre:${ARCH}"
 
 # 
 # Dockerfile
