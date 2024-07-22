@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/node:${ARCH}"
+FROMIMG="lrgc01/debian-node:${ARCH}"
 COMMENT="m365 cli for Microsoft Apps"
 
 # This is globally used

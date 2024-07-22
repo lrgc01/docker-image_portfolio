@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/git:$ARCH" # Using from generic.rc
+FROMIMG="lrgc01/debian-git:$ARCH" # Using from generic.rc
 COMMENT="nvm over git image using openssh-server image"
 
 #
