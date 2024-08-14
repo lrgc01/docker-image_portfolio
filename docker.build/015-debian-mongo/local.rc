@@ -1,6 +1,11 @@
 FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="mongodb server over debian-net image"
 
+if [ "$ARCH" != "amd64" ]; then
+   echo "mongo only works in amd64 architecture. Exiting."
+   exit 0
+fi
+
 #
 # Dockerfile
 #
