@@ -1,0 +1,18 @@
+FROMIMG="lrgc01/debian-net:${ARCH}"
+COMMENT="mongodb server over debian-net image"
+
+#
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+
+# get original Dockerfile from mongo community first and name it Dockerfile.orig
+sed -e "s,ubuntu:jammy,$FROMIMG," -e 's/ubuntu/debian/' -e 's/jammy/bookworm/' -e 's/multiverse/main/' < Dockerfile.orig > Dockerfile.tmp
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
