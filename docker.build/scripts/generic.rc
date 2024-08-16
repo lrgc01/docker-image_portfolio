@@ -108,8 +108,8 @@ FROMIMG="lrgc01/debian-ssh:${ARCH}"
 
 STARTFILE="bootstrap.container.sh"
 IPFILE="container.host"
-#START_DIR="/start.d"
-START_DIR="/start"
+START_DIR="/start.d"
+START_CMD="start.sh"
 
 # Versioning in order to keep a copy if running more than once
 # Note the ":" in the formated output
