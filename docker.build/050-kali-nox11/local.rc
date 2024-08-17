@@ -23,7 +23,7 @@ ARG S6_OVERLAY_VERSION=3.1.5.0
 
 RUN set -ex \\
     && apt-get update \\
-    && apt install -q -y locales  \\
+    && apt install -q -y locales man-db  \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
     && apt install -q -y inetutils-syslogd xz-utils screen tmux sudo apt-utils bc \\
     && apt install -q -y unzip p7zip-full \\
@@ -43,7 +43,7 @@ RUN set -ex \\
 #    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz \\
 #    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
-ENTRYPOINT ["/init"]
+#ENTRYPOINT ["/init"]
 
 "
 

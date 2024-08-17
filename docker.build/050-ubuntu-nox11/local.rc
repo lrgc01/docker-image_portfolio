@@ -44,7 +44,7 @@ RUN set -ex \\
 #    && rm -f /tmp/s6-overlay-noarch.tar.xz /tmp/s6-overlay-${MACHINE}.tar.xz \\
 #    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
-ENTRYPOINT ["/init"]
+#ENTRYPOINT ["/init"]
 
 "
 

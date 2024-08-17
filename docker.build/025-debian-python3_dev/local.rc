@@ -1,6 +1,9 @@
 COMMENT="python3-dev over python3-pip image"
 FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 UID_=${PYTHON3_UID:-10020}
 GID_=${PYTHON3_GID:-10020}
 USR_=${PYTHON3_USR:-pyusr}
@@ -8,8 +11,6 @@ GRP_=${PYTHON3_GRP:-pygrp}
 USERDIR_=${PYTHON3_HOMEDIR:-conf.d}
 USERDIR_=${USERDIR_#/}
 
-STARTFILE=${PYTHON3_START_CMD:-"start.sh"}
-START_DIR=${PYTHON3_START_DIR:-"/start.d"}
 IPFILE=${PYTHON3_IPFILE:-"host.ip"}
 
 # 

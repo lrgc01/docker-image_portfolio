@@ -2,11 +2,12 @@ FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Apache2 web server over openssh-server image"
 IMGNAME="apache2"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 USERDIR_=${APACHE2_HOMEDIR:-var/lib/apache2}
 USERDIR_=${USERDIR_#/}
-START_DIR="start"
 
-STARTFILE=${APACHE_START_CMD:-"apache2.start"}
 IPFILE=${APACHE_IPFILE:-"apache2.host"}
 
 # 
@@ -68,9 +69,9 @@ RUN apt-get update && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man*/* && \\
-    mkdir -p /run/php /$START_DIR 
+    mkdir -p /run/php $START_DIR 
 
-COPY $STARTFILE /$START_DIR/
+COPY $STARTFILE $START_DIR/
 
 # Obvious Web ports
 EXPOSE 80
@@ -79,7 +80,7 @@ EXPOSE 443
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  [\"/etc/apache2\", \"/var/log/apache2\", \"/var/www/html\"]
 
-CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]"
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
 
 IFS="$OLD_IFS"
 

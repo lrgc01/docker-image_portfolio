@@ -2,6 +2,9 @@ FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Node.js and npm over openssh-server image"
 IMGNAME="nodejs"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
 USR_=${JENKINS_USR:-pyuser}
@@ -9,9 +12,7 @@ GRP_=${JENKINS_GRP:-pygrp}
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-STARTFILE=${NODE_START_CMD:-"nodejs.start"}
 IPFILE=${NODE_IPFILE:-"nodejs.host"}
-START_DIR="/start.d"
 
 NODE_VERSION="$(curl --silent 'https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt' | \
  grep 'node-.*linux-x64.tar.xz' | sed -e 's/.* node-v\(.*\)-linux.*/\1/')"

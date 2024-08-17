@@ -1,7 +1,7 @@
 FROMIMG="lrgc01/kali-nox11:${ARCH}"
 COMMENT="Kali desktop image"
 
-STARTFILE="bootstrap.container.sh"
+STARTFILE=${START_CMD:-"start.sh"}
 
 # 
 # ---- Start script / command ----

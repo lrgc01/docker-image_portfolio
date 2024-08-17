@@ -3,6 +3,9 @@
 FROMIMG="lrgc01/ubuntu-jammy-net:${ARCH}"
 COMMENT="PHP and php-fpm software + server over ubuntu Jammy Jellyfish openssh-server image"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 # Not used, just in case ...
 UID_=${JENKINS_UID:-102}
 GID_=${JENKINS_GID:-103}
@@ -12,9 +15,7 @@ GRP_=${JENKINS_GRP:-pygrp}
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-STARTFILE=${PHP_START_CMD:-"php.start"}
 IPFILE=${PHP_IPFILE:-"php.host"}
-START_DIR=${PHP_START_DIR:-"/start.d"}
 PHPVER="8.1"
 
 # 

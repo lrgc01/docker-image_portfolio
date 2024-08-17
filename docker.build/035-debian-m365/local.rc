@@ -1,12 +1,13 @@
 FROMIMG="lrgc01/debian-node:${ARCH}"
 COMMENT="m365 cli for Microsoft Apps"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 # This is globally used
 USERDIR_=${M365_HOMEDIR:-/home/admin}
 USERDIR=${USERDIR_#/}
 
-START_DIR="/start.d"
-STARTFILE=${M365_STARTFILE:-"m365.start.sh"}
 IPFILE=${M365_IPFILE:-"m365.host"}
 
 # 

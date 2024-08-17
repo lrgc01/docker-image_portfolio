@@ -1,12 +1,13 @@
 FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="nginx web server over openssh-server image"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 # This is globally used
 USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
-START_DIR="/start"
-STARTFILE=${NGINX_STARTFILE:-"nginx.start"}
 IPFILE=${NGINX_IPFILE:-"nginx.host"}
 
 # 

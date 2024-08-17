@@ -2,6 +2,9 @@ COMMENT="bind9 DNS server"
 IMGNAME="dns-bind9"
 FROMIMG="lrgc01/debian-net:${ARCH}"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 UID_=${BIND_UID:-53}
 GID_=${BIND_GID:-53}
 USR_=${BIND_USR:-bind}
@@ -10,9 +13,7 @@ GRP_=${BIND_GRP:-bind}
 USERDIR_=${BIND_HOMEDIR:-/etc/bind}
 USERDIR_=${USERDIR_#/}
 
-STARTFILE=${BIND_START_CMD:-"bind.bootstrap"}
 IPFILE=${BIND_IPFILE:-"bind.host"}
-START_DIR="start.d"
 BIND_DIR=${BIND_DIR:-"/etc/bind"}
 BIND_LOGDIR=${BIND_LOGDIR:-"/var/log/bind"}
 BIND_LIBDIR=${BIND_LIBDIR:-"/var/lib/bind"}
@@ -31,7 +32,7 @@ _STARTBODY="#!/bin/bash
 # Some environment variables that may be passed to the container
 # Any file/script can be uploaded inside a volume using the Docker Host
 START_SH=\${DOCKER_START_SH:-\"$START_SCRIPT\"}
-WORKDIR=\${DOCKER_WORKDIR:-\"/$START_DIR\"}
+WORKDIR=\${DOCKER_WORKDIR:-\"$START_DIR\"}
 
 # Start of the container main purpose app
 if [ -d \"\$WORKDIR\" ]; then
@@ -78,9 +79,9 @@ RUN apt-get update && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir -p /$START_DIR 
+    mkdir -p $START_DIR 
 
-COPY $STARTFILE $TMPL $START_SCRIPT /$START_DIR/
+COPY $STARTFILE $TMPL $START_SCRIPT $START_DIR/
 
 # Obvious Web ports and others
 EXPOSE 53
@@ -88,7 +89,7 @@ EXPOSE 53
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  [\"$BIND_DIR\", \"$BIND_LOGDIR\", \"$BIND_LIBDIR\" ]
 
-CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]
 "
 IFS="$OLD_IFS"
 

@@ -2,7 +2,7 @@ FROMIMG="lrgc01/debian-nox11:${ARCH}"
 #FROMIMG="debian:latest"
 COMMENT="Debian desktop image"
 
-STARTFILE="bootstrap.container.sh"
+STARTFILE=${START_CMD:-"start.sh"}
 
 # 
 # ---- Start script / command ----

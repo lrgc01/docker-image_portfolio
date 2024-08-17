@@ -1,14 +1,15 @@
 FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="ISC DHCP server"
 
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 USR_=${DHCP_USR:-dhcp}
 GRP_=${DHCP_GRP:-dhcp}
 USERDIR_=${DHCP_HOMEDIR:-/etc/dhcp}
 USERDIR_=${USERDIR_#/}
 
-STARTFILE=${DHCP_START_CMD:-"dhcp.bootstrap"}
 IPFILE=${DHCP_IPFILE:-"dhcp.host"}
-START_DIR="start.d"
 DHCP_DIR=${DHCP_DIR:-"/etc/dhcp"}
 DHCP_LIBDIR=${DHCP_LIBDIR:-"/var/lib/dhcp"}
 DHCP_LOGDIR=${DHCP_LOGDIR:-"/var/log/dhcp"}
@@ -25,7 +26,7 @@ _STARTBODY="#!/bin/bash
 # Some environment variables that may be passed to the container
 # Any file/script can be uploaded inside a volume using the Docker Host
 START_SH=\${DOCKER_START_SH:-\"$START_SCRIPT\"}
-WORKDIR=\${DOCKER_WORKDIR:-\"/$START_DIR\"}
+WORKDIR=\${DOCKER_WORKDIR:-\"$START_DIR\"}
 
 IFACE=\${DOCKER_IFACE:-\"eth0\"}
 
@@ -69,9 +70,9 @@ RUN apt-get update && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man* && \\
-    mkdir -p /$START_DIR 
+    mkdir -p $START_DIR 
 
-COPY --chmod=755 $STARTFILE $START_SCRIPT /$START_DIR/
+COPY $STARTFILE $START_SCRIPT $START_DIR/
 
 # Standard dhcp ports
 EXPOSE 67
@@ -80,7 +81,7 @@ EXPOSE 68
 # Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
 VOLUME  [\"$DHCP_DIR\", \"$DHCP_LIBDIR\", \"$DHCP_LOGDIR\" ]
 
-CMD [\"sh\",\"/$START_DIR/$STARTFILE\"]
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]
 "
 
 IFS="$OLD_IFS"

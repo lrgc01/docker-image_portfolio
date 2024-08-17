@@ -1,10 +1,10 @@
-#COMMENT="Google Cloud CLI over python3-pip"
 #FROMIMG="lrgc01/python3-pip:${ARCH}"
 COMMENT="Google Cloud CLI over net-stable_slim"
 FROMIMG="lrgc01/debian-net:${ARCH}"
 
-STARTFILE=${STARTFILE:-"start.sh"}
 START_DIR=${START_DIR:-"/start"}
+STARTFILE=${START_CMD:-"start.sh"}
+
 IPFILE=${PYTHON3_IPFILE:-"host.ip"}
 
 # 
