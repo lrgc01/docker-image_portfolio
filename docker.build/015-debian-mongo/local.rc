@@ -13,7 +13,7 @@ OLD_IFS="$IFS"
 IFS=""
 
 # get original Dockerfile from mongo community first and name it Dockerfile.orig
-sed -e "s,ubuntu:jammy,$FROMIMG," -e 's/ubuntu/debian/' -e 's/jammy/bookworm/' -e 's/multiverse/main/' < Dockerfile.orig > Dockerfile.tmp
+sed -e "s,ubuntu:jammy,$FROMIMG," -e 's/ubuntu/debian/' -e 's/jammy/bookworm/' -e 's/multiverse/main/' < Dockerfile.orig > $DOCKERFILE
 
 IFS="$OLD_IFS"
 
