@@ -6,6 +6,7 @@ Usage() {
   Usage: $0 
    -p prepare env (Dockerfile,etc) 
    -f force build 
+   -c clean
    -l <build list> (space separated and quoted)
    -s <skip list> (space separated and quoted)
    -d (Dry Run - no arg)
@@ -23,6 +24,9 @@ do
           shift 1
       ;;
       -[fF]) FORCE="-f"
+          shift 1
+      ;;
+      -[cC]) CLEAN="-c"
           shift 1
       ;;
       -[lL]) BUILDLIST="$2"
@@ -64,7 +68,7 @@ do
     echo "----------------------------------------------"
     ( cd $BASEDIR/$bld 
       [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
-      [ -f ./create.sh ] && $_SUDO ./create.sh $_MINUSD $PREPARE
+      [ -f ./create.sh ] && $_SUDO ./create.sh $CLEAN $_MINUSD $PREPARE
     )
     #if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
     #	break

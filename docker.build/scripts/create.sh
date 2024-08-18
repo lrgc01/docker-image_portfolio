@@ -109,12 +109,12 @@ if [ ! -z "$_STARTBODY" ]; then
 fi
 
 PULLIMG=$(grep -e "^FROM " $DOCKERFILE | sed -e 's/FROM //' -e 's/ AS .*//' | head -1)
-UPTODATE=$($DRYRUN $SUDO docker pull $PULLIMG | grep -e 'up to date')
+UPTODATE=$($DRYRUN $SUDO docker pull -q $PULLIMG )
 
 NEWID=$(CheckImgDependency -l $LASTIDFILE -f $DOCKERFILE $_MINUSD)
 DIFFLASTID=$?
 
-if [ ! -z "$UPTODATE" -a "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
+if [ "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
         echo "No need to update container chain"
         EXITCODE=111
 else
