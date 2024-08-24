@@ -2,6 +2,11 @@
 COMMENT="Google Cloud CLI over net-stable_slim"
 FROMIMG="lrgc01/debian-net:${ARCH}"
 
+if [ "$ARCH" != "amd64" ]; then
+   echo "gcloud-cli only in amd64 architecture for now. Exiting."
+   exit 0
+fi
+
 START_DIR=${START_DIR:-"/start"}
 STARTFILE=${START_CMD:-"start.sh"}
 
