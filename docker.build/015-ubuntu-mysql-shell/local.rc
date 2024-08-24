@@ -1,0 +1,32 @@
+FROMIMG="lrgc01/ubuntu-net:${ARCH}"
+COMMENT="mysql shell over Ubuntu openssh-server image"
+
+#
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN groupadd -g 336 mysql && \\
+    useradd -M -s /bin/false -u 336 -g mysql -d /nonexistent mysql && \\
+    apt-get update && \\
+    apt-get install -y mysql-shell --no-install-recommends && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -f /var/lib/apt/lists/*debian.org* && \\
+    rm -fr /usr/share/man/man*
+
+COPY run.sh /run.sh
+ENTRYPOINT [\"/run.sh\"]
+CMD [\"mysqlsh\"]
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
