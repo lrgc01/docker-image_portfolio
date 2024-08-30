@@ -121,3 +121,5 @@ DIRBASEDTAG="$(basename $CURDIR | sed -e 's/[0-9][0-9][0-9]-//')"
 
 DOCKERFILE="Dockerfile"
 LASTIDFILE="./lastid.${ARCH}"
+
+S6_OVERLAY_VERSION="3.2.0.0"

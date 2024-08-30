@@ -23,7 +23,7 @@ do
       -[pP]) PREPARE="-p"
           shift 1
       ;;
-      -[fF]) FORCE="-f"
+      -[fF]) FORCE="--force"
           shift 1
       ;;
       -[cC]) CLEAN="-c"
@@ -67,8 +67,7 @@ do
     echo "   -----   Running in $BASEDIR/$bld   ------  "
     echo "----------------------------------------------"
     ( cd $BASEDIR/$bld 
-      [ -f ./build.sh ] && $DRYRUN $_SUDO ./build.sh 
-      [ -f ./create.sh ] && $_SUDO ./create.sh $CLEAN $_MINUSD $PREPARE
+      [ -f ./create.sh ] && $_SUDO ./create.sh $CLEAN $_MINUSD $PREPARE $FORCE
     )
     #if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
     #	break

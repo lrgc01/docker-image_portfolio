@@ -1,6 +1,11 @@
 FROMIMG="lrgc01/ubuntu-nox11:${ARCH}"
 COMMENT="Ubuntu desktop image"
 
+# S6 dir hier
+S6Tar=etc-X11-s6.tgz
+cp ../scripts/$S6Tar .
+TOCLEAN="$TOCLEAN $S6Tar"
+
 # 
 # ---- Start script / command ----
 #
@@ -30,7 +35,7 @@ RUN set -ex \\
 
 $_AMD64_CHROME_SNIPPET
 
-ADD etc-s6.tgz /etc/s6-overlay/s6-rc.d/
+ADD $S6Tar /etc/s6-overlay/
 ADD lightdm.conf /etc/lightdm/
 
 ENTRYPOINT ["/init"]
