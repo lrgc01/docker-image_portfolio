@@ -9,3 +9,4 @@ docker.build/apache2/apache2.start
 docker.build/jenkins/get.jenkins.io
 docker.build/dns-bind9/bind.bootstrap
 lixo
+.scannerwork
