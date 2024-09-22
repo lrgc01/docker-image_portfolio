@@ -65,7 +65,7 @@ RUN set -eux; \
 	rm -rf "$GNUPGHOME" KEYS; \
 	\
 	apt-mark auto '.*' > /dev/null; \
-	apt-mark manual $savedAptMark > /dev/null; \
+	apt-mark manual "$savedAptMark" > /dev/null; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	\
 # smoke test
