@@ -23,7 +23,7 @@ ARG S6_OVERLAY_VERSION=$S6_OVERLAY_VERSION
 
 RUN set -ex \\
     && apt-get update \\
-    && yes | unminimize \\
+    && test \$(echo yes | \$(which unminimize)) || echo unminimize not found \\
     && apt install -q -y locales man-db \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
     && apt install -q -y inetutils-syslogd xz-utils screen tmux sudo apt-utils bc \\
