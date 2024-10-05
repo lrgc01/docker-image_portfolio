@@ -1,6 +1,8 @@
 FROMIMG="lrgc01/ubuntu-git:${ARCH}"
 COMMENT="Complete Ubuntu with no desktop package"
 
+#SECURITYBUILD="--security-opt=seccomp=unconfined"
+
 S6_NOARCH="/tmp/s6-noarch.tar.xz"
 S6_MACH="/tmp/s6-machine.tar.xz"
 # 
@@ -12,11 +14,13 @@ IFS=""
 # for S6, MACHINE is ARCH
 if [ "$MACHINE" = "armv7l" ]; then
     MACHINE="$ARCH"
+    # Need --security-opt=seccomp=unconfined which seems not to be available in many distros
+    exit 0
 fi
 #
 # Dockerfile
 #
-_DOCKERBODY="#
+_DOCKERBODY="# 
 FROM $FROMIMG
 
 ARG S6_OVERLAY_VERSION=$S6_OVERLAY_VERSION
