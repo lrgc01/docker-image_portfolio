@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FROMIMG="lrgc01/net-stable_slim:${ARCH}"
+FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Mosquitto MQTT server"
 
 STARTFILE=${START_CMD:-"container.start.sh"}
