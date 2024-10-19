@@ -25,24 +25,9 @@ if [ `whoami` != "root" ]; then
         export SUDO="sudo"
 fi
 
-# The generic and then local definition
-for RCFILE in "../scripts/generic.rc" "./local.rc"
-do
-	if [ -f "$RCFILE" ]; then
-	       	. "$RCFILE" 
-	else
-		echo $RCFILE not found 
-	       	exit 2
-	fi
-done
-
-# Folder is optional - end with a slash
-FOLDER=${BASE_FOLDER:-"lrgc01/"}
-
 DOCKERFILE="Dockerfile.tmp"
 
 _RUN_MANIFEST=0
-_TAG="$DIRBASEDTAG"
 
 while [ $# -gt 0 ]
 do
@@ -99,6 +84,22 @@ do
    esac
 done
 
+# The generic and then local definition
+for RCFILE in "../scripts/generic.rc" "./local.rc"
+do
+	if [ -f "$RCFILE" ]; then
+	       	. "$RCFILE" 
+	else
+		echo $RCFILE not found 
+	       	exit 2
+	fi
+done
+
+# Folder is optional - end with a slash
+FOLDER=${BASE_FOLDER:-"lrgc01/"}
+
+_TAG=${_TAG:-"$DIRBASEDTAG"}
+
 # Comes from local.rc definition
 if [ ! -z "$_DOCKERBODY" ]; then
    echo "$_DOCKERBODY" > $DOCKERFILE
@@ -141,7 +142,7 @@ fi
 
 # Cleaning
 if [ "$_CLEAN_ENV" = "1" ];then
-	$SUDO rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
+	$SUDO rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp Dockerfile.inc ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
 	$DRYRUN $SUDO docker image prune -f
 fi
 # ---- end docker build ----
