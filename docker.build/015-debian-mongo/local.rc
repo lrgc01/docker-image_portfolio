@@ -12,8 +12,9 @@ fi
 OLD_IFS="$IFS"
 IFS=""
 
-# get original Dockerfile from mongo community first and name it Dockerfile.orig
-sed -e "s,ubuntu:jammy,$FROMIMG," -e 's/ubuntu/debian/' -e 's/jammy/bookworm/' -e 's/multiverse/main/' < Dockerfile.orig > $DOCKERFILE
+# get original Dockerfile from mongo community first and name it Dockerfile.inc
+wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/docker-library/mongo/refs/heads/master/8.0/Dockerfile'
+sed -e "s,ubuntu:jammy,$FROMIMG," -e "s,ubuntu:noble,$FROMIMG," -e 's/ubuntu/debian/' -e 's/noble/bookworm/' -e 's/jammy/bookworm/' -e 's/multiverse/main/' < Dockerfile.inc > $DOCKERFILE
 
 IFS="$OLD_IFS"
 
