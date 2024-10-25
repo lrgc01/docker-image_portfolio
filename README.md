@@ -2,15 +2,16 @@
 
 ## Contents:
 
-- docker.build - subdirectories ordered by dependency with one Dockerfile each
-  - ssh - debian/ubuntu/kali slim with openssh-server - base for all
-  - node - node js on top of openssh image
-  - php - php and fpm on top of openssh image
-  - maven - maven tree only to be shared as a volume and used by Jenkins or whatever
-  - jenkins - Jenkins only build on top of openjdk image
-  - nginx - nginx httpd server on top of openssh and that may use the php image
-  - postgresql - simple postgresql (latest) docker based on some stable base image made with debootstrap
-  - mysql - simple mariadb-server docker based on some stable base image made with debootstrap
+- docker.build/###-servicename - subdirectories ordered by dependency with one Dockerfile each
+  - __ssh__ - debian/ubuntu/kali slim with openssh-server - base for all
+  - __node__ - node extracted as is from its original Dockerfile and slightly changed
+  - __php__ - php and fpm on top of openssh image
+  - __jenkins__ - Jenkins-only build on top of openjdk image
+  - __nginx__ - nginx httpd server on top of openssh image
+  - __postgresql__ - simple postgresql (latest) docker based on some stable base image
+  - __oci_cli__ - Oracle Cloud (python) CLI with its Dockerfile inspired in its original from Oracle official docker itself
+  - __gcloud_cli__ - GCP (python) CLI with its Dockerfile inspired in its original from Google Cloud official docker itself
+  - __mariadb__ - simple mariadb-server docker based on some stable base image
   - and many others...
 
 Each image definition has the *create.sh* shell script. It is used to generate the Dockerfile and sometimes 
