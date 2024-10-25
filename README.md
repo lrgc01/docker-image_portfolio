@@ -36,7 +36,7 @@ configuration.
   builder.
 - **local.rc** - local configuration file with particularities of each deploy
 - **README.md** (optional) - explains specific details for each image
-- __lastid.\*__ - automaticaly created file to track each build to avoid building an image in which dependency
+- <b>lastid.*</b> - automaticaly created file to track each build to avoid building an image in which dependency
   didn't change.
 
 ### Subdirectory scripts
