@@ -19,4 +19,4 @@ startup command.
 
 ## Hierarchy
 
-![alt text](Hierarchy.jpg "Hierarchy")
+![Hierarchy](Hierarchy.jpg)
