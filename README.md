@@ -4,11 +4,13 @@
 
 - docker.build/###-servicename - subdirectories ordered by dependency with one Dockerfile each
   - __ssh__ - debian/ubuntu/kali slim with openssh-server - base for all
-  - __node__ - node extracted as is from its original Dockerfile and slightly changed
-  - __php__ - php and fpm on top of openssh image
-  - __jenkins__ - Jenkins-only build on top of openjdk image
+  - __git__ - base git used as FROMIMG in many other programs like node, php,etc
+  - __node__ - node extracted as is from its original Dockerfile and slightly changed to use git image
+  - __php__ - php and fpm on top of git image
+  - __openjre__ - openJRE on top of git image
+  - __openjdk__ - openJDK on top of openjre image
+  - __jenkins__ - Jenkins-only on top of openjdk image
   - __nginx__ - nginx httpd server on top of openssh image
-  - __postgresql__ - simple postgresql (latest) docker based on some stable base image
   - __oci_cli__ - Oracle Cloud (python) CLI with its Dockerfile inspired in its original from Oracle official docker itself
   - __gcloud_cli__ - GCP (python) CLI with its Dockerfile inspired in its original from Google Cloud official docker itself
   - __mariadb__ - simple mariadb-server docker based on some stable base image
@@ -19,6 +21,8 @@ to create a directory hierarchy or even some shell scripts like a command wrappe
 startup command. (See above).
 
 ## Hierarchy
+
+Hierarchy on which all docker dependency are planned and built.
 
 ![Hierarchy](Hierarchy.png)
 
