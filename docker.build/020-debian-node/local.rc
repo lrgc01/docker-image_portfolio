@@ -77,7 +77,7 @@ COPY $STARTFILE $START_DIR/
 
 IFS="$OLD_IFS"
 
-(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" > $DOCKERFILE
+(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" | grep -v 'purge.*auto-remove' > $DOCKERFILE
 unset _DOCKERBODY
 #
 # ---- end Dockerfile ----
