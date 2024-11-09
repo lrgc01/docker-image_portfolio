@@ -3,7 +3,6 @@ FROMIMG="lrgc01/debian-nox11:${ARCH}"
 COMMENT="Debian desktop image"
 
 # S6 dir hier
-S6Tar=etc-X11-s6.tgz
 cp ../scripts/$S6Tar .
 TOCLEAN="$TOCLEAN $S6Tar"
 

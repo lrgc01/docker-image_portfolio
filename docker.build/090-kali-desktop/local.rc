@@ -4,7 +4,6 @@ COMMENT="Kali desktop image"
 STARTFILE=${START_CMD:-"start.sh"}
 
 # S6 dir hier
-S6Tar=etc-X11-s6.tgz
 cp ../scripts/$S6Tar .
 TOCLEAN="$TOCLEAN $S6Tar"
 

@@ -123,3 +123,5 @@ DOCKERFILE="Dockerfile"
 LASTIDFILE="./lastid.${ARCH}"
 
 S6_OVERLAY_VERSION="3.2.0.0"
+
+S6Tar=etc-s6.tgz
