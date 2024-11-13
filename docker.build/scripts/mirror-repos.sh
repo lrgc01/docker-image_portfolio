@@ -77,11 +77,12 @@ do
     ( cd $bld
     CURDIR=$(pwd)
     _TAG="$(basename $CURDIR | sed -e 's/[0-9][0-9][0-9]-//')"
-    $DRYRUN $SUDO docker pull ${ORIGIN}${_TAG}:${ARCH}
-    $DRYRUN $SUDO docker push ${TARGET}${_TAG}:${ARCH}
-    $DRYRUN $SUDO docker manifest rm ${TARGET}${_TAG}:latest 
-    $DRYRUN $SUDO docker manifest create ${TARGET}${_TAG}:latest --amend ${TARGET}${_TAG}:arm64 --amend ${TARGET}${_TAG}:amd64 --amend ${TARGET}${_TAG}:armhf
-    $DRYRUN $SUDO docker manifest push ${TARGET}${_TAG}:latest 
+       $DRYRUN $SUDO docker pull ${ORIGIN}${_TAG}:${ARCH} && \
+       $DRYRUN $SUDO docker push ${TARGET}${_TAG}:${ARCH} && \
+       $DRYRUN $SUDO docker manifest rm ${TARGET}${_TAG}:latest 
+       $DRYRUN $SUDO docker manifest create ${TARGET}${_TAG}:latest --amend ${TARGET}${_TAG}:arm64 --amend ${TARGET}${_TAG}:amd64 --amend ${TARGET}${_TAG}:armhf && \
+       $DRYRUN $SUDO docker manifest push ${TARGET}${_TAG}:latest 
+       $DRYRUN $SUDO docker image rm ${ORIGIN}${_TAG}:${ARCH} ${TARGET}${_TAG}:${ARCH}
     )
   else
     echo "Skipping $bld"
