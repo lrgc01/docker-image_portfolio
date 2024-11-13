@@ -78,7 +78,7 @@ do
     CURDIR=$(pwd)
     _TAG="$(basename $CURDIR | sed -e 's/[0-9][0-9][0-9]-//')"
        $DRYRUN $_SUDO docker pull ${ORIGIN}${_TAG}:${ARCH} && \
-       $DRYRUN $_SUDO docker image tag ${TARGET}${_TAG}:${ARCH} && \
+       $DRYRUN $_SUDO docker image tag ${ORIGIN}${_TAG}:${ARCH} ${TARGET}${_TAG}:${ARCH} && \
        $DRYRUN $_SUDO docker push ${TARGET}${_TAG}:${ARCH} && \
        $DRYRUN $_SUDO docker manifest rm ${TARGET}${_TAG}:latest 
        $DRYRUN $_SUDO docker manifest create ${TARGET}${_TAG}:latest --amend ${TARGET}${_TAG}:arm64 --amend ${TARGET}${_TAG}:amd64 --amend ${TARGET}${_TAG}:armhf && \
