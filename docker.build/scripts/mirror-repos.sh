@@ -83,11 +83,26 @@ do
        $DRYRUN $_SUDO docker manifest rm ${TARGET}${_TAG}:latest 
        $DRYRUN $_SUDO docker manifest create ${TARGET}${_TAG}:latest --amend ${TARGET}${_TAG}:arm64 --amend ${TARGET}${_TAG}:amd64 --amend ${TARGET}${_TAG}:armhf && \
        $DRYRUN $_SUDO docker manifest push ${TARGET}${_TAG}:latest 
-       $DRYRUN $_SUDO docker image rm ${ORIGIN}${_TAG}:${ARCH} ${TARGET}${_TAG}:${ARCH}
     )
   else
     echo "Skipping $bld"
   fi
 done
 
-#$DRYRUN $_SUDO docker image prune -f
+# another run to clean downloaded origin images
+for bld in $BUILDLIST
+do
+  _skip="$(echo $SKIPLIST | grep -w $bld)"
+  if [ -z "$_skip" ] ; then
+    echo "----------------------------------------------"
+    echo "   -----   Cleaning for $bld   ------  "
+    echo "----------------------------------------------"
+    ( cd $bld
+       CURDIR=$(pwd)
+       _TAG="$(basename $CURDIR | sed -e 's/[0-9][0-9][0-9]-//')"
+       $DRYRUN $_SUDO docker image rm ${ORIGIN}${_TAG}:${ARCH} ${TARGET}${_TAG}:${ARCH}
+    )
+  fi
+done
+
+$DRYRUN $_SUDO docker image prune -f
