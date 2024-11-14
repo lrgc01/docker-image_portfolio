@@ -18,6 +18,8 @@ USERDIR_=${USERDIR_#/}
 IPFILE=${PHP_IPFILE:-"php.host"}
 PHPVER="8.1"
 
+PHPHEALTHCK="https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck"
+
 # 
 # ---- Start command ----
 #    ... with workaround to get IP 
@@ -70,8 +72,24 @@ RUN export DEBIAN_FRONTEND=noninteractive && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
     set -ex && \\
     apt-get update && \\
-    apt-get install -q -y php$PHPVER php$PHPVER-fpm php$PHPVER-mysql php$PHPVER-gd php$PHPVER-curl php$PHPVER-mbstring php$PHPVER-intl php$PHPVER-xml php$PHPVER-zip php$PHPVER-imagick && \\
+    apt-get install -q -y php$PHPVER php$PHPVER-fpm php$PHPVER-mysql php$PHPVER-gd php$PHPVER-curl php$PHPVER-mbstring php$PHPVER-intl php$PHPVER-xml php$PHPVER-zip php$PHPVER-imagick libfcgi-bin && \\
     apt-get clean && \\
+    #
+    # Download php heathcheck to /usr/local/bin
+    #
+    mkdir -p /usr/local/bin 2>&1 > /dev/null ; \\
+    curl -o /usr/local/bin/php-fpm-healthcheck $PHPHEALTHCK && \\
+    chmod +x /usr/local/bin/php-fpm-healthcheck && \\
+    #
+    # Replace config to listen port instead of socket and to open status port/folder
+    #
+    sed -i /etc/php/$PHPVER/fpm/pool.d/www.conf \\
+      -e 's,listen = /run/php/php$PHPVER-fpm.sock,listen = 9000,' \\
+      -e 's,;pm.status_path = .*,pm.status_path = /status,' \\
+      -e 's,;pm.status_listen = .*,pm.status_listen = 9001,' && \\
+    #
+    # Clean stuff
+    #
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
     rm -fr /usr/share/man/man*/* && \\
@@ -79,6 +97,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && \\
 
 COPY $STARTFILE $START_DIR/
 COPY policy.xml /etc/ImageMagick-6/
+
+HEALTHCHECK --interval=5s --timeout=1s \\
+    CMD php-fpm-healthcheck || exit 1
 
 # If someone wants TCP instead of socket
 EXPOSE 9000
