@@ -64,7 +64,7 @@ CheckImgDependency() {
 }
 
 
-BASE_FOLDER="lrgc01/"
+BASE_FOLDER=${BASE_FOLDER:-"lrgc01/"}
 
 BASEPATH=/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin
 
