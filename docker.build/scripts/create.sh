@@ -16,7 +16,7 @@ Usage() {
 EXITCODE=0
 
 _FORCE=0
-_CLEAN_ENV=0
+_CLEAN_ENV=1
 _ENV_ONLY=0
 
 WORKDIR="`dirname $0`"
