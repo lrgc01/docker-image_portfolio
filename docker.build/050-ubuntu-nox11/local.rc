@@ -14,8 +14,8 @@ IFS=""
 # for S6, MACHINE is ARCH
 if [ "$MACHINE" = "armv7l" ]; then
     MACHINE="$ARCH"
-    # Need --security-opt=seccomp=unconfined which seems not to be available in many distros
-    exit 0
+#    # Need --security-opt=seccomp=unconfined which seems not to be available in many distros
+#    exit 0
 fi
 #
 # Dockerfile
