@@ -16,8 +16,9 @@ Usage() {
 EXITCODE=0
 
 _FORCE=0
-_CLEAN_ENV=1
+_CLEAN_ENV=0
 _ENV_ONLY=0
+_RUN_MANIFEST=0
 
 WORKDIR="`dirname $0`"
 cd "$WORKDIR"
@@ -27,8 +28,6 @@ if [ `whoami` != "root" ]; then
 fi
 
 DOCKERFILE="Dockerfile.tmp"
-
-_RUN_MANIFEST=0
 
 while [ $# -gt 0 ]
 do
@@ -125,6 +124,7 @@ if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_
       # Now build the image using docker build only if root is running
       if [ "$_ENV_ONLY" != "1" -a "$_RUN_MANIFEST" != "1" ]; then
    	 $DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
+         _CLEAN_ENV=1
    	 if [ $? -eq 0 ]; then
    	    if [ ! -z "$DRYRUN" ]; then
                echo "Would write NEWID according to: $NEWID"
