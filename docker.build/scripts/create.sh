@@ -17,7 +17,7 @@ EXITCODE=0
 
 _FORCE=0
 _CLEAN_ENV=0
-_ENV_ONLY=1
+_ENV_ONLY=0
 _RUN_MANIFEST=0
 
 WORKDIR="`dirname $0`"
@@ -84,6 +84,8 @@ do
    esac
 done
 
+##############
+# ENVIRONMENT
 # The generic and then local definition
 for RCFILE in "../scripts/generic.rc" "./local.rc"
 do
@@ -108,7 +110,11 @@ if [ ! -z "$_STARTBODY" ]; then
    echo "$_STARTBODY" > $STARTFILE
    chmod 755 $STARTFILE
 fi
+##############
 
+##############
+# Build, clean, manifest, etc
+#
 # Skip if build env only or cleaning only or manifest only
 if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_ONLY" -ne 1 ]; then
    PULLIMG=$(grep -e "^FROM " $DOCKERFILE | sed -e 's/FROM //' -e 's/ AS .*//' | head -1)
@@ -117,14 +123,14 @@ if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_
    NEWID=$(CheckImgDependency -l $LASTIDFILE -f $DOCKERFILE $_MINUSD)
    DIFFLASTID=$?
    
+   _CLEAN_ENV=1
+
    if [ "$DIFFLASTID" -eq 0 -a "$_FORCE" -ne 1 ]; then
            echo "No need to update container chain"
            EXITCODE=111
    else
       # Now build the image using docker build only if root is running
-      if [ "$_ENV_ONLY" != "1" -a "$_RUN_MANIFEST" != "1" ]; then
    	 $DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
-         _CLEAN_ENV=1
    	 if [ $? -eq 0 ]; then
    	    if [ ! -z "$DRYRUN" ]; then
                echo "Would write NEWID according to: $NEWID"
@@ -133,7 +139,6 @@ if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_
    	    fi
    	    _RUN_MANIFEST=1
    	 fi
-      fi
    fi
 fi
 
@@ -149,5 +154,5 @@ if [ "$_CLEAN_ENV" = "1" ];then
 	$DRYRUN $SUDO rm -fr ${OPTDIR} ${DOCKERFILE} Dockerfile.tmp Dockerfile.inc ${TOCLEAN} "$USERDIR_" usr var etc $STARTFILE
 	$DRYRUN $SUDO docker image prune -f
 fi
-# ---- end docker build ----
 exit $EXITCODE
+##############
