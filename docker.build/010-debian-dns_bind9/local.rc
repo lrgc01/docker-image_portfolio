@@ -1,5 +1,4 @@
 COMMENT="bind9 DNS server"
-IMGNAME="dns-bind9"
 FROMIMG="lrgc01/debian-net:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
