@@ -1,0 +1,36 @@
+FROMIMG="lrgc01/debian-nox11:${ARCH}"
+COMMENT="Complete Debian with no desktop package and added with docker.io"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+# for S6, MACHINE is ARCH
+if [ "$MACHINE" = "armv7l" ]; then
+    MACHINE="$ARCH"
+fi
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN set -ex \\
+    && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && apt-get update \\
+    && apt install -q -y cron docker.io --no-install-recommends \\
+    && apt purge -y --auto-remove \\
+    && apt clean \\
+    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
