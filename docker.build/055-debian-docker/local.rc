@@ -27,7 +27,7 @@ RUN set -ex \\
     && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
 HEALTHCHECK --interval=60s --timeout=2s \\
-    CMD nc -z localhost 22 || exit 1
+    CMD su - root -c ls || exit 1
 
 "
 
