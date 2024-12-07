@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-nox11:${ARCH}"
+FROMIMG="lrgc01/ubuntu-s6:${ARCH}"
 COMMENT="Ubuntu desktop image"
 
 # S6 dir hier
