@@ -1,5 +1,4 @@
-FROMIMG="lrgc01/debian-nox11:${ARCH}"
-#FROMIMG="debian:latest"
+FROMIMG="lrgc01/debian-s6:${ARCH}"
 COMMENT="Debian desktop image"
 
 # S6 dir hier
