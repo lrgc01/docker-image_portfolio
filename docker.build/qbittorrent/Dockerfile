@@ -1,11 +1,12 @@
 #
 # This is a Dockerfile made from create.sh script - don't change here
 #
-FROM lrgc01/python3-pip:arm64
+FROM lrgc01/debian-python3_pip
 
 LABEL Comment="qbittorrent using python3-pip image"
 
 RUN set -ex && \
+    userdel admin | true && groupdel admin | true && \
     groupadd -g 1000 qbittorrent && \
     useradd -M -u 1000 -g qbittorrent -d /data qbittorrent && \
     apt-get update && \
