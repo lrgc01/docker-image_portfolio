@@ -137,7 +137,7 @@ if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_
    	    else
            	echo $NEWID | $SUDO tee $LASTIDFILE
    	    fi
-   	    _RUN_MANIFEST=1
+            [ ! -z "$(echo $(basename `pwd`) | grep -e '^[0-9][0-9][0-9].*')" ] && _RUN_MANIFEST=1
    	 fi
    fi
 fi
