@@ -7,6 +7,8 @@ TOCLEAN="$TOCLEAN $S6Tar"
 
 STARTFILE=${START_CMD:-"start.sh"}
 
+DMO_KEYRING="https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2024.9.1_all.deb"
+
 # 
 # ---- Start script / command ----
 #
@@ -26,7 +28,14 @@ _DOCKERBODY="#
 FROM $FROMIMG
 
 RUN set -ex \\
-    && apt-get update \\
+    && echo 'Types: deb' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'URIs: https://www.deb-multimedia.org' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Suites: bookworm' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Components: main non-free' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp' >> /etc/apt/sources.list.d/dmo.sources \\
+    && curl -o /tmp/dmo-key.deb $DMO_KEYRING \\
+    && dpkg -i /tmp/dmo-key.deb && rm -f /tmp/dmo-key.deb \\
+    && apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y \\
     && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
     && apt-get install -q -y gnome fuse3 gvfs-fuse \\
     && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 mpv xtightvncviewer mesa-utils-bin \\
