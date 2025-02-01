@@ -39,6 +39,7 @@ RUN set -ex \\
     && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
     && apt-get install -q -y gnome fuse3 gvfs-fuse \\
     && apt-get install -q -y firefox-esr libreoffice freerdp2-x11 ffmpeg mpv xtightvncviewer mesa-utils-bin \\
+    && curl -fsS https://dl.brave.com/install.sh | sh \\
     && apt-get purge -y --auto-remove \\
     && apt-get clean 
 
