@@ -1,0 +1,86 @@
+FROMIMG="lrgc01/debian-net:${ARCH}"
+COMMENT="megacmd webdav server over net-tools image"
+
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
+# This is globally used
+USERDIR_=${HOMEDIR:-/home/admin}
+USERDIR_=${USERDIR_#/}
+
+IPFILE=${IPFILE:-"megacmd.host"}
+
+MEGACMD_SOURCE="https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb"
+MEGACMD_TMP="megacmd_amd64.deb"
+TOCLEAN="$TOCLEAN $MEGACMD_TMP"
+wget -O $MEGACMD_TMP -q $MEGACMD_SOURCE 
+
+# 
+# ---- Start script / command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# workaround to get my ip
+#grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+
+if [ \"\$HOME/.megacmd/session\" ]; then
+   mega-login \$(cat \$HOME/.megacmd/session)
+   mega-session
+   mega-webdav --public /
+fi
+
+# then start sshd without detach (but change off to on in nginx call)
+#/usr/sbin/sshd -D
+while :
+do
+        sleep 60
+        mega-session
+done
+mega-logout
+
+"
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+COPY $MEGACMD_TMP /
+
+RUN apt-get update && \\
+    apt-get install -q -y /$MEGACMD_TMP && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin /$MEGACMD_TMP && \\
+    rm -fr /var/lib/apt/lists/* /usr/share/man/man* && \\
+    mkdir -p $START_DIR 
+
+COPY $STARTFILE $START_DIR/
+
+# Obvious Web ports
+EXPOSE 80
+EXPOSE 443
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"/etc/nginx\", \"/var/log/nginx\", \"/var/www/html\"]
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
+# Seems useless, because when COPY by Dockerfile it looses file mode
+#chmod 755 $START_CMD
+
