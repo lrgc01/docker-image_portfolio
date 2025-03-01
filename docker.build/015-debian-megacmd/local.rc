@@ -10,6 +10,11 @@ USERDIR_=${USERDIR_#/}
 
 IPFILE=${IPFILE:-"megacmd.host"}
 
+if [ "$ARCH" != "amd64" ]; then
+   echo "megacmd only in amd64 architecture for now. Exiting."
+   exit 0
+fi
+
 MEGACMD_SOURCE="https://mega.nz/linux/repo/Debian_12/amd64/megacmd-Debian_12_amd64.deb"
 MEGACMD_TMP="megacmd_amd64.deb"
 TOCLEAN="$TOCLEAN $MEGACMD_TMP"
