@@ -21,7 +21,7 @@ RUN set -ex \\
     && apt install --reinstall \$DPKGLIST \\
     && apt install -q -y locales man-db \\
     && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
-    && apt install -q -y inetutils-syslogd xz-utils screen tmux sudo apt-utils bc \\
+    && apt install -q -y syslog-ng xz-utils screen tmux sudo apt-utils bc \\
     && apt install -q -y unzip p7zip-full \\
     && apt purge -y --auto-remove \\
     && apt clean \\
