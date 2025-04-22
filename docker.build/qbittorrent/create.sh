@@ -27,7 +27,7 @@ fi
 
 COMMENT="qbittorrent using python3-pip image"
 IMGNAME="qbittorrent"
-FROMIMG="lrgc01/python3-pip:${ARCH}"
+FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
 
 UID_=${QBITTORRENT_UID:-1000}
 GID_=${QBITTORRENT_GID:-1000}
