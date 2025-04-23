@@ -1,0 +1,58 @@
+FROMIMG="lrgc01/debian-net:${ARCH}"
+COMMENT="mysql client over openssh-server image"
+
+APTSRC=mysql.list
+TO_CLEAN="TO_CLEAN $APTSRC"
+
+cat > $APTSRC << EOF
+deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-apt-config
+deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0
+deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-tools
+deb-src [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0
+EOF
+
+#
+# Dockerfile
+#
+OLD_IFS="$IFS"
+IFS=""
+
+#echo -en \"deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-apt-config\\ndeb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0\\ndeb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-tools\\ndeb-src [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0\"
+#deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-apt-config
+#deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0
+#deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-tools
+#deb-src [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0
+
+_DOCKERBODY="#
+FROM $FROMIMG
+
+# Note1: Create mysql group and user with unprobable UID/GID 336 (mysql's port without 0)
+# Note2: clean some files that will be downloaded again on every apt update command.
+# Note3: There is no man command on base docker image, so no man pages at all.
+RUN groupadd -g 336 mysql && \\
+    useradd -M -s /bin/false -u 336 -g mysql -d /nonexistent mysql && \\
+    export DEBIAN_FRONTEND=noninteractive && \\
+    apt-get update && \\
+    apt-get install wget gnupg lsb-release -y --no-install-recommends && \\
+    wget -O /tmp/mysql.deb https://dev.mysql.com/get/mysql-apt-config_0.8.30-1_all.deb && \\
+    dpkg -i /tmp/mysql.deb && \\
+    echo 'deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-apt-config' > /etc/apt/sources.list.d/mysql.list && \\
+    echo 'deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0' >> /etc/apt/sources.list.d/mysql.list && \\
+    echo 'deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-tools' >> /etc/apt/sources.list.d/mysql.list && \\
+    echo 'deb-src [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0' >> /etc/apt/sources.list.d/mysql.list && \\
+    apt-get update && apt-get install mysql-community-client -y && \\
+    apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -f /var/lib/apt/lists/*debian.org* && \\
+    rm -fr /usr/share/man/man*
+
+
+CMD [\"/usr/sbin/sshd\",\"-D\"]
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
