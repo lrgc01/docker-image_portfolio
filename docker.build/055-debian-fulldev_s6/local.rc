@@ -22,13 +22,6 @@ FROM $FROMIMG
 ARG S6_OVERLAY_VERSION=$S6_OVERLAY_VERSION
 
 RUN set -ex \\
-    && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
-    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
-    && apt update \\
-    && DPKGLIST=\"\$(dpkg-query --show --showformat='\${Package} ')\" \\
-    && apt install --reinstall \$DPKGLIST \\
-    && apt install -q -y locales man-db \\
-    && update-locale LANG=C.UTF-8 && locale-gen --keep-existing \\
     && curl --location --output $S6_NOARCH --silent \\
        https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz \\
     && curl --location --output $S6_MACH --silent \\
