@@ -1,0 +1,62 @@
+FROMIMG="lrgc01/debian-fulldev_s6:${ARCH}"
+COMMENT="Debian Full Development desktop image"
+
+# No ffmpeg/mpv - no firefox
+
+# S6 dir hier
+cp ../scripts/$S6Tar .
+TOCLEAN="$TOCLEAN $S6Tar"
+
+STARTFILE=${START_CMD:-"start.sh"}
+
+DMO_KEYRING="https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2024.9.1_all.deb"
+
+# 
+# ---- Start script / command ----
+#
+OLD_IFS="$IFS"
+IFS=""
+
+# Extra for amd64 only
+if [ "$ARCH" = "amd64" ]; then
+    _AMD64_CHROME_SNIPPET="ADD https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp
+RUN apt install /tmp/google-chrome-stable_current_amd64.deb -y ; rm -f /tmp/google-chrome-stable_current_amd64.deb
+"
+fi
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+FROM $FROMIMG
+
+RUN set -ex \\
+    && echo 'Types: deb' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'URIs: https://www.deb-multimedia.org' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Suites: bookworm' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Components: main non-free' >> /etc/apt/sources.list.d/dmo.sources \\
+    && echo 'Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp' >> /etc/apt/sources.list.d/dmo.sources \\
+    && curl -o /tmp/dmo-key.deb $DMO_KEYRING \\
+    && dpkg -i /tmp/dmo-key.deb && rm -f /tmp/dmo-key.deb \\
+    && apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y \\
+    && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
+    && apt-get install -q -y fuse3 gvfs-fuse \\
+    && apt-get install -q -y libreoffice freerdp2-x11 xtightvncviewer \\
+    && curl -fsS https://dl.brave.com/install.sh | sh \\
+    && apt-get purge -y --auto-remove \\
+    && apt-get clean 
+
+$_AMD64_CHROME_SNIPPET
+
+ADD $S6Tar /etc/s6-overlay/
+ADD lightdm.conf /etc/lightdm/
+
+ENTRYPOINT ["/init"]
+
+"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+

@@ -18,7 +18,7 @@ LOCALBIN=${LOCALBIN:-"usr/local/bin"}
 IPFILE=${NODE_IPFILE:-"nodejs.host"}
 
 # Get Original Dockerfile as Dockerfile.inc
-wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/nodejs/docker-node/refs/heads/main/22/bookworm-slim/Dockerfile'
+#wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/nodejs/docker-node/refs/heads/main/22/bookworm-slim/Dockerfile'
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
@@ -71,12 +71,12 @@ FROM $FROMIMG
 
 LABEL Comment=\"$COMMENT\"
 
-RUN groupadd --gid 1001 node && \\
-    useradd --uid 1001 --gid node --shell /bin/bash --create-home node && \\
+RUN [ ! \$(id -g node > /dev/null) ] && echo group node exists ||  groupadd --gid 1001 node && \\
+    [ ! \$(id node > /dev/null) ] && echo user node exists || useradd --uid 1001 --gid node --shell /bin/bash --create-home node && \\
     [ ! \$(id -g $GRP_ > /dev/null) ] && echo group $GRP_ exists || groupadd --gid $GID_ $GRP_ && \\
     [ ! \$(id $USR_ > /dev/null) ] && echo user $USR_ exists || \\
     useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
-    apt-get update && apt-get install -y xz-utils gpg curl python3 make gcc g++ && \\
+    apt-get update && apt-get install -y xz-utils gpg curl python3 python3-pip python3-dev make gcc g++ && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
@@ -88,8 +88,8 @@ COPY $STARTFILE $START_DIR/
 
 IFS="$OLD_IFS"
 
-(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" | grep -v 'purge.*auto-remove' > $DOCKERFILE
-unset _DOCKERBODY
+#(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" | grep -v 'purge.*auto-remove' > $DOCKERFILE
+#unset _DOCKERBODY
 #
 # ---- end Dockerfile ----
 #
