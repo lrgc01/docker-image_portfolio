@@ -10,11 +10,21 @@ IFS=""
 _DOCKERBODY="#
 FROM $FROMIMG
 
+# First get back full system
 RUN set -ex \\
-    && apt-get update && apt-get install -q -y git vim rsync \\
+    && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
+    && apt-get update \\
+    && DPKGLIST=\"\$(dpkg-query --show --showformat='\${Package} ')\" \\
+    && apt install --reinstall \$DPKGLIST \\
+    && apt install -q -y locales man-db \\
+    && update-locale LANG=C.UTF-8 && locale-gen --keep-existing 
+
+# git & other tools
+RUN set -ex \\
+    && apt-get install -q -y git vim rsync \\
     && apt-get purge -y --auto-remove \\
     && rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin  \\
-    && rm -fr /usr/share/man/man*  \\
     && rm -rf /var/lib/apt/lists/* 
 
 CMD [ \"/usr/sbin/sshd\",\"-D\" ]

@@ -70,7 +70,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     set -ex && \\
     apt-get update && \\
     apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-zip php-imagick libfcgi-bin && \\
-    apt-get clean && \\
+    apt-get clean && apt purge -y --auto-remove \\
     #
     # Download php heathcheck to /usr/local/bin
     #
@@ -89,7 +89,6 @@ RUN groupadd -g $GID_ $GRP_ && \\
     #
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man*/* && \\
     mkdir -p /run/php $START_DIR
 
 COPY $STARTFILE $START_DIR/

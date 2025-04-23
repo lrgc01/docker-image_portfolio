@@ -1,5 +1,13 @@
 FROMIMG="lrgc01/debian-git:${ARCH}"
-COMMENT="Complete Debian with no desktop package"
+COMMENT="Extended Debian with no desktop package plus s6 supervisor"
+
+S6_NOARCH="/tmp/s6-noarch.tar.xz"
+S6_MACH="/tmp/s6-machine.tar.xz"
+
+# for S6, MACHINE is ARCH
+if [ "$MACHINE" = "armv7l" ]; then
+    MACHINE="$ARCH"
+fi
 
 # 
 # ---- Start script / command ----
@@ -25,6 +33,17 @@ RUN set -ex \\
     && apt install -q -y unzip p7zip-full \\
     && apt purge -y --auto-remove \\
     && apt clean \\
+    && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
+
+ARG S6_OVERLAY_VERSION=$S6_OVERLAY_VERSION
+
+RUN set -ex \\
+    && curl --location --output $S6_NOARCH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz \\
+    && curl --location --output $S6_MACH --silent \\
+       https://github.com/just-containers/s6-overlay/releases/download/v\${S6_OVERLAY_VERSION}/s6-overlay-${MACHINE}.tar.xz \\
+    && tar -C / -Jxpf $S6_NOARCH && tar -C / -Jxpf $S6_MACH \\
+    && rm -f $S6_NOARCH $S6_MACH \\
     && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
 
 "

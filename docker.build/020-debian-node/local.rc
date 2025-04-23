@@ -202,10 +202,9 @@ RUN groupadd --gid 1001 node && \\
     [ ! \$(id $USR_ > /dev/null) ] && echo user $USR_ exists || \\
     useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
     apt-get update && apt-get install -y xz-utils gpg curl && \\
-    apt-get clean && \\
+    apt clean && apt-get purge -y --auto-remove && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
     mkdir -p $START_DIR
 
 COPY $STARTFILE $START_DIR/

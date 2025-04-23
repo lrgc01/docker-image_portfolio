@@ -35,10 +35,9 @@ LABEL Comment=\"$COMMENT\"
 RUN set -ex && \\
     apt-get update && \\
     apt-get install -y python3-pip --no-install-recommends && \\
-    apt-get clean && \\
+    apt-get clean && apt purge -y --auto-remove && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
-    rm -fr /usr/share/man/man* && \\
     mkdir -p $START_DIR
 
 COPY $STARTFILE $START_DIR/
