@@ -37,6 +37,7 @@ RUN set -ex \\
     && echo 'Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp' >> /etc/apt/sources.list.d/dmo.sources \\
     && curl -o /tmp/dmo-key.deb $DMO_KEYRING \\
     && dpkg -i /tmp/dmo-key.deb && rm -f /tmp/dmo-key.deb \\
+    && mkdir -p /usr/share/man/man1 \\
     && apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y \\
     && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 policykit-1 \\
     && apt-get install -q -y fuse3 gvfs-fuse \\
