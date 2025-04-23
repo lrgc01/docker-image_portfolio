@@ -1,5 +1,5 @@
 COMMENT="python3-pip over openssh-server image"
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="lrgc01/debian-git:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}
