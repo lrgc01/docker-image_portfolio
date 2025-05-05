@@ -22,6 +22,7 @@ _DOCKERBODY="#
 FROM $FROMIMG
 
 RUN set -ex \\
+    && apt update \\
     && apt install -q -y syslog-ng xz-utils screen tmux sudo apt-utils bc \\
     && apt install -q -y unzip p7zip-full \\
     && apt purge -y --auto-remove \\

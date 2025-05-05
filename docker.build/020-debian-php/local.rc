@@ -70,7 +70,7 @@ RUN groupadd -g $GID_ $GRP_ && \\
     set -ex && \\
     apt-get update && \\
     apt-get install -q -y php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-zip php-imagick libfcgi-bin && \\
-    apt-get clean && apt purge -y --auto-remove \\
+    apt-get clean && apt purge -y --auto-remove && \\
     #
     # Download php heathcheck to /usr/local/bin
     #
