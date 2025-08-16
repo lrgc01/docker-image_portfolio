@@ -2,7 +2,7 @@ FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="mysql client over openssh-server image"
 
 APTSRC=mysql.list
-TO_CLEAN="TO_CLEAN $APTSRC"
+TOCLEAN="$TOCLEAN $APTSRC"
 
 cat > $APTSRC << EOF
 deb [signed-by=/usr/share/keyrings/mysql-apt-config.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-apt-config
