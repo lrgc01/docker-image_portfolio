@@ -14,7 +14,7 @@ USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
 USERDIR_=${USERDIR_#/}
 
 IPFILE=${PHP_IPFILE:-"php.host"}
-PHPVER="8.2"
+PHPVER="8.4"
 
 PHPHEALTHCK="https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck"
 

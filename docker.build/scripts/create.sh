@@ -6,10 +6,11 @@ Usage() {
         echo "	-p (prepare env (Dockerfile,etc))"
         echo "	-c (clean env (Dockerfile,etc))"
         echo "	-f <filename> (use alternate name for Dockerfile)"
-        echo "	-m (run manifest ONLY)"
+        echo "	-m - run manifest ONLY"
 	echo "	-t <img_tag> (tag image as)"
 	echo "	-h this help"
-	echo "	--force force build even if it is up to date"
+	echo "	--force - force build even if it is up to date"
+	echo "	-nc - no cache builder"
         echo "	-d (Dry Run - no arg)"
 }
 
@@ -68,6 +69,9 @@ do
 	  _CLEAN_ENV="1"
           DOCKERFILE="Dockerfile"
 	  _FORCE="1"
+          shift 1
+      ;;
+      -[nN][cC]) NOCACHE="--no-cache"
           shift 1
       ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
@@ -130,7 +134,7 @@ if [ "$_FORCE" -eq 1 -o "$_RUN_MANIFEST" -ne 1 -a "$_CLEAN_ENV" -ne 1 -a "$_ENV_
            EXITCODE=111
    else
       # Now build the image using docker build only if root is running
-   	 $DRYRUN $SUDO docker build -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
+   	 $DRYRUN $SUDO docker build $NOCACHE -t ${FOLDER}${_TAG}:${ARCH} -f ${DOCKERFILE} .
    	 if [ $? -eq 0 ]; then
    	    if [ ! -z "$DRYRUN" ]; then
                echo "Would write NEWID according to: $NEWID"

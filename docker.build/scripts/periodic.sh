@@ -9,6 +9,7 @@ Usage() {
    -c clean
    -l <build list> (space separated and quoted)
    -s <skip list> (space separated and quoted)
+   -nc (do not use builder cache)
    -d (Dry Run - no arg)
 "
 }
@@ -34,6 +35,9 @@ do
       ;;
       -[sS]) SKIPLIST="$2"
           shift 2
+      ;;
+      -[nN][cC]) NOCACHE="-nc"
+          shift 1
       ;;
       --[dD][rR][yY]-[rR][uU][nN]|-[dD]) 
           DRYRUN='echo [DryRun] Would run:'
@@ -67,7 +71,7 @@ do
     echo "   -----   Running in $BASEDIR/$bld   ------  "
     echo "----------------------------------------------"
     ( cd $BASEDIR/$bld 
-      [ -f ./create.sh ] && $_SUDO ./create.sh $CLEAN $_MINUSD $PREPARE $FORCE
+      [ -f ./create.sh ] && $_SUDO ./create.sh $CLEAN $_MINUSD $PREPARE $FORCE $NOCACHE
     )
     #if [ $? -ne 0 -a "$FORCE" != "-f" ]; then
     #	break

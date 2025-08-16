@@ -36,8 +36,11 @@ fi
 _DOCKERBODY="#
 FROM $FROMIMG
 
+# systemd-journal group doesn't make sense inside docker and breaks mongodb Dockerfile
 RUN set -ex \\
-    && apt update && apt install -q -y openssh-server --no-install-recommends \\
+    && [ \$(id -g systemd-journal > /dev/null) ] \\
+    && groupdel systemd-journal ; \\
+    apt update && apt install -q -y openssh-server --no-install-recommends \\
     && apt purge -y --auto-remove \\
     && useradd -m -s /bin/bash admin \\
     && rm -rf /var/lib/apt/lists/* \\
