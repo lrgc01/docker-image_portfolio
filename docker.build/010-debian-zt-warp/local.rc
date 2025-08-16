@@ -1,0 +1,76 @@
+FROMIMG="lrgc01/debian-net:${ARCH}"
+COMMENT="Cloudflare warp service over net-tools image"
+
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
+IPFILE=${IPFILE:-"megacmd.host"}
+
+if [ "$ARCH" != "amd64" ]; then
+   echo "megacmd only in amd64 architecture for now. Exiting."
+   exit 0
+fi
+
+# 
+# ---- Start script / command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+if [ ! -d /run/dbus ]; then
+   mkdir /run/dbus
+fi
+/bin/dbus-daemon --fork --syslog --system
+
+while :
+do
+   if [ ! \$(which warp-svc > /dev/null 2>&1) ]; then
+      warp-svc
+   else
+      echo \"warp-svc not found\"
+   fi
+   sleep 10
+done
+"
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt-get update && apt install -y --no-install-recommends gpg iptables \\
+    && curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg \\
+    | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg \\
+    && echo \"deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] \\
+    https://pkg.cloudflareclient.com/ $(lsb_release -cs) main\" \\
+    | tee /etc/apt/sources.list.d/cloudflare-client.list \\
+    && apt-get update && apt-get install -y cloudflare-warp \\
+    && apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* /usr/share/man/man* && \\
+    mkdir -p $START_DIR 
+
+COPY $STARTFILE $START_DIR/
+
+VOLUME  [\"/var/lib/cloudflare-warp\"]
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
+# Seems useless, because when COPY by Dockerfile it looses file mode
+#chmod 755 $START_CMD
+
