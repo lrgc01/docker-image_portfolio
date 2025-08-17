@@ -1,15 +1,13 @@
+if [ "$ARCH" != "amd64" ]; then
+   echo "Zerotrust connectors only in amd64 architecture for now. Exiting."
+   exit 0
+fi
+
 FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Cloudflare warp service over net-tools image"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}
-
-IPFILE=${IPFILE:-"megacmd.host"}
-
-if [ "$ARCH" != "amd64" ]; then
-   echo "megacmd only in amd64 architecture for now. Exiting."
-   exit 0
-fi
 
 # 
 # ---- Start script / command ----
