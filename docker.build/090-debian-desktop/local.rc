@@ -40,7 +40,7 @@ RUN set -ex \\
     && curl -o /tmp/dmo-key.deb $DMO_KEYRING \\
     && dpkg -i /tmp/dmo-key.deb && rm -f /tmp/dmo-key.deb \\
     && apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y \\
-    && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies openbox dbus-x11 \\
+    && apt-get install -q -y xorg xrdp xfce4 xfce4-goodies xfce4-screensaver dbus-x11 \\
     && apt-get install -q -y gnome fuse3 gvfs-fuse xserver-xorg-input-evdev mkvtoolnix \\
     && apt-get install -q -y firefox-esr libreoffice freerdp3-x11 ffmpeg mpv xtightvncviewer mesa-utils-bin \\
     && curl -fsS https://dl.brave.com/install.sh | sh \\
