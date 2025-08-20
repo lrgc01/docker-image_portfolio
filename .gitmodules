@@ -1,0 +1,4 @@
+[submodule "docker.build/scripts"]
+	path = docker.build/scripts
+	url = git@github.com:lrgc01/docker-scripts.git
+	branch = master
