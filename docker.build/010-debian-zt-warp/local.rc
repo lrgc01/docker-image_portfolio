@@ -25,12 +25,12 @@ fi
 
 while :
 do
+   sleep 10
    if [ ! \$(which warp-svc > /dev/null 2>&1) ]; then
       warp-svc
    else
       echo \"warp-svc not found\"
    fi
-   sleep 10
 done
 "
 #

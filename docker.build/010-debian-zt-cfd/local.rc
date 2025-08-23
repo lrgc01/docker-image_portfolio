@@ -20,6 +20,7 @@ _STARTBODY="#!/bin/bash
 
 while :
 do
+   sleep 10
    if [ -z \"\$CF_TOKEN\" -a -f \"\$START_DIR/.cf_token\" ]; then
       source \"\$START_DIR/.cf_token\"
    fi
@@ -28,7 +29,6 @@ do
    else
       echo \"cloudflared service not found\"
    fi
-   sleep 10
 done
 "
 #
