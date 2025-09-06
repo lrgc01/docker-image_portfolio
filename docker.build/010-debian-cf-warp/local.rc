@@ -1,4 +1,4 @@
-if [ "$ARCH" != "amd64" ]; then
+if [ "$ARCH" != "amd64" -a "$ARCH" != "arm64" ]; then
    echo "Zerotrust connectors only in amd64 architecture for now. Exiting."
    exit 0
 fi
