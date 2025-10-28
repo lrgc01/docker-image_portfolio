@@ -1,7 +1,7 @@
-if [ "$ARCH" != "amd64" ]; then
-   echo "Zerotrust connectos only in amd64 architecture for now. Exiting."
-   exit 0
-fi
+#if [ "$ARCH" != "amd64" ]; then
+#   echo "Zerotrust connectors only in amd64 architecture for now. Exiting."
+#   exit 0
+#fi
 
 FROMIMG="lrgc01/debian-net:${ARCH}"
 COMMENT="Cloudflared service over net-tools image"

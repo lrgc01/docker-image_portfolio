@@ -44,9 +44,6 @@ RUN set -ex \\
     && apt-get install -q -y gnome fuse3 gvfs-fuse xserver-xorg-input-evdev mkvtoolnix \\
     && apt-get install -q -y firefox-esr libreoffice freerdp3-x11 ffmpeg mpv xtightvncviewer mesa-utils-bin \\
     && curl -fsS https://dl.brave.com/install.sh | sh \\
-    && wget -O $TMP_JELLYFIN $JELLYFIN_CLIENT \\
-    && apt install -y $TMP_JELLYFIN \\
-    && rm -f $TMP_JELLYFIN \\
     && apt-get purge -y --auto-remove \\
     && apt-get clean 
 
