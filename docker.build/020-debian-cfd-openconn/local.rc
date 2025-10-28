@@ -1,0 +1,65 @@
+#if [ "$ARCH" != "amd64" ]; then
+#   echo "Zerotrust connectors only in amd64 architecture for now. Exiting."
+#   exit 0
+#fi
+
+FROMIMG="lrgc01/debian-zt-cfd:${ARCH}"
+COMMENT="Openconnect service over cloudflare argo image"
+
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
+# 
+# ---- Start script / command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+while :
+do
+   sleep 10
+   if [ -z \"\$CF_TOKEN\" -a -f \"\$START_DIR/.cf_token\" ]; then
+      source \"\$START_DIR/.cf_token\"
+   fi
+   if [ ! \$(which cloudflared > /dev/null 2>&1) ]; then
+      [ ! -z \"\$CF_TOKEN\" ] && (echo \"Starting cloudflared service\" ; cloudflared tunnel run --token \$CF_TOKEN) || echo \"Missing token. Retrying after 10s\"
+   else
+      echo \"cloudflared service not found\"
+   fi
+done
+"
+#
+# ---- end workaround IP ----
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN set -ex \\
+    && apt-get update && apt-get install -y openconnect \\
+    && apt-get clean && \\
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* /usr/share/man/man* && \\
+    mkdir -p $START_DIR 
+
+COPY $STARTFILE $START_DIR/
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]"
+
+IFS="$OLD_IFS"
+
+# 
+# ---- end Dockerfile ----
+#
+
+# Seems useless, because when COPY by Dockerfile it looses file mode
+#chmod 755 $START_CMD
+
