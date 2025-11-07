@@ -21,7 +21,7 @@ RUN set -ex \\
     && sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \\
     && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker \\
     && apt-get update \\
-    && apt install -q -y cron logrotate docker.io --no-install-recommends \\
+    && apt install -q -y cron logrotate docker.io docker-cli --no-install-recommends \\
     && apt purge -y --auto-remove \\
     && apt clean \\
     && touch /var/run/utmp && chgrp utmp /var/run/utmp && chmod g+w /var/run/utmp
