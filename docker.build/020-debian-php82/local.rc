@@ -1,0 +1,111 @@
+FROMIMG="debian:bookworm-slim"
+COMMENT="PHP and php-fpm software 8.2 server over bookworm image"
+
+START_DIR=${START_DIR:-"/start.d"}
+STARTFILE=${START_CMD:-"start.sh"}
+
+# Not used, just in case ...
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+# This is globally used
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+USERDIR_=${USERDIR_#/}
+
+IPFILE=${PHP_IPFILE:-"php.host"}
+PHPVER="8.2"
+
+PHPHEALTHCK="https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck"
+
+# 
+# ---- Start command ----
+#    ... with workaround to get IP 
+#
+OLD_IFS="$IFS"
+IFS=""
+
+_STARTBODY="#!/bin/bash
+
+# Some environment variables that may be passed to the container
+# Any file/script can be uploaded inside a volume using the Docker Host
+START_SH=\${DOCKER_START_SH}
+WORKDIR=\${DOCKER_WORKDIR:-\"/startup.d\"}
+
+# First start the fpm server as a daemon
+/usr/sbin/php-fpm$PHPVER --daemonize --fpm-config /etc/php/$PHPVER/fpm/php-fpm.conf
+
+# Start of the container main purpose app
+if [ -d \"\$WORKDIR\" ]; then
+   cd \"\$WORKDIR\"
+fi
+
+# If there is a application script, run it, otherwise run sshd below
+if [ -f \"\$START_SH\" ]; then
+   bash \"\$START_SH\"
+else
+   if [ -d \"/$USERDIR_\" ];  then
+      # workaround to get my ip
+      grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+   fi
+   # -D to run the daemon in foreground
+   /usr/sbin/sshd -D
+fi
+"
+#
+# ---- end workaround IP ----
+
+#
+# Dockerfile
+#
+_DOCKERBODY="#
+# This is a Dockerfile made from create.sh script - don't change here
+#
+FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    set -ex && \\
+    apt-get update && \\
+    apt-get install -q -y curl php php-fpm php-mysql php-gd php-curl php-mbstring php-intl php-xml php-zip php-imagick libfcgi-bin && \\
+    apt-get clean && apt purge -y --auto-remove && \\
+    #
+    # Download php heathcheck to /usr/local/bin
+    #
+    mkdir -p /usr/local/bin 2>&1 > /dev/null ; \\
+    curl -o /usr/local/bin/php-fpm-healthcheck $PHPHEALTHCK && \\
+    chmod +x /usr/local/bin/php-fpm-healthcheck && \\
+    #
+    # Replace config to listen port instead of socket and to open status port/folder
+    #
+    sed -i /etc/php/$PHPVER/fpm/pool.d/www.conf \\
+      -e 's,listen = /run/php/php$PHPVER-fpm.sock,listen = 9000,' \\
+      -e 's,;pm.status_path = .*,pm.status_path = /status,' \\
+      -e 's,;pm.status_listen = .*,pm.status_listen = 9001,' && \\
+    #
+    # Clean stuff
+    #
+    rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
+    rm -fr /var/lib/apt/lists/* && \\
+    mkdir -p /run/php $START_DIR
+
+COPY $STARTFILE $START_DIR/
+
+HEALTHCHECK --interval=5s --timeout=1s \\
+    CMD php-fpm-healthcheck || exit 1
+
+# If someone wants TCP instead of socket
+EXPOSE 9000
+
+# Add VOLUMEs to allow backup of config, logs and other (this is a best practice)
+VOLUME  [\"/run/php\",\"/etc/php\"]
+
+CMD [\"sh\",\"$START_DIR/$STARTFILE\"]
+"
+IFS="$OLD_IFS"
+
+#
+# ---- end Dockerfile ----
+#
