@@ -11,7 +11,7 @@ GRP_=${PYTHON3_GRP:-pygrp}
 USERDIR_=${PYTHON3_HOMEDIR:-conf.d}
 USERDIR_=${USERDIR_#/}
 
-IPFILE=${PYTHON3_IPFILE:-"host.ip"}
+IPFILE=${PYTHON3_IPFILE:-"python.host"}
 
 # 
 # ---- Start command ----
@@ -24,6 +24,13 @@ _STARTBODY="#!/bin/bash
 
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"$START_DIR/$IPFILE\"
+
+# Set for jenkins cluster using a wrapper script
+if [ -d \"\$JENKINS_HOME\" ]; then
+   # Create jenkins user and copy hostfile workaround
+   [ id -u \$JENKINS_USER ] || useradd -u \$JENKINS_UID -d \$JENKINS_HOME -s /bin/bash \$JENKINS_USER
+   cp -f \"$START_DIR/$IPFILE\" \"\$JENKINS_HOME\"
+fi
 
 /usr/sbin/sshd -D
 "

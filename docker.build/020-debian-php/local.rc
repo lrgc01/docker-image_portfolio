@@ -48,6 +48,12 @@ else
       # workaround to get my ip
       grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
    fi
+   # Set for jenkins cluster using a wrapper script
+   if [ -d \"\$JENKINS_HOME\" ]; then
+      # Create jenkins user and copy hostfile workaround
+      [ id -u \$JENKINS_USER ] || useradd -u \$JENKINS_UID -d \$JENKINS_HOME -s /bin/bash \$JENKINS_USER 
+      cp -f \"/$USERDIR_/$IPFILE\" \"\$JENKINS_HOME\"
+   fi
    # -D to run the daemon in foreground
    /usr/sbin/sshd -D
 fi
