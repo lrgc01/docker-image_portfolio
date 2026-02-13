@@ -1,5 +1,5 @@
-COMMENT="python3-dev over python3-pip image"
-FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
+COMMENT="python3-full over ssh image"
+FROMIMG="lrgc01/debian-ssh:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}
@@ -50,7 +50,7 @@ LABEL Comment=\"$COMMENT\"
 RUN set -ex && \\
     apt-get update && \\
     apt install -y build-essential extrepo && \\
-    apt-get install -y python3-venv python3-dev python3-requests libssl-dev \\
+    apt-get install -y python3-full libssl-dev \\
       zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev \\
       tk-dev uuid-dev && \\
     apt-get clean && \\

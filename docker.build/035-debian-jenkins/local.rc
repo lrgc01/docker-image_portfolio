@@ -66,7 +66,7 @@ echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
 PYHOST_FILE=${PYHOST_FILE:-"python.host"}
 PYWRAP_FILE=${PYWRAP_FILE:-"python_wrap.sh"}
 # python commands to be linked to $PYWRAP_FILE
-PYFILES="python python3 pytest py.test pyinstaller"
+PYFILES="python python3 pytest py.test pyinstaller pip pip3"
 
 if [ ! -d $LOCALBIN ]; then
    mkdir -p $LOCALBIN
@@ -74,8 +74,8 @@ fi
 cat > $LOCALBIN/$PYWRAP_FILE << EOF
 #!/bin/sh
 
-if [ -f ~/$PYHOST_FILE ]; then
-   PYHOST=\$(head -1 ~/$PYHOST_FILE)
+if [ -f ~jenkins/$PYHOST_FILE ]; then
+   PYHOST=\$(head -1 ~jenkins/$PYHOST_FILE)
 else
    PYHOST=python
 fi
@@ -118,8 +118,8 @@ fi
 cat > $LOCALBIN/$NODE_WRAP_FILE << EOF
 #!/bin/sh
 
-if [ -f ~/$NODE_HOST_FILE ]; then
-   NODE_HOST=\$(head -1 ~/$NODE_HOST_FILE)
+if [ -f ~jenkins/$NODE_HOST_FILE ]; then
+   NODE_HOST=\$(head -1 ~jenkins/$NODE_HOST_FILE)
 else
    NODE_HOST=node
 fi
@@ -157,8 +157,8 @@ fi
 cat > $LOCALBIN/$PHP_WRAP_FILE << EOF
 #!/bin/sh
 
-if [ -f ~/$PHP_HOST_FILE ]; then
-   PHP_HOST=\$(head -1 ~/$PHP_HOST_FILE)
+if [ -f ~jenkins/$PHP_HOST_FILE ]; then
+   PHP_HOST=\$(head -1 ~jenkins/$PHP_HOST_FILE)
 else
    PHP_HOST=php
 fi
@@ -192,6 +192,14 @@ umask 022
 JENKINS_WAR="$JENKINS_WAR"
 URL="$JENKINS_URL"
 JPORT=\${DOCKER_JENKINS_PORT:-8080}
+
+# set timezone
+if [ ! -z "\$TZ" ]; then
+   ZINFOFILE="/usr/share/zoneinfo/\$TZ"
+   if [ -f "\$ZINFOFILE" ]; then
+      (cd /etc ; ln -sf \$ZINFOFILE localtime)
+   fi
+fi
 
 # check for WAR. If not found, donwload and try.
 if [ -f "\$JENKINS_WAR" ]; then
