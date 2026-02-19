@@ -81,14 +81,17 @@ else
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
-COMMAND=\`basename \$0\`	# Just want the command name itself
+#COMMAND=\`basename \$0\`	# Just want the command name itself
+COMMAND=\"\$0\"
 
-if [ "\$COMMAND" = "python" ] ; then
-   # If need python2, remove this IF but install python2 in the python container
-   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; python3 "\$@" )"
-else
-   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
-fi
+ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
+
+#if [ "\$COMMAND" = "python" ] ; then
+#   # If need python2, remove this IF but install python2 in the python container
+#   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; python3 "\$@" )"
+#else
+#   ssh -o StrictHostKeyChecking=no \$PYHOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
+#fi
 
 EOF
 
@@ -109,8 +112,8 @@ done )
 # This will be used by jenkins to find out the node.js host
 NODE_HOST_FILE=${NODE_HOST_FILE:-"nodejs.host"}
 NODE_WRAP_FILE=${NODE_WRAP_FILE:-"nodejs_wrap.sh"}
-# python commands to be linked to $PYWRAP_FILE
-NODE_FILES="node npm "
+# node commands to be linked to $NODE_WRAP_FILE
+NODE_FILES="node npm npx nodejs"
 
 if [ ! -d $LOCALBIN ]; then
    mkdir -p $LOCALBIN
@@ -125,7 +128,8 @@ else
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
-COMMAND=\`basename \$0\`	# Just want the command name itself
+#COMMAND=\`basename \$0\`	# Just want the command name itself
+COMMAND=\"\$0\"
 
 ssh -o StrictHostKeyChecking=no \$NODE_HOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
 
@@ -164,7 +168,8 @@ else
 fi
 
 CWD="\`pwd\`"		# Should run in the same directory
-COMMAND=\`basename \$0\`	# Just want the command name itself
+#COMMAND=\`basename \$0\`	# Just want the command name itself
+COMMAND=\"\$0\"
 
 ssh -o StrictHostKeyChecking=no \$PHP_HOST "(cd \"\$CWD\" ; \$COMMAND "\$@" )"
 
@@ -264,7 +269,7 @@ ADD $TAR_BALL /
 # BUT works on arm64 platforms...
 
 RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ $USR_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ && \\
     mkdir -p $JENKINS_WAR_PATH && \\
     chmod 755 $JENKINS_WAR_PATH && chown $UID_:$GID_ $JENKINS_WAR_PATH
 

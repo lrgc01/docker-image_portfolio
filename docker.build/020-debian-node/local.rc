@@ -178,6 +178,7 @@ else
    if [ -d \"/$USERDIR_\" ];  then
       # workaround to get my ip
       grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"/$USERDIR_/$IPFILE\"
+      (cd /usr/local/bin && ln -sf /usr/bin/node* /usr/bin/npx /usr/bin/npm .)
    fi
    # Set for jenkins cluster using a wrapper script
    if [ -d \"\$JENKINS_HOME\" ]; then

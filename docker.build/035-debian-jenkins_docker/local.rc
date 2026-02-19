@@ -1,0 +1,188 @@
+OMMENT="Jenkins over base + jdk environment"
+
+FROMIMG="lrgc01/debian-openjdk:${ARCH}"
+
+if [ `whoami` != "root" ]; then
+        SUDO="sudo"
+fi
+
+# These are expected to be sourced from generic.rc
+UID_=${JENKINS_UID:-102}
+GID_=${JENKINS_GID:-103}
+USR_=${JENKINS_USR:-pyuser}
+GRP_=${JENKINS_GRP:-pygrp}
+USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+# Strip out first slash
+USERDIR_=${USERDIR_#/}
+KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
+BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
+LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
+JENKINS_WAR_PATH=${JENKINS_WAR_PATH:-"/$USERDIR_/bin"}
+JENKINS_WAR=${JENKINS_WAR:-"$JENKINS_WAR_PATH/jenkins.war"}
+JENKINS_URL="https://get.jenkins.io/war-stable/latest/jenkins.war"
+
+DOCKER_TGZ=/var/lib_docker.tgz
+
+# Temporary tarball to ADD into the container
+TAR_BALL=temp_tarball.tgz
+
+TOCLEAN="$TAR_BALL jenkins.war daemon.json"
+
+if [ ! -d $LOCALBIN ]; then
+   mkdir -p $LOCALBIN
+fi
+
+# Pre build of some directory trees
+#
+# ---- SSH configuration ----
+#
+if [ ! -d "$USERDIR_" ]; then
+   mkdir -p "$USERDIR_" 
+fi
+#mkdir -p "$USERDIR_"/.ssh
+#ssh-keygen -f "$USERDIR_/.ssh/$KEY_FILE" -N ''
+#cp "$USERDIR_/.ssh/$KEY_FILE".pub "$USERDIR_"/.ssh/authorized_keys
+# ssh config to use widely
+#cat > "$USERDIR_"/.ssh/config << EOF
+#Host *
+#IdentityFile ~/.ssh/$KEY_FILE
+#User $USR_
+#StrictHostKeyChecking no
+#EOF
+#
+# ---- end SSH ----
+
+# 
+# ---- other user configs ----
+echo export PATH=$BASEPATH > "$USERDIR_"/.profile
+echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
+# ---- end configs ----
+
+#
+# ---- The jenkins CMD to start container ----
+cat > $LOCALBIN/jenkins << EOF
+#!/bin/bash
+
+PATH=$BASEPATH
+export PATH
+umask 022
+JENKINS_WAR="$JENKINS_WAR"
+URL="$JENKINS_URL"
+JPORT=\${DOCKER_JENKINS_PORT:-8080}
+
+# set timezone
+if [ ! -z "\$TZ" ]; then
+   ZINFOFILE="/usr/share/zoneinfo/\$TZ"
+   if [ -f "\$ZINFOFILE" ]; then
+      (cd /etc ; ln -sf \$ZINFOFILE localtime)
+   fi
+fi
+
+# check for WAR. If not found, donwload and try.
+if [ -f "\$JENKINS_WAR" ]; then
+   _FOUND_JENKINS=1
+else
+   mkdir -p "\$(dirname \$JENKINS_WAR)"
+   # Download
+   if [ "\$(which curl)" != "" ]; then
+      echo "\$(date): Downloading \$URL to \$JENKINS_WAR with curl"
+      curl --silent --location --output \$JENKINS_WAR \$URL && _FOUND_JENKINS=1
+      echo "\$(date): Downloaded."
+   elif [ "\$(which wget)" != "" ]; then
+      echo "\$(date): Downloading \$URL to \$JENKINS_WAR with wget"
+      wget -q -O \$JENKINS_WAR \$URL && _FOUND_JENKINS=1
+      echo "\$(date): Downloaded."
+   fi   
+fi
+
+# Docker inside the container
+#if [ ! -d /var/lib/docker/volumes ]; then
+#   if [ -f $DOCKER_TGZ ]; then
+#      tar -xpf $DOCKER_TGZ -C /
+#   fi
+#fi
+dockerd
+
+if [ "\$_FOUND_JENKINS" = "1" ]; then
+   if [ \$(whoami) = "root" ]; then
+      su -l jenkins -c "java -jar \$JENKINS_WAR --httpPort=\$JPORT" &
+      /usr/sbin/sshd -D
+   else
+      java -jar \$JENKINS_WAR --httpPort=\$JPORT
+   fi
+else
+   echo "Jenkins not found and could not be downloaded. Aborting."
+   exit 2
+fi
+EOF
+
+chmod 755 $LOCALBIN/jenkins
+#
+# ---- end jenkins CMD ----
+
+# Docker daemon.json that stays in /etc/docker
+cat > daemon.json << EOF
+{
+  "ipv6": true,
+  "fixed-cidr-v6": "fcbb:d11d:deb::/64",
+  "experimental": true,
+  "ip6tables": true,
+  "default-address-pools": [
+    { "base": "172.29.0.0/14", "size": 22 },
+    { "base": "fcbb:d11d:d0c::/56", "size": 72 }
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "50m",
+    "max-file": "3"
+  }
+}
+EOF
+
+# Before packing, ensure proper settings to ensure ssh running
+$SUDO chown -R $UID_:$GID_ "$USERDIR_"
+$SUDO chmod -R go-rwx "$USERDIR_"
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.profile
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.bashrc
+# Make tar ball that will contain usr and var trees
+[ -d usr ] && DIRLIST="$DIRLIST usr"
+[ -d etc ] && DIRLIST="$DIRLIST etc"
+[ -d var ] && DIRLIST="$DIRLIST var"
+# may add USERDIR_ when it is not inside var
+#[ -d $USERDIR_ ] && DIRLIST="$DIRLIST $USERDIR_"
+$SUDO tar -czf ${TAR_BALL} $DIRLIST
+
+
+# 
+# ---- Finally Dockerfile ----
+#
+OLD_IFS="$IFS"
+IFS=""
+_DOCKERBODY="FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+ADD $TAR_BALL /
+
+# Check https://docs.docker.com/engine/reference/builder/#add to see the useless behavior of ADD --chmod when donwloading from URL
+# BUT works on arm64 platforms...
+
+RUN groupadd -g $GID_ $GRP_ && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ && \\
+    mkdir -p $JENKINS_WAR_PATH && \\
+    chmod 755 $JENKINS_WAR_PATH && chown $UID_:$GID_ $JENKINS_WAR_PATH && \\
+    apt update && \\
+    apt install -y docker.io docker-cli docker-compose tini containerd libfuse3-4 && \\
+    apt clean && \\
+    [ ! -d /etc/docker ] && mkdir /etc/docker
+
+COPY daemon.json /etc/docker
+
+EXPOSE 8080
+
+VOLUME  [\"/$USERDIR_\"]
+
+CMD [\"/$LOCALBIN/jenkins\"]
+"
+IFS="$OLD_IFS"
+#EOF

@@ -24,6 +24,7 @@ _STARTBODY="#!/bin/bash
 
 # workaround to get my ip
 grep -w \$(hostname) /etc/hosts | awk '{print \$1}' > \"$START_DIR/$IPFILE\"
+(cd /usr/local/bin && ln -sf /usr/bin/python* .)
 
 # Set for jenkins cluster using a wrapper script
 if [ -d \"\$JENKINS_HOME\" ]; then
