@@ -1,32 +1,29 @@
 COMMENT="Docker in Docker + jre environment"
 
-FROMIMG="${BASE_FOLDER}debian-openjre:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-git:${ARCH}"
 
 if [ `whoami` != "root" ]; then
         SUDO="sudo"
 fi
 
 # These are expected to be sourced from generic.rc
-UID_=${JENKINS_UID:-102}
-GID_=${JENKINS_GID:-103}
-USR_=${JENKINS_USR:-pyuser}
-GRP_=${JENKINS_GRP:-pygrp}
-USERDIR_=${JENKINS_HOMEDIR:-var/lib/jenkins}
+UID_=${ADMIN_UID:-102}
+GID_=${ADMIN_GID:-103}
+USR_=${ADMIN_USR:-admin}
+GRP_=${ADMIN_GRP:-admin}
+USERDIR_=${ADMIN_HOMEDIR:-home/admin}
 # Strip out first slash
 USERDIR_=${USERDIR_#/}
-KEY_FILE=${JENKINS_KEY_FILE:-"Jenkins_System_Key"}
+KEY_FILE=${ADMIN_KEY_FILE:-"id_rsa"}
 BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
-LOCALBIN=${JENKINS_LOCALBIN:-"usr/local/bin"}
-JENKINS_WAR_PATH=${JENKINS_WAR_PATH:-"/$USERDIR_/bin"}
-JENKINS_WAR=${JENKINS_WAR:-"$JENKINS_WAR_PATH/jenkins.war"}
-JENKINS_URL="https://get.jenkins.io/war-stable/latest/jenkins.war"
+LOCALBIN=${ADMIN_LOCALBIN:-"usr/local/bin"}
 
 DOCKER_TGZ=/var/lib_docker.tgz
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
 
-TOCLEAN="$TAR_BALL jenkins.war daemon.json"
+TOCLEAN="$TAR_BALL daemon.json"
 
 if [ ! -d $LOCALBIN ]; then
    mkdir -p $LOCALBIN
@@ -145,19 +142,12 @@ ADD $TAR_BALL /
 # Check https://docs.docker.com/engine/reference/builder/#add to see the useless behavior of ADD --chmod when donwloading from URL
 # BUT works on arm64 platforms...
 
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ && \\
-    mkdir -p $JENKINS_WAR_PATH && \\
-    chmod 755 $JENKINS_WAR_PATH && chown $UID_:$GID_ $JENKINS_WAR_PATH && \\
+RUN groupadd -g $GID_ $GRP_ || true && \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ || true && \\
     apt update && \\
-    apt install -y podman fuse-overlayfs uidmap && \\
+    apt install -y docker.io docker-cli docker-compose tini containerd libfuse3-4 && \\
     apt clean && \\
-    mkdir -p /etc/containers && \\
-    printf \"[storage]\ndriver = \\\"overlay\\\"\n\n[storage.options]\nmount_program = \\\"/usr/bin/fuse-overlayfs\\\"\n\" > /etc/containers/storage.conf && \\
-    printf \"root:100000:65536\n$USR_:200000:65536\n\" > /etc/subuid && \\
-    printf \"root:100000:65536\n$USR_:200000:65536\n\" > /etc/subgid 
-
-ENV _CONTAINERS_USERNS_CONFIGURED=\"\"
+    usermod -G docker -a $USR_
 
 EXPOSE 22
 
