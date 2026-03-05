@@ -1,0 +1,137 @@
+COMMENT="Postgresql from official image plus timescaleDB community licensed"
+
+#FROMIMG="${BASE_FOLDER}debian-git:${ARCH}"
+FROMIMG="postgres:17-trixie"
+
+if [ `whoami` != "root" ]; then
+        SUDO="sudo"
+fi
+
+# These are expected to be sourced from generic.rc
+UID_=${ADMIN_UID:-102}
+GID_=${ADMIN_GID:-103}
+USR_=${ADMIN_USR:-admin}
+GRP_=${ADMIN_GRP:-admin}
+USERDIR_=${ADMIN_HOMEDIR:-home/admin}
+# Strip out first slash
+USERDIR_=${USERDIR_#/}
+KEY_FILE=${ADMIN_KEY_FILE:-"id_rsa"}
+BASEPATH=${BASEPATH:-"/usr/local/bin:/usr/local/sbin:/opt/maven/bin:/usr/bin:/usr/sbin:/bin:/sbin"}
+LOCALBIN=${ADMIN_LOCALBIN:-"usr/local/bin"}
+
+DOCKER_TGZ=/var/lib_docker.tgz
+
+# Temporary tarball to ADD into the container
+TAR_BALL=temp_tarball.tgz
+
+TOCLEAN="$TAR_BALL daemon.json"
+
+if [ ! -d $LOCALBIN ]; then
+   mkdir -p $LOCALBIN
+fi
+
+# Pre build of some directory trees
+#
+# ---- SSH configuration ----
+#
+if [ ! -d "$USERDIR_" ]; then
+   mkdir -p "$USERDIR_" 
+fi
+#mkdir -p "$USERDIR_"/.ssh
+#ssh-keygen -f "$USERDIR_/.ssh/$KEY_FILE" -N ''
+#cp "$USERDIR_/.ssh/$KEY_FILE".pub "$USERDIR_"/.ssh/authorized_keys
+# ssh config to use widely
+#cat > "$USERDIR_"/.ssh/config << EOF
+#Host *
+#IdentityFile ~/.ssh/$KEY_FILE
+#User $USR_
+#StrictHostKeyChecking no
+#EOF
+#
+# ---- end SSH ----
+
+# 
+# ---- other user configs ----
+echo export PATH=$BASEPATH > "$USERDIR_"/.profile
+echo export PATH=$BASEPATH > "$USERDIR_"/.bashrc
+# ---- end configs ----
+
+#
+# ---- start.sh ----
+# ---- DOES NOT install jenkins in node ----
+#
+cat > $LOCALBIN/start.sh << EOF
+#!/bin/bash
+
+PATH=$BASEPATH
+export PATH
+umask 022
+
+# set timezone
+if [ ! -z "\$TZ" ]; then
+   ZINFOFILE="/usr/share/zoneinfo/\$TZ"
+   if [ -f "\$ZINFOFILE" ]; then
+      (cd /etc ; ln -sf \$ZINFOFILE localtime)
+   fi
+fi
+
+# Docker in Docker
+rm -fr /var/run/docker/*
+rm -f /var/run/docker.*
+dockerd &
+
+# Check if the agent was already configured and is ready to run
+if [ -f /data/run-agent.sh ]; then
+   /usr/sbin/sshd
+   sh /data/run-agent.sh
+else
+   /usr/sbin/sshd -D
+fi
+EOF
+
+chmod 755 $LOCALBIN/start.sh
+#
+# ---- end start.sh CMD ----
+
+# Before packing, ensure proper settings to ensure ssh running
+$SUDO chown -R $UID_:$GID_ "$USERDIR_"
+$SUDO chmod -R go-rwx "$USERDIR_"
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.profile
+$SUDO chown $UID_:$GID_ "$USERDIR_"/.bashrc
+# Make tar ball that will contain usr and var trees
+[ -d usr ] && DIRLIST="$DIRLIST usr"
+[ -d etc ] && DIRLIST="$DIRLIST etc"
+[ -d var ] && DIRLIST="$DIRLIST var"
+# may add USERDIR_ when it is not inside var
+#[ -d $USERDIR_ ] && DIRLIST="$DIRLIST $USERDIR_"
+$SUDO tar -czf ${TAR_BALL} $DIRLIST
+
+
+# 
+# ---- Finally Dockerfile ----
+#
+OLD_IFS="$IFS"
+IFS=""
+_DOCKERBODY="FROM $FROMIMG
+
+LABEL Comment=\"$COMMENT\"
+
+RUN apt update && \\
+    apt install -y debian-archive-keyring curl gnupg apt-transport-https && \\
+    mkdir -p /etc/apt/keyrings || true && \\
+    curl -fsSL https://packagecloud.io/timescale/timescaledb/gpgkey \\
+    | gpg --dearmor > /etc/apt/keyrings/timescale_timescaledb.gpg && \\
+    echo 'deb [signed-by=/etc/apt/keyrings/timescale_timescaledb.gpg] https://packagecloud.io/timescale/timescaledb/debian trixie main' >> /etc/apt/sources.list.d/timescaledb.list && \\
+    echo 'deb-src [signed-by=/etc/apt/keyrings/timescale_timescaledb.gpg] https://packagecloud.io/timescale/timescaledb/debian trixie main' >> /etc/apt/sources.list.d/timescaledb.list && \\
+    apt update && \\
+    apt install -y timescaledb-2-2.24.0-postgresql-17 && \\
+    apt clean 
+
+EXPOSE 22
+
+VOLUME  [\"/$USERDIR_\"]
+
+CMD [\"/$LOCALBIN/start.sh\"]
+"
+IFS="$OLD_IFS"
+#EOF
