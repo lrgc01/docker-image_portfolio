@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 COMMENT="megacmd webdav server over net-tools image"
 
 START_DIR=${START_DIR:-"/start.d"}

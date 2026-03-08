@@ -1,6 +1,6 @@
 COMMENT="Jenkins over base + jdk environment"
 
-FROMIMG="lrgc01/debian-openjdk:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-openjdk:${ARCH}"
 
 if [ `whoami` != "root" ]; then
         SUDO="sudo"

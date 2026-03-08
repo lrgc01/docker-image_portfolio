@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FROMIMG="lrgc01/ubuntu-jammy-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}ubuntu-jammy-net:${ARCH}"
 COMMENT="PHP and php-fpm software + server over ubuntu Jammy Jellyfish openssh-server image"
 
 START_DIR=${START_DIR:-"/start.d"}

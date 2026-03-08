@@ -1,5 +1,5 @@
 COMMENT="python3-full over ssh image"
-FROMIMG="lrgc01/debian-ssh:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-ssh:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}

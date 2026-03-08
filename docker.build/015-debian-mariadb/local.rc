@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 COMMENT="mariadb server over openssh-server image"
 
 #

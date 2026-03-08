@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-net:$ARCH" # Using from generic.rc
+FROMIMG="${BASE_FOLDER}ubuntu-net:$ARCH" # Using from generic.rc
 COMMENT="base dev git stuff over net utils using openssh-server image"
 
 #

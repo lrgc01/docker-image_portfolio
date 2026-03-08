@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 COMMENT="PHP and php-fpm software + server over openssh-server image"
 
 START_DIR=${START_DIR:-"/start.d"}

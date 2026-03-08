@@ -1,7 +1,7 @@
-#FROMIMG="python:slim"
-FROMIMG="node:25-slim"
-#COMMENT="Node.js and npm over python:slim image"
-COMMENT="python over node:slim image"
+FROMIMG="python:slim"
+#FROMIMG="node:25-slim"
+COMMENT="Node.js and npm over python:slim image"
+#COMMENT="python over node:slim image"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}
@@ -22,8 +22,8 @@ IPFILE=${NODE_IPFILE:-"nodejs.host"}
 # Get Original Dockerfile as Dockerfile.inc
 # See https://github.com/nodejs/docker-node
 #wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/nodejs/docker-node/refs/heads/main/22/bookworm-slim/Dockerfile'
-#wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/nodejs/docker-node/refs/heads/main/25/trixie-slim/Dockerfile'
-wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/docker-library/python/ce782e2435387d50d3a21a29c76d0eb4115057d3/3.14/slim-trixie/Dockerfile'
+wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/nodejs/docker-node/refs/heads/main/25/trixie-slim/Dockerfile'
+#wget --quiet -O Dockerfile.inc 'https://raw.githubusercontent.com/docker-library/python/ce782e2435387d50d3a21a29c76d0eb4115057d3/3.14/slim-trixie/Dockerfile'
 
 # Temporary tarball to ADD into the container
 TAR_BALL=temp_tarball.tgz
@@ -90,7 +90,11 @@ RUN groupadd --gid 1001 node || true && \\
     [ ! \$(id -g $GRP_ > /dev/null) ] && echo group $GRP_ exists || groupadd --gid $GID_ $GRP_ && \\
     [ ! \$(id $USR_ > /dev/null) ] && echo user $USR_ exists || \\
     useradd -M --uid $UID_ --gid $GRP_ --shell /bin/bash -d /$USERDIR_ $USR_ && \\
-    apt-get update && apt-get install -y xz-utils gpg curl && \\
+    apt-get update && apt-get install -y xz-utils gpg curl libglib2.0-0 libnss3 \\
+    libatk-bridge2.0-0 libatk1.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 \\
+    libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \\
+    libpango-1.0-0 fonts-liberation libx11-xcb1 libxcursor1 libgtk-3-common libgtk-3-0 \\
+    libgdk-pixbuf-2.0-0 libcairo-gobject2 && \\
     apt clean && apt-get purge -y --auto-remove && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
@@ -101,8 +105,8 @@ COPY $STARTFILE $START_DIR/
 
 IFS="$OLD_IFS"
 
-#(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" | grep -v 'purge.*auto-remove' > $DOCKERFILE
-(echo "$_DOCKERBODY" ; tail -n +8 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" -e 's/dist-clean/clean/' > $DOCKERFILE
+(echo "$_DOCKERBODY" ; tail -n +5 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" -e 's/ manual / manual || true /' | grep -v 'purge.*auto-remove' > $DOCKERFILE
+#(echo "$_DOCKERBODY" ; tail -n +8 Dockerfile.inc) | sed -e "s|CMD.*|CMD [\"sh\",\"$START_DIR/$STARTFILE\"]|" -e 's/dist-clean/clean/' > $DOCKERFILE
 unset _DOCKERBODY
 #
 # ---- end Dockerfile ----

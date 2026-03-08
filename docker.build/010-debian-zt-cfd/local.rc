@@ -3,7 +3,7 @@
 #   exit 0
 #fi
 
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 COMMENT="Cloudflared service over net-tools image"
 
 START_DIR=${START_DIR:-"/start.d"}

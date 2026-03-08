@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-ssh:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-ssh:${ARCH}"
 COMMENT="net utils using openssh-server image"
 
 #

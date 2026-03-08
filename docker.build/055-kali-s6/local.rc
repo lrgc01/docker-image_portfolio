@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/kali-nox11:${ARCH}"
+FROMIMG="${BASE_FOLDER}kali-nox11:${ARCH}"
 COMMENT="Complete Kali with no desktop package"
 
 S6_NOARCH="/tmp/s6-noarch.tar.xz"

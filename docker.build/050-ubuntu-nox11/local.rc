@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-git:${ARCH}"
+FROMIMG="${BASE_FOLDER}ubuntu-git:${ARCH}"
 COMMENT="Complete Ubuntu with no desktop package"
 
 #SECURITYBUILD="--security-opt=seccomp=unconfined"

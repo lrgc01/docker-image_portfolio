@@ -1,6 +1,6 @@
-#FROMIMG="lrgc01/python3-pip:${ARCH}"
+#FROMIMG="${BASE_FOLDER}python3-pip:${ARCH}"
 COMMENT="Google Cloud CLI over net-stable_slim"
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 
 if [ "$ARCH" != "amd64" ]; then
    echo "gcloud-cli only in amd64 architecture for now. Exiting."

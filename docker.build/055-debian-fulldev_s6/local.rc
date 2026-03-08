@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-node_fulldev:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-node_fulldev:${ARCH}"
 COMMENT="Complete Debian DEV pack with no desktop package plus s6 supervisor"
 
 S6_NOARCH="/tmp/s6-noarch.tar.xz"

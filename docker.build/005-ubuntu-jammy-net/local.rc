@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-jammy-ssh:${ARCH}" # Using from generic.rc
+FROMIMG="${BASE_FOLDER}ubuntu-jammy-ssh:${ARCH}" # Using from generic.rc
 COMMENT="net utils using ubuntu Jammy Jellyfish openssh-server image"
 
 #

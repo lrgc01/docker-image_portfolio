@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/kali-git:${ARCH}"
+FROMIMG="${BASE_FOLDER}kali-git:${ARCH}"
 COMMENT="Complete Kali with no desktop package"
 
 # 

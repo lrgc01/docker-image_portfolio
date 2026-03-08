@@ -1,7 +1,7 @@
 COMMENT="Adding g++ on top of git/net image"
 
 # Folder is optional - end with a slash
-FROMIMG="lrgc01/ubuntu-git:${ARCH}"
+FROMIMG="${BASE_FOLDER}ubuntu-git:${ARCH}"
 
 # 
 # Dockerfile

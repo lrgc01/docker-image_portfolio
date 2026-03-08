@@ -3,7 +3,7 @@
 #   exit 0
 #fi
 
-FROMIMG="lrgc01/debian-zt-cfd:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-zt-cfd:${ARCH}"
 COMMENT="Openconnect service over cloudflare argo image"
 
 START_DIR=${START_DIR:-"/start.d"}

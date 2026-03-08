@@ -1,6 +1,6 @@
-OMMENT="Jenkins over base + jdk environment"
+COMMENT="Jenkins over base + jdk environment"
 
-FROMIMG="lrgc01/debian-openjdk:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-jenkins:${ARCH}"
 
 if [ `whoami` != "root" ]; then
         SUDO="sudo"
@@ -167,10 +167,10 @@ ADD $TAR_BALL /
 # Check https://docs.docker.com/engine/reference/builder/#add to see the useless behavior of ADD --chmod when donwloading from URL
 # BUT works on arm64 platforms...
 
-RUN groupadd -g $GID_ $GRP_ && \\
-    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ && \\
-    mkdir -p $JENKINS_WAR_PATH && \\
-    chmod 755 $JENKINS_WAR_PATH && chown $UID_:$GID_ $JENKINS_WAR_PATH && \\
+RUN groupadd -g $GID_ $GRP_ ; \\
+    useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ ; \\
+    mkdir -p $JENKINS_WAR_PATH ; \\
+    chmod 755 $JENKINS_WAR_PATH ; chown $UID_:$GID_ $JENKINS_WAR_PATH ; \\
     apt update && \\
     apt install -y docker.io docker-cli docker-compose tini containerd libfuse3-4 && \\
     apt clean && \\

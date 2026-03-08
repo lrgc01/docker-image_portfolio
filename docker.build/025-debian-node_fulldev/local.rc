@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-node:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-node:${ARCH}"
 COMMENT="Node.js and npm over openssh-server image"
 IMGNAME="nodejs"
 

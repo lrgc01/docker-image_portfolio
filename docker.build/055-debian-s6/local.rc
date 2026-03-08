@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-nox11:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-nox11:${ARCH}"
 COMMENT="Complete Debian with no desktop package plus s6 supervisor"
 
 S6_NOARCH="/tmp/s6-noarch.tar.xz"

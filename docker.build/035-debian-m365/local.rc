@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-node:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-node:${ARCH}"
 COMMENT="m365 cli for Microsoft Apps"
 
 START_DIR=${START_DIR:-"/start.d"}

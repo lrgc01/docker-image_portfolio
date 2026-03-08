@@ -1,5 +1,5 @@
 COMMENT="bind9 DNS server"
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}

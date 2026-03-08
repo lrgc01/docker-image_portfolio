@@ -3,7 +3,7 @@ if [ "$ARCH" != "amd64" -a "$ARCH" != "arm64" ]; then
    exit 0
 fi
 
-FROMIMG="lrgc01/debian-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-net:${ARCH}"
 COMMENT="Cloudflare warp service over net-tools image"
 
 START_DIR=${START_DIR:-"/start.d"}

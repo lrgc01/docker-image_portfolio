@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-net:${ARCH}"
+FROMIMG="${BASE_FOLDER}ubuntu-net:${ARCH}"
 COMMENT="mysql shell over Ubuntu openssh-server image"
 
 #

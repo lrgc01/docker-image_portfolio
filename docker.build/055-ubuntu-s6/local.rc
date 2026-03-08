@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/ubuntu-nox11:${ARCH}"
+FROMIMG="${BASE_FOLDER}ubuntu-nox11:${ARCH}"
 COMMENT="Complete Ubuntu with no desktop package plus s6 supervisor"
 
 #SECURITYBUILD="--security-opt=seccomp=unconfined"

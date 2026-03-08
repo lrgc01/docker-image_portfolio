@@ -1,5 +1,5 @@
 # Folder is optional - end with a slash
-FOLDER=${BASE_FOLDER:-"lrgc01/"}
+FOLDER=${BASE_FOLDER:-"${BASE_FOLDER}"}
 # Versioning in order to keep a copy if running more than once
 # Note the ":" in the formated output
 # May change for own needs

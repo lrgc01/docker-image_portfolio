@@ -1,5 +1,5 @@
 COMMENT="python3-dev over python3-pip image"
-FROMIMG="lrgc01/debian-python3_pip:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-python3_pip:${ARCH}"
 
 START_DIR=${START_DIR:-"/start.d"}
 STARTFILE=${START_CMD:-"start.sh"}

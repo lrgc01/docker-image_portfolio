@@ -1,4 +1,4 @@
-FROMIMG="lrgc01/debian-nginx:${ARCH}"
+FROMIMG="${BASE_FOLDER}debian-nginx:${ARCH}"
 COMMENT="nginx web server plus rtmp module image"
 
 START_DIR=${START_DIR:-"/start.d"}
