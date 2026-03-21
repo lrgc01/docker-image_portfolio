@@ -51,7 +51,7 @@ LABEL Comment=\"$COMMENT\"
 
 RUN set -ex && \\
     apt-get update && \\
-    apt-get install -q -y --install-recommends mosquitto && \\
+    apt-get install -q -y --install-recommends mosquitto mosquitto-clients && \\
     apt-get clean && \\
     rm -f /var/cache/apt/pkgcache.bin /var/cache/apt/srcpkgcache.bin && \\
     rm -fr /var/lib/apt/lists/* && \\
