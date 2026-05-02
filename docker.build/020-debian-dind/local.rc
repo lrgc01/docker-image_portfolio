@@ -145,7 +145,7 @@ ADD $TAR_BALL /
 RUN groupadd -g $GID_ $GRP_ || true && \\
     useradd -M -u $UID_ -g $GRP_ -d /$USERDIR_ -s /bin/bash $USR_ || true && \\
     apt update && \\
-    apt install -y docker.io docker-cli docker-compose tini containerd libfuse3-4 && \\
+    apt install -y locales-all docker.io docker-cli docker-compose tini containerd libfuse3-4 && \\
     apt clean && \\
     usermod -G docker -a $USR_
 
